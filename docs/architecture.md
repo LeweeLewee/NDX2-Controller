@@ -1,0 +1,47 @@
+# Architecture
+
+## Required playback path
+
+```mermaid
+flowchart LR
+    UI[Square touchscreen] -->|Control and metadata| NDX[Naim NDX 2]
+    UI -. Optional control bridge .-> PI[Existing home-automation Pi]
+    PI -. Commands and metadata .-> NDX
+    TIDAL[TIDAL service] -->|Native Naim audio retrieval| NDX
+    NDX --> AMP[Existing Naim amplifier]
+```
+
+This is the intended architecture. The solid local control path was exercised from a computer; neither ESP32 firmware nor a Pi bridge has been implemented. Network packets to TIDAL were not independently captured, but the live native endpoint, native queue class and player source identified the Naim TIDAL path. The test process fetched no audio.
+
+## Responsibilities
+
+**Controller:** rendering, touch input, local UI state, cached artwork, sleep/wake policy and battery monitoring. It sends high-level requests and rechecks actual device state after reconnecting.
+
+**NDX 2:** native music retrieval and decoding, native queue and playback state. Existing amplifier integration must be preserved.
+
+**Optional Pi:** convenience layer for search, artwork conversion, caching or reconnect handling. Its necessity is still under evaluation: direct Naim browsing has worked without it. Home Assistant's web page is reachable; no authenticated HA integration has been inspected or installed.
+
+## Observed local interface
+
+The tested NDX 2 exposes HTTP port 15081, API 1.4.0 and appVer 3.11.0.5662. Firmware changes could affect behaviour.
+
+| Operation | Observed request or reference |
+| --- | --- |
+| System information | `GET /system` |
+| Input descriptions | `GET /inputs` |
+| Current playback | `GET /nowplaying` |
+| Native queue | `GET /inputs/playqueue` |
+| Favourites | `GET /favourites` |
+| Native content | Returned `inputs/tidal/artists/...`, `albums/...`, `playlists/...`, `tracks/...` references |
+| Single native track playback | `GET /inputs/tidal/tracks/{returned-id}?cmd=play` |
+| Stop request | `GET /nowplaying?cmd=stop` |
+
+Some GET requests mutate playback. HTTP method alone is not a read-only guarantee. The diagnostic tool uses a fixed command-free allowlist.
+
+Native playback reports `source=inputs/playqueue`, `sourceDetail=tidal`; the queue item class was `object.track.tidal`. Merely seeing playqueue is not enough to identify the music source.
+
+Do not assume every duration uses the same units: the track description returned seconds, while now-playing duration and advancing position appeared in milliseconds. Negative position occurred during startup. Production parsing needs explicit per-field handling and tests.
+
+## Extensibility
+
+Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. The native search syntax, authentication lifecycle, queue-edit semantics and amplifier command path remain unresolved.
