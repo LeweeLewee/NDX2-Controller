@@ -25,7 +25,7 @@ The first mode uses live TIDAL catalogue metadata with a simulated player. The s
 
 Without --tidal, search is a demo fixture even if an NDX is configured; its candidate IDs still require native resolution. Collection and Queue use the NDX when --ndx is configured.
 
-The bridge resolves selected candidates through native Naim browse. Play buttons require a matching returned native reference and TIDAL object class. Each mutation reads player state first and is sent once; a timeout does not trigger automatic retry. Acknowledgement is labelled as a request, and the Now playing screen polls actual player state every five seconds while visible. This has offline coverage but has not been exercised against the NDX through this UI.
+The bridge resolves selected candidates through native Naim browse. Play buttons require a matching returned native reference and TIDAL object class. Each mutation reads player state first and is sent once; a timeout does not trigger automatic retry. Acknowledgement is labelled as a request, and the Now playing screen polls actual player state every five seconds while visible. The search-to-native-track-play path has now passed through this UI on the home network.
 
 The bridge validates Host and Origin, accepts only JSON at its fixed API route, and exposes no arbitrary proxy, audio URL, volume or device-configuration operation. It is a local development service, not a network-accessible Pi deployment.
 
@@ -33,7 +33,7 @@ The bridge validates Host and Origin, accepts only JSON at its fixed API route, 
 
 | Available in this prototype | Remaining |
 | --- | --- |
-| Ranked search, type filters and catalogue next-page requests | Live search-result-to-native-play acceptance test |
+| Ranked search, type filters and catalogue next-page requests | Broader album/playlist and failure-recovery UI trials |
 | Native favourites and item drill-down | Large collections and back-navigation edge cases on real responses |
 | Play now, play next and append requests | Confirm native queue mutations and app coexistence through the UI |
 | Now playing, pause/resume, next/previous and stop | Real disconnect/reconnect and asynchronous transition validation |
@@ -45,4 +45,4 @@ Amplifier volume remains excluded pending a successful System Automation test. A
 
 ## Verification
 
-28 offline tests pass, including native-resolution gating, rejection of unsupported volume, demo isolation and HTTP Host/Origin enforcement. The loopback HTTP test needs an environment that permits local sockets. Browser checks covered rendered now-playing layout, search filtering, album and track detail, demo play, next, pause, queue listing/addition and return navigation. Live UI validation remains pending because the computer is away from home.
+34 offline tests pass, including native-resolution gating, rejection of unsupported volume, demo isolation and HTTP Host/Origin enforcement. The loopback HTTP test needs an environment that permits local sockets. Browser checks covered rendered now-playing layout, search filtering, album and track detail, demo play, next, pause, queue listing/addition and return navigation. After returning home, live TIDAL search → native Teardrop playback and AI suggestion → TIDAL → native artist browsing also passed. The user confirmed that microphone input returned the correct transcript. See [voice and AI discovery](voice-discovery.md) for setup.

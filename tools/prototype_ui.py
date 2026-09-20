@@ -9,6 +9,7 @@ import urllib.parse
 
 from naim_client import NaimClient, native_ref, playback_state
 from tidal_catalog import TidalCatalog, ordered_items
+from music_discovery import MusicDiscovery, DiscoveryError, read_key
 
 UI = pathlib.Path(__file__).parents[1] / 'ui' / 'index.html'
 
@@ -21,13 +22,18 @@ def native_item(data):
 
 
 class Bridge:
-    def __init__(self, naim=None, catalog=None):
+    def __init__(self, naim=None, catalog=None, ai=None):
         self.naim, self.catalog = naim, catalog
+        self.ai = ai
         self.resolved = set()
 
     def request(self, action, args):
         if action == 'config':
-            return {'live': self.naim is not None, 'catalog': self.catalog is not None}
+            return {'live': self.naim is not None, 'catalog': self.catalog is not None, 'ai': self.ai is not None}
+        if action == 'discover':
+            if not self.ai:
+                raise DiscoveryError('AI search is not configured on this server.')
+            return self.ai.discover(args.get('prompt'), args.get('context', ''))
         if action == 'search':
             if not self.catalog:
                 raise ValueError('Catalogue credentials are not configured')
@@ -64,7 +70,9 @@ class Bridge:
             item = native_item(data)
             try:
                 native_ref(reference)
-                playable = item['reference'] == reference and str(data.get('class', '')).endswith('.tidal')
+                expected_class = {'tracks': 'object.tidalTrack', 'albums': 'object.tidalAlbum',
+                                  'playlists': 'object.tidalPlaylist'}.get(reference.split('/')[2])
+                playable = item['reference'] == reference and data.get('class') == expected_class
             except ValueError:
                 playable = False
             if playable:
@@ -103,7 +111,7 @@ def handler_for(bridge, port):
             self.send_header('Content-Length', str(len(raw)))
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff')
-            self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'")
+            self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'")
             self.end_headers()
             self.wfile.write(raw)
 
@@ -114,6 +122,8 @@ def handler_for(bridge, port):
                 self.send(UI.read_bytes(), mime='text/html; charset=utf-8')
             elif self.path == '/api/config':
                 self.send(bridge.request('config', {}))
+            elif self.path in ('/discovery.js', '/discovery.css'):
+                self.send((UI.parent / self.path[1:]).read_bytes(), mime='text/javascript' if self.path.endswith('.js') else 'text/css')
             else:
                 self.send({'error': 'Not found'}, 404)
 
@@ -122,17 +132,28 @@ def handler_for(bridge, port):
             if host not in hosts or self.headers.get('Origin') != 'http://' + host:
                 self.send({'error': 'Same-origin requests required'}, 403)
                 return
-            if self.path != '/api' or self.headers.get('Content-Type') != 'application/json':
+            if self.path not in ('/api', '/api/transcribe'):
                 self.send({'error': 'Invalid request'}, 400)
                 return
             try:
                 length = int(self.headers.get('Content-Length', 0))
+                if self.path == '/api/transcribe':
+                    if not bridge.ai:
+                        raise DiscoveryError('Voice transcription is not configured on this server.')
+                    if not 0 < length <= 3 * 1024 * 1024:
+                        raise ValueError('Recording too large')
+                    self.send(bridge.ai.transcribe(self.rfile.read(length), self.headers.get('Content-Type', '')))
+                    return
+                if self.headers.get('Content-Type') != 'application/json':
+                    raise ValueError('JSON required')
                 if not 0 < length <= 8192:
                     raise ValueError('Request too large or empty')
                 data = json.loads(self.rfile.read(length))
                 if not isinstance(data, dict) or not isinstance(data.get('args', {}), dict):
                     raise ValueError('Expected an object')
                 self.send(bridge.request(data.get('action'), data.get('args', {})))
+            except DiscoveryError as exc:
+                self.send({'error': str(exc)}, 502)
             except (ValueError, TypeError):
                 self.send({'error': 'Request rejected. Check selection and configuration.'}, 400)
             except Exception:
@@ -146,6 +167,9 @@ def main():
     parser.add_argument('--ndx', help='Private NDX IPv4 address; enables live controls')
     parser.add_argument('--tidal', action='store_true', help='Enable live catalogue; credentials prompted without echo')
     parser.add_argument('--country', default='GB')
+    parser.add_argument('--ai', action='store_true', help='Enable OpenAI discovery and transcription')
+    parser.add_argument('--openai-env-file', help='Explicit approved local env file; only OPENAI_API_KEY is read')
+    parser.add_argument('--ai-model', default='gpt-4.1-mini')
     parser.add_argument('--port', type=int, default=8990)
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
@@ -155,7 +179,8 @@ def main():
     if args.tidal:
         catalog = TidalCatalog(os.environ.get('TIDAL_CLIENT_ID') or getpass.getpass('TIDAL client ID: '),
                                os.environ.get('TIDAL_CLIENT_SECRET') or getpass.getpass('TIDAL client secret: '), args.country)
-    bridge = Bridge(naim, catalog)
+    ai = MusicDiscovery(read_key(args.openai_env_file), args.ai_model) if args.ai else None
+    bridge = Bridge(naim, catalog, ai)
     server = http.server.HTTPServer(('127.0.0.1', args.port), handler_for(bridge, args.port))
     print('Open http://127.0.0.1:' + str(args.port), flush=True)
     print('Live NDX controls enabled.' if naim else 'Demo playback only; no NDX commands.', flush=True)

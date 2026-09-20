@@ -4,9 +4,9 @@ A compact, battery-powered coffee-table touchscreen for native Naim music playba
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
-**Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to Naim and amplifier control remain unresolved. ESP32 firmware and the physical controller have not been built.
+**Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; amplifier control remains unresolved. ESP32 firmware and the physical controller have not been built.
 
-The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. Search-result handoff to Naim awaits a home-network test; personalized cloud features remain untested.
+The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. Personalized cloud features remain untested.
 
 ## The product
 
@@ -23,6 +23,7 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 | Document | Purpose |
 | --- | --- |
 | [Updated design concept](docs/design-concept.md) | Selected Waveshare screen, physical direction and parallel investigation brief |
+| [Voice and AI discovery](docs/voice-discovery.md) | Describe a mood, refine suggestions and explore native TIDAL content |
 | [Prototype UI](docs/prototype-ui.md) | Run the 800 × 480 demo and configure the experimental live bridge |
 | [Product brief](docs/product-brief.md) | Requirements, constraints and unresolved choices |
 | [Hardware and parts BOM](docs/hardware/README.md) | Design baseline, parts, sourcing and validation |

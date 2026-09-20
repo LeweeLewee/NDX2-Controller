@@ -12,7 +12,7 @@ from prototype_ui import Bridge, handler_for
 class Naim:
     def __init__(self):
         self.calls = []
-        self.description = {'ussi': 'inputs/tidal/tracks/123', 'class': 'object.track.tidal', 'title': 'Example'}
+        self.description = {'ussi': 'inputs/tidal/tracks/123', 'class': 'object.tidalTrack', 'title': 'Example'}
 
     def browse(self, *args):
         return self.description
@@ -52,9 +52,18 @@ class BridgeTests(unittest.TestCase):
             bridge.request('play', {'reference': ref})
         self.assertEqual(naim.calls, [])
 
+    def test_browse_class_must_match_reference_kind(self):
+        naim = Naim()
+        for kind, classname in [('tracks', 'object.tidalTrack'), ('albums', 'object.tidalAlbum'), ('playlists', 'object.tidalPlaylist')]:
+            ref = 'inputs/tidal/' + kind + '/123'
+            naim.description = {'ussi': ref, 'class': classname}
+            self.assertTrue(Bridge(naim).request('browse', {'reference': ref})['playable'])
+            naim.description['class'] = 'object.track.tidal'
+            self.assertFalse(Bridge(naim).request('browse', {'reference': ref})['playable'])
+
     def test_demo_backend_cannot_mutate_player(self):
         bridge = Bridge()
-        self.assertEqual(bridge.request('config', {}), {'live': False, 'catalog': False})
+        self.assertEqual(bridge.request('config', {}), {'live': False, 'catalog': False, 'ai': False})
         with self.assertRaises(ValueError):
             bridge.request('transport', {'command': 'resume'})
 

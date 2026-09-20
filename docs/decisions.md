@@ -37,3 +37,7 @@
 
 Onboard power circuitry versus an external charger/converter remains a research choice. Touch wake, screen-off standby, charging and runtime must be measured. No purchase is recorded. See [hardware design and BOM](hardware/README.md).
 
+
+## D010 — Voice and AI discovery
+
+**Accepted, 20 September 2026.** Add explicit microphone recording and natural-language music discovery, with moods, reference artists and refinements. OpenAI handles interpretation/transcription off the controller; project key creation and its local destination were explicitly approved. Suggestions become catalogue searches, never direct playback commands. Microphone hardware and power remain unverified; computer-browser transcription is user-confirmed. Colours can follow the eventual enclosure material. See [voice discovery](voice-discovery.md).

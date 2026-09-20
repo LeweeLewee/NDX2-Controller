@@ -26,13 +26,13 @@ Cable-free coffee-table use remains mandatory. Charging may use accessible USB-C
 
 Use 800 × 480 as the design canvas, with large controls and restrained warm accents on charcoal. A computer browser is a software prototype only: it cannot validate touch accuracy at physical size, LCD power, ESP32 frame rate or wake latency.
 
-The first UI excludes amplifier volume until the actual System Automation command passes an audible test. Voice and AI discovery belong to the separately proposed version 2 concept and are not dependencies for this first control loop.
+The first UI excludes amplifier volume until the actual System Automation command passes an audible test. The user subsequently requested voice and natural-language AI discovery, now included in the computer prototype. See [voice discovery](voice-discovery.md) for behaviour and outstanding microphone hardware work. The palette stays adjustable to the final enclosure material.
 
 ## Required software path
 
 TIDAL catalogue metadata → resolve the chosen reference through native Naim browsing → native Naim play/queue command → verify player state. The NDX 2 retrieves and decodes the audio. The controller and optional Pi carry commands and metadata only.
 
-Public catalogue search and pagination have passed live tests. Native collection playback, queue commands and 24-bit playback have also passed independently. Combining a public search result with native playback remains a home-network acceptance test. Full personalized TIDAL functionality is not yet established.
+Public catalogue search and pagination have passed live tests. Native collection playback, queue commands and 24-bit playback have also passed independently. Combining a public search result with native playback has now passed through the UI on the home network. Full personalized TIDAL functionality is not yet established.
 
 ## Independent investigation tracks
 

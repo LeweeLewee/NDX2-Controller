@@ -11,7 +11,7 @@
 ## M1 — Complete software control loop (next)
 
 - [x] Verify public catalogue search and pagination using the project's own TIDAL app (artists, tracks, albums and playlists).
-- [ ] Verify search-result IDs through native Naim browse and playback on the home network.
+- [x] Verify search-result IDs through native Naim browse and playback on the home network (Teardrop through the UI).
 - [x] Retrieve artwork with bounded caching and no credential leakage (native TIDAL JPEG).
 - [x] Launch albums and playlists using native Naim semantics.
 - [x] Verify queue listing, add/remove/reorder and next/previous behaviour.
@@ -21,7 +21,10 @@
 
 Automatic track advancement and a new controller connection during playback passed. Audible gaplessness, app concurrency and actual network outage recovery remain open. Switching the Naim app from High to Max changed the native API setting to losslessHd and enabled 24-bit playback through the same native command. Higher sample rates remain untested.
 - [x] Build the first 800 × 480 computer-side UI and check demo search, selection, transport and queue interactions.
-- [ ] Verify search → select → native play → now playing through the UI on the home network; complete artwork and queue-edit controls.
+- [x] Verify search → select → native play → now playing through the UI on the home network.
+- [x] Add AI discovery/refinement and verify suggestion → live TIDAL search → native artist browsing.
+- [x] Validate browser microphone capture and transcription (user confirmed correct transcript).
+- [ ] Complete artwork and queue-edit controls.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
 

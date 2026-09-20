@@ -16,7 +16,7 @@ Last updated: 20 September 2026.
 | Stop behaviour | Observed, asynchronous | Immediate read stale; subsequent state=1, position=0, no longer active playback |
 | Amplifier control | Unresolved; levels/room failed audible test | Readback accepted 13 → 5 → 13, but user confirmed no audible volume change. This endpoint does not establish working amplifier control in the current setup |
 | Full catalogue search | Unresolved | Exploratory GET query/path variants returned 400; correct syntax unknown. This does not prove search unavailable |
-| Separate TIDAL metadata search adapter | Live search and pagination passed | Own app authenticated; artists, tracks, albums and playlists returned results and a distinct next page. Search-to-Naim ID compatibility remains unverified |
+| Separate TIDAL metadata search adapter | Live search and pagination passed | Own app authenticated; artists, tracks, albums and playlists returned results and a distinct next page. Search-to-native-track playback has now passed through the UI |
 | Collection pagination | Observed | favourites/albums with offset=0 and 2, limit=2 returned distinct successive pages and totalCount |
 | Artwork retrieval and cache | Observed | Returned resources.tidal.com JPEG fetched (41,661 bytes), visually checked; second lookup reused cache. Host restriction, byte cap and eviction covered offline |
 | Album/playlist launch | Observed | cmd=play populated native queues of 11 and 50 tracks and started first tracks |
@@ -82,3 +82,11 @@ Published the revised design concept using the user's selected Waveshare ESP32-S
 All 28 offline tests passed, including native-reference resolution before play and HTTP origin/host restrictions. The loopback test required local-socket permissions; it initially failed under the restricted network sandbox and passed with those permissions. No NDX commands were issued. Live UI integration, actual artwork display, queue-edit controls, embedded keyboard, physical touch usability and power measurements remain unverified or unimplemented as described in [prototype documentation](prototype-ui.md).
 
 Record date, firmware, initial state, exact operation, observed result and final state. Distinguish API acknowledgement from actual state change. Link sanitized fixtures or local report filenames as appropriate. Never mark a capability complete solely because an endpoint exists or returned HTTP 200.
+
+## Home-network UI and AI discovery — 20 September 2026
+
+The user confirmed the computer was back home. Initial NDX status was stopped, native TIDAL source, error=0. Public TIDAL search in the browser returned Teardrop, which resolved through native browse. Browse descriptors are object.tidalTrack, object.tidalAlbum and object.tidalPlaylist, distinct from queue class object.track.tidal. The validator now requires an exact matching browse class and reference.
+
+After announcing the test, Play now in our UI started Teardrop. Device samples showed playing state=2, positions 18111 → 21083 → 24055 ms, source=inputs/playqueue, sourceDetail=tidal, 16-bit/44.1 kHz, error=0. The queue contained one object.track.tidal. Cleanup confirmed stopped state=1, position=0, error=0. No volume command was sent. Filtered evidence: ignored local/evidence/ui-native-search-play.json.
+
+The OpenAI project key was created securely and saved to the approved ignored destination. Live AI requests and refinements passed. Explore on a Tycho recommendation returned live TIDAL artists; selecting Tycho opened native Naim albums without playing music. 34 offline tests pass. The user tested Speak with the Bonobo request and confirmed: “Transcript appears correctly.” This verifies microphone capture and live transcription in that browser session, not future ESP32 hardware.
