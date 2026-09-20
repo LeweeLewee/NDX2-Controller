@@ -7,6 +7,17 @@ from naim_native_probe import NoRedirect
 MAX_IMAGE_BYTES = 1024 * 1024
 
 
+def validate_artwork_url(url):
+    if not isinstance(url, str):
+        raise ValueError('Expected a returned TIDAL JPEG artwork URL')
+    parts = urllib.parse.urlsplit(url)
+    if (parts.scheme != 'https' or parts.netloc != 'resources.tidal.com'
+            or parts.query or parts.fragment or not parts.path.startswith('/images/')
+            or not parts.path.endswith('.jpg')):
+        raise ValueError('Expected a returned TIDAL JPEG artwork URL')
+    return url
+
+
 class ArtworkCache:
     def __init__(self, opener=None, capacity=8):
         if type(capacity) is not int or not 1 <= capacity <= 16:
@@ -16,11 +27,7 @@ class ArtworkCache:
         self.images = OrderedDict()
 
     def get(self, url):
-        parts = urllib.parse.urlsplit(url)
-        if (parts.scheme != 'https' or parts.netloc != 'resources.tidal.com'
-                or parts.query or parts.fragment or not parts.path.startswith('/images/')
-                or not parts.path.endswith('.jpg')):
-            raise ValueError('Expected a returned TIDAL JPEG artwork URL')
+        validate_artwork_url(url)
         if url in self.images:
             self.images.move_to_end(url)
             return self.images[url]

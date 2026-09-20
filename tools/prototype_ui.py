@@ -6,10 +6,13 @@ import json
 import os
 import pathlib
 import urllib.parse
+import hashlib
+from collections import OrderedDict
 
 from naim_client import NaimClient, native_ref, playback_state
 from tidal_catalog import TidalCatalog, ordered_items
 from music_discovery import MusicDiscovery, DiscoveryError, read_key
+from artwork_cache import ArtworkCache, validate_artwork_url
 
 UI = pathlib.Path(__file__).parents[1] / 'ui' / 'index.html'
 
@@ -26,6 +29,26 @@ class Bridge:
         self.naim, self.catalog = naim, catalog
         self.ai = ai
         self.resolved = set()
+        self.artwork = ArtworkCache()
+        self.artwork_refs = OrderedDict()
+
+    def cover(self, value):
+        try:
+            url = validate_artwork_url(value)
+        except ValueError:
+            return None
+        path = '/artwork/' + hashlib.sha256(url.encode()).hexdigest() + '.jpg'
+        self.artwork_refs[path] = url
+        self.artwork_refs.move_to_end(path)
+        while len(self.artwork_refs) > 32:
+            self.artwork_refs.popitem(last=False)
+        return path
+
+    def image(self, path):
+        # Only URLs previously returned by the Naim metadata can be fetched.
+        if path not in self.artwork_refs:
+            raise ValueError('Unknown artwork')
+        return self.artwork.get(self.artwork_refs[path])
 
     def request(self, action, args):
         if action == 'config':
@@ -58,8 +81,9 @@ class Bridge:
             raise ValueError('NDX is not configured; use the on-screen demo')
         if action == 'status':
             data = self.naim.status()
-            fields = ('title', 'artist', 'artistName', 'album', 'duration', 'transportPosition', 'sourceDetail', 'bitDepth', 'sampleRate')
-            return {**{key: data.get(key) for key in fields}, 'state': playback_state(data)}
+            fields = ('title', 'artist', 'artistName', 'duration', 'transportPosition', 'sourceDetail', 'bitDepth', 'sampleRate')
+            return {**{key: data.get(key) for key in fields}, 'album': data.get('album') or data.get('albumName'),
+                    'artwork': self.cover(data.get('artwork')), 'state': playback_state(data)}
         if action == 'queue':
             return {'items': [native_item(i) for i in self.naim.queue().get('children', [])]}
         if action == 'browse':
@@ -68,6 +92,7 @@ class Bridge:
             data = self.naim.browse(reference, args.get('offset', 0))
             # Only a matching native object grants a play capability. Children do not.
             item = native_item(data)
+            item['artwork'] = self.cover(data.get('artwork'))
             try:
                 native_ref(reference)
                 expected_class = {'tracks': 'object.tidalTrack', 'albums': 'object.tidalAlbum',
@@ -104,12 +129,12 @@ def handler_for(bridge, port):
         def log_message(self, *args):
             pass
 
-        def send(self, data, status=200, mime='application/json'):
+        def send(self, data, status=200, mime='application/json', cache='no-store'):
             raw = data if isinstance(data, bytes) else json.dumps(data).encode()
             self.send_response(status)
             self.send_header('Content-Type', mime)
             self.send_header('Content-Length', str(len(raw)))
-            self.send_header('Cache-Control', 'no-store')
+            self.send_header('Cache-Control', cache)
             self.send_header('X-Content-Type-Options', 'nosniff')
             self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'")
             self.end_headers()
@@ -124,6 +149,11 @@ def handler_for(bridge, port):
                 self.send(bridge.request('config', {}))
             elif self.path in ('/discovery.js', '/discovery.css'):
                 self.send((UI.parent / self.path[1:]).read_bytes(), mime='text/javascript' if self.path.endswith('.js') else 'text/css')
+            elif self.path.startswith('/artwork/'):
+                try:
+                    self.send(bridge.image(self.path), mime='image/jpeg', cache='private, max-age=3600')
+                except Exception:
+                    self.send({'error': 'Artwork unavailable'}, 404)
             else:
                 self.send({'error': 'Not found'}, 404)
 

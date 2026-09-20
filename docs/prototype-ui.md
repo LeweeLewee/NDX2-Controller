@@ -38,11 +38,11 @@ The bridge validates Host and Origin, accepts only JSON at its fixed API route, 
 | Play now, play next and append requests | Confirm native queue mutations and app coexistence through the UI |
 | Now playing, pause/resume, next/previous and stop | Real disconnect/reconnect and asynchronous transition validation |
 | Queue listing and refresh | Queue removal/reordering controls |
-| Artwork placeholder | Connect the existing artwork cache to this UI |
+| Player-supplied cover art in Now Playing and native detail views, with bounded caching and fallback | Broader artwork coverage across sources |
 | Browser input field and responsive layout | Embedded on-screen keyboard, physical touch sizing and LVGL implementation |
 
 Amplifier volume remains excluded pending a successful System Automation test. Artwork, duration and playback state in demo mode are illustrations, not device observations. The browser does not measure display power, standby, wake latency or physical usability.
 
 ## Verification
 
-34 offline tests pass, including native-resolution gating, rejection of unsupported volume, demo isolation and HTTP Host/Origin enforcement. The loopback HTTP test needs an environment that permits local sockets. Browser checks covered rendered now-playing layout, search filtering, album and track detail, demo play, next, pause, queue listing/addition and return navigation. After returning home, live TIDAL search → native Teardrop playback and AI suggestion → TIDAL → native artist browsing also passed. The user confirmed that microphone input returned the correct transcript. See [voice and AI discovery](voice-discovery.md) for setup.
+36 offline tests pass, including native-resolution gating, artwork registration and album-name mapping, rejection of unsupported volume, demo isolation and HTTP Host/Origin enforcement. The loopback HTTP test needs an environment that permits local sockets. Browser checks covered rendered now-playing layout, search filtering, album and track detail, demo play, next, pause, queue listing/addition and return navigation. After returning home, live TIDAL search → native Teardrop playback and AI suggestion → TIDAL → native artist browsing also passed. Live Now Playing artwork loaded at 640 × 640 and was visually verified without changing playback. The user confirmed that microphone input returned the correct transcript. See [voice and AI discovery](voice-discovery.md) for setup.

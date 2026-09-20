@@ -26,6 +26,27 @@ class Naim:
 
 
 class BridgeTests(unittest.TestCase):
+    def test_artwork_is_registered_from_metadata_not_arbitrary_requests(self):
+        bridge = Bridge()
+        url = 'https://resources.tidal.com/images/album/640x640.jpg'
+        path = bridge.cover(url)
+        self.assertTrue(path.startswith('/artwork/'))
+        self.assertEqual(path, bridge.cover(url))
+        self.assertIsNone(bridge.cover('http://192.168.1.1/private.jpg'))
+        self.assertIsNone(bridge.cover(None))
+        with self.assertRaises(ValueError):
+            bridge.image('/artwork/unknown.jpg')
+        self.assertNotEqual(path, bridge.cover(url.replace('album', 'next-album')))
+
+    def test_status_exposes_local_cover_and_album_name(self):
+        naim = Naim()
+        naim.status = lambda: {'transportState': '2', 'albumName': 'The album',
+                              'artwork': 'https://resources.tidal.com/images/album/640x640.jpg'}
+        data = Bridge(naim).request('status', {})
+        self.assertEqual(data['album'], 'The album')
+        self.assertTrue(data['artwork'].startswith('/artwork/'))
+        self.assertEqual(data['state'], 'playing')
+
     def test_candidate_cannot_play_until_native_identity_matches(self):
         naim = Naim()
         bridge = Bridge(naim)

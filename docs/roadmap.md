@@ -24,7 +24,8 @@ Automatic track advancement and a new controller connection during playback pass
 - [x] Verify search → select → native play → now playing through the UI on the home network.
 - [x] Add AI discovery/refinement and verify suggestion → live TIDAL search → native artist browsing.
 - [x] Validate browser microphone capture and transcription (user confirmed correct transcript).
-- [ ] Complete artwork and queue-edit controls.
+- [x] Connect cached native artwork to the UI and verify live Now Playing display.
+- [ ] Complete queue-edit controls.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
 

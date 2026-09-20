@@ -19,6 +19,7 @@ Last updated: 20 September 2026.
 | Separate TIDAL metadata search adapter | Live search and pagination passed | Own app authenticated; artists, tracks, albums and playlists returned results and a distinct next page. Search-to-native-track playback has now passed through the UI |
 | Collection pagination | Observed | favourites/albums with offset=0 and 2, limit=2 returned distinct successive pages and totalCount |
 | Artwork retrieval and cache | Observed | Returned resources.tidal.com JPEG fetched (41,661 bytes), visually checked; second lookup reused cache. Host restriction, byte cap and eviction covered offline |
+| Prototype Now Playing cover art | Observed | Player-supplied image loaded at 640 × 640 in the browser and was visually verified; albumName also displayed. No playback commands issued during this check |
 | Album/playlist launch | Observed | cmd=play populated native queues of 11 and 50 tracks and started first tracks |
 | Queue append/insert/remove/reorder | Observed | playLast appended; playNext inserted after current; DELETE removed returned queue reference; move placed item before destination |
 | Next/previous, pause/resume | Observed | Titles and current queue references changed; pause state=3 held position, resume state=2 advanced |
