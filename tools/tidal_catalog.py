@@ -115,6 +115,26 @@ class TidalCatalog:
             raise ValueError('Use a 1..256 character search and a supported type')
         return self._get('searchResults', {'filter[query]': query.strip(), 'countryCode': self.country, 'include': kind})
 
+    def related(self, reference):
+        """Resolve exact album/artist relationships, never a title-search guess."""
+        parts = reference.split('/') if isinstance(reference, str) else []
+        if len(parts) != 4 or parts[2] not in ('tracks', 'albums') or candidate_reference(parts[2], parts[3]) != reference:
+            raise ValueError('Expected a TIDAL track or album')
+        kinds = ('albums', 'artists') if parts[2] == 'tracks' else ('artists',)
+        data = self._get(parts[2] + '/' + parts[3], {'countryCode': self.country, 'include': ','.join(kinds)})
+        resource = data.get('data') or {}
+        if resource.get('type') != parts[2] or resource.get('id') != parts[3]:
+            raise CatalogError('TIDAL returned a different item')
+        result = []
+        for kind in kinds:
+            page = {'data': (resource.get('relationships', {}).get(kind) or {}).get('data'),
+                    'included': data.get('included')}
+            for item in ordered_items(page, kind):
+                if item['candidate_native_reference']:
+                    result.append({'reference': item['candidate_native_reference'], 'kind': kind,
+                                   'title': item['title'] or kind[:-1].title(), 'artist': ''})
+        return result
+
     def page(self, result_id, kind, cursor=None):
         # Current API IDs are opaque; do not substitute the search text for ID.
         if kind not in KINDS or not isinstance(result_id, str) or not 1 <= len(result_id) <= 2048 or result_id in ('.', '..'):

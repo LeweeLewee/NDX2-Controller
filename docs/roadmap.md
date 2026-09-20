@@ -28,7 +28,8 @@ Automatic track advancement and a new controller connection during playback pass
 - [ ] Complete queue-edit controls.
 - [x] Implement TIDAL collection hearts, album saves, artist/playlist saves and OAuth account connection; verify all four save/remove round trips live.
 - [x] Provide Back from discovery, nested browsing and main sections with restored browsing context.
-- [ ] Add playlist creation/editing, related album/artist links and shuffle/repeat/seek UI.
+- [x] Add direct Now Playing album/artist shortcuts and related links on track/album details.
+- [ ] Add playlist creation/editing, shuffle/repeat/seek UI.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
 

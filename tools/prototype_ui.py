@@ -79,6 +79,10 @@ class Bridge:
             if not self.ai:
                 raise DiscoveryError('AI search is not configured on this server.')
             return self.ai.discover(args.get('prompt'), args.get('context', ''))
+        if action == 'related':
+            if not self.catalog:
+                raise LibraryError('TIDAL catalogue access is needed for album and artist links.')
+            return {'items': self.catalog.related(args.get('reference'))}
         if action == 'search':
             if not self.catalog:
                 raise ValueError('Catalogue credentials are not configured')

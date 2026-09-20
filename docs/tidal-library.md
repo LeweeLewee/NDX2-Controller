@@ -7,8 +7,9 @@ The heart is TIDAL's My Collection action: like a track, save an album or playli
 1. Open Collection → Connect TIDAL library. Sign in with the same account used in the Naim app.
 2. Open an album, track, artist or playlist from search or Collection. The detail page checks its saved state and offers a heart action.
 3. Use Collection's Albums, Liked tracks, Artists and Playlists filters to browse saved music. More saved music follows the service's cursor.
-4. Now Playing → Track details / save resolves the current queue item's actual TIDAL ID. It does not infer an ID from the song title.
-5. Back stays in the top bar, including AI discovery and collection folders. It restores the previous query, filter, results, pagination and scroll position. Leaving a voice-input screen cancels recording.
+4. Tap the album or artist name on Now Playing to open its detail page and save/follow it. Track and album detail pages also show exact related album/artist links; multiple artists are offered individually. These links use TIDAL relationships, never text-search guesses.
+5. Now Playing → Track details / save resolves the current queue item's actual TIDAL ID. It does not infer an ID from the song title.
+6. Back stays in the top bar, including AI discovery and collection folders. It restores the previous query, filter, results, pagination and scroll position. Leaving a voice-input screen cancels recording.
 
 The existing Play now, Play next and Add to queue controls remain native Naim commands. This collection integration cannot relay or play audio.
 
@@ -26,7 +27,7 @@ TIDAL clients may take time to show changes made by another client. The controll
 
 Implemented: collection read/save/remove for the four types, account sign-in/disconnect, native current-track details and persistent Back navigation. Pure demo hearts are explicitly simulated and reset with the page.
 
-Still planned: playlist creation and editing, queue editing in the UI, shuffle/repeat/seek UI, related album/artist shortcuts, favourites directly on result rows, persistent sign-in for deployment, and physical touchscreen testing. Do not describe this prototype as complete TIDAL feature parity.
+Still planned: playlist creation and editing, queue editing in the UI, shuffle/repeat/seek UI, favourites directly on result rows, persistent sign-in for deployment, and physical touchscreen testing. Do not describe this prototype as complete TIDAL feature parity.
 
 Offline checks: `python -m unittest discover -s tests -v` and `node tests/test_navigation.cjs`. Save/remove round trips for all four types passed live with original test states restored. Live account evidence is recorded separately in [the evidence ledger](evidence.md).
 
