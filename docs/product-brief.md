@@ -19,7 +19,7 @@ The user can browse the full TIDAL catalogue, albums, artists, favourites and pl
 
 ## Candidate choices, not final specifications
 
-- ESP32-class controller, with ESP32-S3 a candidate.
+- ESP32-S3 integrated into the preferred Waveshare display assembly; no separate MCU board is assumed.
 - Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case, is the leading 4.3-inch 800 x 480 colour touchscreen candidate. No hardware performance is proven.
 - 5,000–10,000 mAh battery considered; no pack has been selected.
 - Charcoal finish, shallow tilt, silicone base and low battery placement.
@@ -32,3 +32,5 @@ LCD needs ongoing power to show now-playing; screen-off standby sacrifices the v
 The first product milestone is a complete native software interaction loop, followed by a representative screen/battery prototype. Final CAD should follow component selection.
 
 Hardware design, parts and unresolved selections are managed in [Hardware](hardware/README.md).
+
+The [updated design concept](design-concept.md) records this screen selection and the shared brief for parts investigation and the prototype UI.
