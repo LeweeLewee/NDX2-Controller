@@ -4,7 +4,7 @@ A compact, battery-powered coffee-table touchscreen for native Naim music playba
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
-**Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; amplifier control remains unresolved. ESP32 firmware and the physical controller have not been built.
+**Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. ESP32 firmware and the physical controller have not been built.
 
 The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. Personalized cloud features remain untested.
 

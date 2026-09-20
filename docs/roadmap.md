@@ -15,7 +15,7 @@
 - [x] Retrieve artwork with bounded caching and no credential leakage (native TIDAL JPEG).
 - [x] Launch albums and playlists using native Naim semantics.
 - [x] Verify queue listing, add/remove/reorder and next/previous behaviour.
-- [ ] Identify and test actual amplifier System Automation volume control.
+- [x] Identify System Automation commands and audibly verify volume down/up; add bounded UI controls.
 - [x] Verify high-resolution playback where the service and recording support it (24-bit/44.1 kHz observed).
 - [ ] Check gapless transitions, native app coexistence and recovery after reconnect.
 

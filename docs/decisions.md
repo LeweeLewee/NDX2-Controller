@@ -41,3 +41,7 @@ Onboard power circuitry versus an external charger/converter remains a research 
 ## D010 — Voice and AI discovery
 
 **Accepted, 20 September 2026.** Add explicit microphone recording and natural-language music discovery, with moods, reference artists and refinements. OpenAI handles interpretation/transcription off the controller; project key creation and its local destination were explicitly approved. Suggestions become catalogue searches, never direct playback commands. Microphone hardware and power remain unverified; computer-browser transcription is user-confirmed. Colours can follow the eventual enclosure material. See [voice discovery](voice-discovery.md).
+
+## D011 — Bounded wired System Automation volume
+
+**Verified implementation, 20 September 2026.** Use the NDX automation IR commands for amplifier volume, preserving fixed audio output. Both directions were audibly confirmed using one press frame and four held frames, spaced 0.2 seconds apart. A UI tap sends this bounded sequence once; no continuous hold, retries, numeric slider or inferred amplifier level. Controls remain busy until completion. See [protocol evidence](research/system-automation.md).

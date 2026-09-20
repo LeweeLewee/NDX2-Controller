@@ -3,6 +3,7 @@ import json
 import pathlib
 import sys
 import unittest
+from unittest.mock import patch
 import urllib.parse
 
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1] / 'tools'))
@@ -20,6 +21,39 @@ class FakeOpener:
 
 
 class ClientTests(unittest.TestCase):
+    @patch('naim_client.time.sleep')
+    def test_amplifier_burst_checks_automation_and_is_bounded(self, sleep):
+        for direction, command in [('down', 'irVolumeDown'), ('up', 'irVolumeUp')]:
+            opener = FakeOpener(b'{"enabled":"1"}')
+            client = NaimClient('192.168.1.2', opener)
+            client.amplifier_nudge(direction)
+            paths = [urllib.parse.urlsplit(r.full_url) for r in opener.requests]
+            self.assertEqual([p.path for p in paths], ['/nowplaying', '/automation'] + ['/automation']*5 + ['/nowplaying'])
+            self.assertEqual([urllib.parse.parse_qs(p.query) for p in paths[2:7]],
+                             [{'cmd': [command], 'repeat': [v]} for v in ['false'] + ['true']*4])
+            self.assertTrue(all(r.get_method() == 'GET' for r in opener.requests))
+
+    def test_amplifier_disabled_or_invalid_direction_cannot_send_ir(self):
+        with self.assertRaises(ValueError):
+            self.client.amplifier_nudge('up&repeat=true')
+        self.assertEqual(self.opener.requests, [])
+        with self.assertRaises(ValueError):
+            self.client.amplifier_nudge('down')
+        self.assertFalse(any('cmd=' in r.full_url for r in self.opener.requests))
+
+    @patch('naim_client.time.sleep')
+    def test_amplifier_uncertain_response_stops_without_retry(self, sleep):
+        class FailingOpener(FakeOpener):
+            def open(self, request, timeout):
+                result = super().open(request, timeout)
+                if len(self.requests) == 4:
+                    raise TimeoutError('Uncertain delivery')
+                return result
+        opener = FailingOpener(b'{"enabled":"1"}')
+        with self.assertRaises(TimeoutError):
+            NaimClient('192.168.1.2', opener).amplifier_nudge('down')
+        self.assertEqual(len(opener.requests), 4)
+
     def setUp(self):
         self.opener = FakeOpener()
         self.client = NaimClient('192.168.1.2', self.opener)

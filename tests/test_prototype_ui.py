@@ -26,6 +26,19 @@ class Naim:
 
 
 class BridgeTests(unittest.TestCase):
+    def test_amplifier_action_is_direction_only_and_live_only(self):
+        naim = Naim()
+        naim.amplifier_nudge = lambda direction: naim.calls.append(('amplifier', direction))
+        bridge = Bridge(naim)
+        bridge.request('amplifier', {'direction': 'down'})
+        self.assertEqual(naim.calls, [('amplifier', 'down')])
+        for args in ({'direction': 'mute'}, {'direction': 'up', 'repeat': True}, {'volume': 90}):
+            with self.assertRaises(ValueError):
+                bridge.request('amplifier', args)
+        self.assertEqual(len(naim.calls), 1)
+        with self.assertRaises(ValueError):
+            Bridge().request('amplifier', {'direction': 'up'})
+
     def test_artwork_is_registered_from_metadata_not_arbitrary_requests(self):
         bridge = Bridge()
         url = 'https://resources.tidal.com/images/album/640x640.jpg'

@@ -1,11 +1,12 @@
 """Small native Naim control client; never fetches or supplies audio URLs.
 
 Experimental API 1.4.0 support. Caller owns user authorization for mutations.
-Search, amplifier volume and authentication are deliberately not implemented.
+Search and authentication are deliberately not implemented.
 """
 import ipaddress
 import json
 import re
+import time
 import urllib.parse
 import urllib.request
 
@@ -50,6 +51,23 @@ class NaimClient:
 
     def status(self):
         return self._request('nowplaying')
+
+    def amplifier_nudge(self, direction):
+        """Verified System Automation burst, not a digital volume target.
+
+        One press frame followed by four held frames. No retries or restoration:
+        an uncertain response may already have moved the physical amplifier.
+        """
+        if direction not in ('down', 'up'):
+            raise ValueError('Expected amplifier direction down or up')
+        self.status()
+        if str(self._request('automation').get('enabled')) != '1':
+            raise ValueError('System Automation is not enabled on this NDX')
+        command = 'irVolumeDown' if direction == 'down' else 'irVolumeUp'
+        for repeat in ('false', 'true', 'true', 'true', 'true'):
+            self._request('automation', cmd=command, repeat=repeat)
+            time.sleep(0.2)
+        self.status()
 
     def queue(self):
         # Firmware ignores limit on this endpoint; bound the response in bytes.

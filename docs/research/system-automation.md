@@ -12,8 +12,8 @@ HTTP command specification.
 ## Established facts
 
 - Static Android app inspection now identifies the System Automation volume
-  requests below. One volume-down request was accepted by the NDX during
-  playback; audible confirmation is pending.
+  requests below. The user audibly confirmed short held sequences in both
+  directions; the prototype now uses these bounded sequences.
 
 - Live `/automation` reads report enabled=1 and class `object.automation`.
 - The existing `/levels/room` trial changed numeric readback without changing
@@ -44,8 +44,10 @@ In `classes19.dex`, Retrofit annotations on
 
 The separate `com.naimaudio.leo.LeoAutomation` implementation corroborates the
 volume commands: it appends the boolean to `?cmd=irVolumeDown&repeat=` or
-`?cmd=irVolumeUp&repeat=` and calls the product's GET request method. A bounded
-single tap uses `repeat=false`; hold/repeat behaviour is not validated.
+`?cmd=irVolumeUp&repeat=` and calls the product's GET request method.
+`VolumeHelperLeo.volDownPressed` passes false, while `volDownHeld` passes true;
+the up handlers follow the same pattern. This establishes tap versus held-frame
+parameters from app bytecode, not a numeric target level.
 
 The first live trial sent exactly one GET
 `/automation?cmd=irVolumeDown&repeat=false` after confirming automation enabled
@@ -57,11 +59,26 @@ The user found the single-tap change too small to judge. A second announced
 trial sent five discrete down commands, 0.5 seconds apart, each with
 `repeat=false`. All five were accepted; playback remained active with error 0
 and position advanced 183066 to 186070 ms. The resulting level was left for the
-user to assess; no upward correction was sent. The report is in ignored
+user to assess; no upward correction was sent. The user again reported no clear
+change. The report is in ignored
 `local/evidence/system-automation-five-down.json`.
 
-**Audible effect, volume-up and mute remain unverified.** Do not expose volume
-as working in the product UI until the user confirms the physical effect.
+After inspecting the held-button handlers, a third announced trial sent one
+`repeat=false` down request followed by four `repeat=true` down requests,
+0.2 seconds apart. All five were accepted; player error remained 0 and music
+continued. The interval/count is a bounded diagnostic choice, not a claim of
+the app's exact repeat timing. The user confirmed: “Yes, it worked.” Filtered report:
+`local/evidence/system-automation-short-hold.json`.
+
+A matching upward sequence was then accepted with error 0 and continuing
+playback. The user confirmed: “Yes, volume increased.” Filtered report:
+`local/evidence/system-automation-short-up.json`.
+
+**Volume down and up are audibly verified.** The UI uses one fixed short sequence
+per tap, disables controls during the request and stops on any failure without
+retry or automatic restoration. It checks automation enabled and reads player
+state before/after. Numeric amplifier feedback, exact physical level restoration,
+mute and continuous holding remain unverified and are not exposed.
 
 ## Targeted app capture — failed on the phone; retired
 

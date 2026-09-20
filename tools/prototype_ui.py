@@ -119,6 +119,11 @@ class Bridge:
             self.naim.status()
             self.naim.transport(command)
             return {'message': 'Request sent. Waiting for player state.'}
+        if action == 'amplifier':
+            if set(args) != {'direction'} or args.get('direction') not in ('down', 'up'):
+                raise ValueError('Expected one amplifier direction: down or up')
+            self.naim.amplifier_nudge(args['direction'])
+            return {'message': 'Amplifier volume ' + args['direction'] + ' request sent.'}
         raise ValueError('Unknown action')
 
 
