@@ -23,7 +23,7 @@ State reads immediately after commands can be stale. Observe the queue and playb
 
 - Catalogue search: tested GET variants using query, search, q, term and value, and guessed nested search paths, returned 400. An app request or vendor specification is needed to establish syntax; no supported search function is claimed.
 - Quality resolved for 24-bit: the user corrected High to Max in the Naim app. Native bitrate changed from lossless to losslessHd. Replaying the identical native track through cmd=play returned FLAC 24-bit/44.1 kHz with error=0. Higher sample rates remain untested.
-- Amplifier: automation.enabled=1, but neither the correct volume command nor a physical amplifier movement has been verified. Generic /levels volume is excluded from the client pending that check.
+- Amplifier: automation.enabled=1, but the actual System Automation command remains unidentified. A live PUT /levels/room test changed readback 13 → 5 → 13 while music played; the user confirmed no audible volume change. Do not use that endpoint as amplifier control in this setup. Output mode was unchanged, level restored and playback stopped. Volume remains excluded from the client.
 - Queue selection passed: selecting a returned second-track queue reference started that track and changed current. A subsequent stop was confirmed.
 - Automatic transition passed. Audible gaplessness, prolonged playback, token renewal, app concurrency and actual network outage recovery remain unverified.
 

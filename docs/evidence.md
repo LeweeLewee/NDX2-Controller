@@ -14,7 +14,7 @@ Last updated: 20 September 2026.
 | Audible output | User confirmed | Music was audible during the volume trial; packet-level cloud route not independently checked |
 | Playback quality | Observed at 24-bit/44.1 kHz | User corrected Naim app setting from High to Max; API changed lossless to losslessHd. Same native track command then returned FLAC 24-bit/44.1 kHz, playing state, error=0 |
 | Stop behaviour | Observed, asynchronous | Immediate read stale; subsequent state=1, position=0, no longer active playback |
-| Amplifier control | Unresolved | levels/room accepted 13 → 11 → 13; user heard music but could not judge a volume change. Numeric readback does not prove System Automation |
+| Amplifier control | Unresolved; levels/room failed audible test | Readback accepted 13 → 5 → 13, but user confirmed no audible volume change. This endpoint does not establish working amplifier control in the current setup |
 | Full catalogue search | Unresolved | Exploratory GET query/path variants returned 400; correct syntax unknown. This does not prove search unavailable |
 | Collection pagination | Observed | favourites/albums with offset=0 and 2, limit=2 returned distinct successive pages and totalCount |
 | Artwork retrieval and cache | Observed | Returned resources.tidal.com JPEG fetched (41,661 bytes), visually checked; second lookup reused cache. Host restriction, byte cap and eviction covered offline |
@@ -53,7 +53,7 @@ Queue selection with PUT current also passed: the returned second-track referenc
 
 The user authorized an audible volume comparison. With output mode unchanged, a native TIDAL track played while PUT /levels/room changed the reported setting from 13 to 11 and back to 13. Subsequent reads confirmed those values and advancing playback. Cleanup confirmed volume=13, mute=0, stopped state=1, position=0 and error=0. The user confirmed audible music but said the change was unclear. This result is inconclusive for amplifier control; it is not a pass or proof of no effect.
 
-A second trial used a larger reduction, 13 → 5 → 13, without exceeding the starting setting. Readback confirmed each level; final state again showed stopped, position=0, volume=13, mute=0 and error=0. User assessment of this second trial is pending. Neither trial changed the fixed/variable output mode.
+A second trial used a larger reduction, 13 → 5 → 13, without exceeding the starting setting. Readback confirmed each level; final state again showed stopped, position=0, volume=13, mute=0 and error=0. The user confirmed no audible volume change. This is a failed audible-control test for /levels/room in the current setup, not a failure of native playback or proof that System Automation is unavailable. Neither trial changed the fixed/variable output mode. Keep volume out of the implemented control client until the actual amplifier command is identified and verified.
 
 ### Capture-only recorder limitation
 
