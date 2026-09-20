@@ -62,6 +62,10 @@ python tools/tidal_catalog.py "Massive Attack" --kind artists --country GB
 
 The command prompts locally without echo for credentials unless TIDAL_CLIENT_ID and TIDAL_CLIENT_SECRET are already present in its environment. It keeps the token in memory and does not persist credentials. Supported types are artists, albums, tracks and playlists. Use the account's correct catalogue country; GB is a configurable initial assumption.
 
-The API class also exposes page(result_id, kind, cursor) for a result ID and cursor returned by TIDAL. It constructs requests to fixed TIDAL endpoints instead of following arbitrary returned URLs. The CLI shows the first relationship page in returned result order, resolving metadata from included resources. The included array alone is not the result ranking. There is no complete paginated interactive UI yet.
+The API class also exposes page(result_id, kind, cursor) for a result ID and cursor returned by TIDAL. It constructs requests to fixed TIDAL endpoints instead of following arbitrary returned URLs. The CLI shows the first relationship page in returned result order, resolving metadata from included resources. The included array alone is not the result ranking. The interactive prototype supports search pagination and collection pagination. See docs/prototype-ui.md and docs/tidal-library.md for setup and feature limits.
 
 Search result references are explicitly candidates. Before playback, resolve a candidate through NaimClient.browse and verify the returned native object. A live search → native browse → native play test is still required. Catalogue access uses client credentials; personalized cloud resources would require separate user authorization. Existing native Naim collection browsing is already available.
+
+## Milestone reference
+
+`software-feasibility-v1` is the frozen software feasibility baseline. Begin new work with docs/milestone-handover.md and keep decisions, evidence and backlog in the repository. Run `node tests/test_navigation.cjs` alongside the Python suite for UI logic changes. Credentials and private live reports remain outside Git.

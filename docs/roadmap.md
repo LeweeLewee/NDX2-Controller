@@ -8,7 +8,7 @@
 - [x] Launch one native track and observe playback.
 - [x] Establish a local repository and evidence record.
 
-## M1 — Complete software control loop (next)
+## M1 — Software feasibility (closed, 20 September 2026)
 
 - [x] Verify public catalogue search and pagination using the project's own TIDAL app (artists, tracks, albums and playlists).
 - [x] Verify search-result IDs through native Naim browse and playback on the home network (Teardrop through the UI).
@@ -17,7 +17,6 @@
 - [x] Verify queue listing, add/remove/reorder and next/previous behaviour.
 - [x] Identify System Automation commands and audibly verify volume down/up; add bounded UI controls.
 - [x] Verify high-resolution playback where the service and recording support it (24-bit/44.1 kHz observed).
-- [ ] Check gapless transitions, native app coexistence and recovery after reconnect.
 
 Automatic track advancement and a new controller connection during playback passed. Audible gaplessness, app concurrency and actual network outage recovery remain open. Switching the Naim app from High to Max changed the native API setting to losslessHd and enabled 24-bit playback through the same native command. Higher sample rates remain untested.
 - [x] Build the first 800 × 480 computer-side UI and check demo search, selection, transport and queue interactions.
@@ -25,16 +24,19 @@ Automatic track advancement and a new controller connection during playback pass
 - [x] Add AI discovery/refinement and verify suggestion → live TIDAL search → native artist browsing.
 - [x] Validate browser microphone capture and transcription (user confirmed correct transcript).
 - [x] Connect cached native artwork to the UI and verify live Now Playing display.
-- [ ] Complete queue-edit controls.
 - [x] Implement TIDAL collection hearts, album saves, artist/playlist saves and OAuth account connection; verify all four save/remove round trips live.
 - [x] Provide Back from discovery, nested browsing and main sections with restored browsing context.
 - [x] Add save/unsave hearts directly to album search results.
 - [x] Add direct Now Playing album/artist shortcuts and related links on track/album details.
-- [ ] Add playlist creation/editing, shuffle/repeat/seek UI.
 
-**Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
+**Closeout:** the user accepted software feasibility as achieved. The essential control path has live evidence and native playback is preserved. This is not production readiness or full feature parity. Unfinished UI and reliability work is carried forward below; no failed or untested item is marked proven. Frozen reference: `software-feasibility-v1`; see [handover](milestone-handover.md).
 
-## M2 — Touch display and power prototype
+## M2 — Detailed design, deployment and hardware proof (next)
+
+- [ ] Decide where the bridge runs and specify secure credential storage and persistent sign-in.
+- [ ] Validate gapless transitions, native app coexistence and disconnect/reconnect recovery.
+- [ ] Define interaction flows and touch targets on the actual 4.3-inch display.
+- [ ] Carry forward queue-edit controls and playlist creation/editing, shuffle/repeat/seek UI; prioritize only when required by the detailed design.
 
 - [x] Record hardware design baseline and initial parts BOM ([hardware](hardware/README.md)); Waveshare ESP32-S3-Touch-LCD-4.3B is preferred.
 - [ ] Validate and finalize the display/touch selection.

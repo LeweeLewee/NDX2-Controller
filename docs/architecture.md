@@ -44,10 +44,14 @@ Do not assume every duration uses the same units: the track description returned
 
 ## Extensibility
 
-Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. Native queue edits have passed live tests; native search syntax, authentication renewal and amplifier commands remain unresolved.
+Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. Native queue edits and wired System Automation amplifier control have passed live tests. Search uses the project’s public TIDAL catalogue adapter. Native search syntax is not required by this prototype; long-running authentication renewal and recovery remain deployment validation work.
 
 ## Catalogue metadata prototype
 
 The computer-side UI uses a loopback-only Python bridge in tools/prototype_ui.py. It runs a labelled demo by default; optional live catalogue and NDX configuration use the existing adapters. This is an implementation aid for the chosen display, not a committed Pi deployment or ESP32 firmware architecture. See [prototype scope and validation](prototype-ui.md).
 
 tools/tidal_catalog.py implements public TIDAL catalogue search separately from native Naim playback. It uses this project's own developer credentials, sends only metadata requests, and returns candidate native IDs for subsequent resolution on the NDX. It does not import Naim credentials, fetch playback manifests or transfer audio. Credentials and tokens stay in the computer/Pi process; deployment on the final controller is undecided. Live search and pagination pass for artists, tracks, albums and playlists. Public search → native track resolution → playback has passed through the UI. AI discovery supplies catalogue queries only; see [voice discovery](voice-discovery.md).
+
+## Account collection and phase boundary
+
+The prototype also uses the project’s own TIDAL OAuth authorization for collection read/write, with exact album/artist metadata links and native resolution before playback. See [collection integration](tidal-library.md). The computer bridge is a proven reference implementation, not a selected final deployment. Software feasibility is closed; [the handover](milestone-handover.md) governs detailed design and records the remaining reliability and hardware gates.

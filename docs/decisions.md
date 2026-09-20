@@ -49,3 +49,7 @@ Onboard power circuitry versus an external charger/converter remains a research 
 ## D012 — Real TIDAL collection actions
 
 **Accepted implementation direction, 20 September 2026.** Hearts and library saves use the project's own TIDAL OAuth authorization, limited to collection read/write. Native Naim playback remains mandatory and independent. Do not implement cosmetic local hearts in live mode or silently assume a failed saved-state lookup means unsaved. Tokens stay in memory for this prototype. Provide persistent Back navigation with restored browsing context. See [collection design and setup](tidal-library.md).
+
+## D013 — Close software feasibility and move to detailed design
+
+**Accepted, 20 September 2026.** The user agreed that software feasibility has achieved its purpose. Freeze the working reference at `software-feasibility-v1`; use the repository as the source of truth for decisions, evidence, implementation and backlog. Further feature expansion must answer a next-phase design question. Detailed design prioritizes physical screen/touch/power proof, bridge deployment and authentication/recovery, followed by enclosure packaging. Open reliability checks and feature gaps remain explicit in the roadmap and handover. Chat history is supporting history, not a required project specification.
