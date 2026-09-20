@@ -10,7 +10,7 @@
 
 ## M1 — Complete software control loop (next)
 
-- [ ] Identify native catalogue search (collection pagination verified).
+- [ ] Identify catalogue search (collection pagination verified; separate public metadata adapter offline tested, credentials and live ID handoff pending).
 - [x] Retrieve artwork with bounded caching and no credential leakage (native TIDAL JPEG).
 - [x] Launch albums and playlists using native Naim semantics.
 - [x] Verify queue listing, add/remove/reorder and next/previous behaviour.

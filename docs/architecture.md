@@ -44,4 +44,8 @@ Do not assume every duration uses the same units: the track description returned
 
 ## Extensibility
 
-Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. The native search syntax, authentication lifecycle, queue-edit semantics and amplifier command path remain unresolved.
+Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. Native queue edits have passed live tests; native search syntax, authentication renewal and amplifier commands remain unresolved.
+
+## Catalogue metadata prototype
+
+tools/tidal_catalog.py implements public TIDAL catalogue search separately from native Naim playback. It uses this project's own developer credentials, sends only metadata requests, and returns candidate native IDs for subsequent resolution on the NDX. It does not import Naim credentials, fetch playback manifests or transfer audio. Credentials and tokens stay in the computer/Pi process; deployment on the final controller is undecided. Offline tests pass; live API access and native ID compatibility remain unverified.

@@ -27,3 +27,7 @@
 ## D007 — Project repository
 
 **Updated, 20 September 2026.** The user selected [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller) as the project repository. The original local project and existing GitHub initial commit are preserved in the combined history. Personal reports remain ignored locally. Repository visibility is unchanged; no distribution licence has been selected. There is no affiliation with Naim or TIDAL implied by the project name.
+
+## D008 — Prototype catalogue search separately from playback
+
+**Provisional implementation, 20 September 2026.** Test TIDAL's public metadata API using this project's own developer application. Native Naim playback remains mandatory. The search adapter cannot play audio; candidate IDs require native resolution before handoff. Whether this becomes the final architecture depends on live API access, result compatibility and small-screen usability. Credentials are not provisioned yet.
