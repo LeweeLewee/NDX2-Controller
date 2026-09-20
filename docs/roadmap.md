@@ -20,7 +20,8 @@
 - [ ] Check gapless transitions, native app coexistence and recovery after reconnect.
 
 Automatic track advancement and a new controller connection during playback passed. Audible gaplessness, app concurrency and actual network outage recovery remain open. Switching the Naim app from High to Max changed the native API setting to losslessHd and enabled 24-bit playback through the same native command. Higher sample rates remain untested.
-- [ ] Build a small computer-side UI covering search → select → native play → now playing.
+- [x] Build the first 800 × 480 computer-side UI and check demo search, selection, transport and queue interactions.
+- [ ] Verify search → select → native play → now playing through the UI on the home network; complete artwork and queue-edit controls.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
 

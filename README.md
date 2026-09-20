@@ -23,6 +23,7 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 | Document | Purpose |
 | --- | --- |
 | [Updated design concept](docs/design-concept.md) | Selected Waveshare screen, physical direction and parallel investigation brief |
+| [Prototype UI](docs/prototype-ui.md) | Run the 800 × 480 demo and configure the experimental live bridge |
 | [Product brief](docs/product-brief.md) | Requirements, constraints and unresolved choices |
 | [Hardware and parts BOM](docs/hardware/README.md) | Design baseline, parts, sourcing and validation |
 | [Architecture](docs/architecture.md) | Control path, responsibilities and integration boundaries |

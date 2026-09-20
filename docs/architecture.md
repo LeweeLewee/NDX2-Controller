@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-    UI[Square touchscreen] -->|Control and metadata| NDX[Naim NDX 2]
+    UI[800 x 480 touchscreen] -->|Control and metadata| NDX[Naim NDX 2]
     UI -. Optional control bridge .-> PI[Existing home-automation Pi]
     PI -. Commands and metadata .-> NDX
     TIDAL[TIDAL service] -->|Native Naim audio retrieval| NDX
@@ -47,5 +47,7 @@ Do not assume every duration uses the same units: the track description returned
 Separate UI requests from service adapters and Naim player commands. Future providers must satisfy the same native-playback requirement. Avoid building a universal audio server as a shortcut. Native queue edits have passed live tests; native search syntax, authentication renewal and amplifier commands remain unresolved.
 
 ## Catalogue metadata prototype
+
+The computer-side UI uses a loopback-only Python bridge in tools/prototype_ui.py. It runs a labelled demo by default; optional live catalogue and NDX configuration use the existing adapters. This is an implementation aid for the chosen display, not a committed Pi deployment or ESP32 firmware architecture. See [prototype scope and validation](prototype-ui.md).
 
 tools/tidal_catalog.py implements public TIDAL catalogue search separately from native Naim playback. It uses this project's own developer credentials, sends only metadata requests, and returns candidate native IDs for subsequent resolution on the NDX. It does not import Naim credentials, fetch playback manifests or transfer audio. Credentials and tokens stay in the computer/Pi process; deployment on the final controller is undecided. Live search and pagination pass for artists, tracks, albums and playlists. Native ID compatibility remains unverified.

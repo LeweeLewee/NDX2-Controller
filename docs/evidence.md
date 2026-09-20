@@ -75,4 +75,10 @@ These were catalogue-only requests: no audio manifest, audio transfer or NDX com
 
 ## How to update this ledger
 
+### Computer UI prototype — 20 September 2026
+
+Published the revised design concept using the user's selected Waveshare ESP32-S3-Touch-LCD-4.3B without case. The hardware/BOM work remains separately maintained. Implemented the first 800 × 480 browser prototype and a loopback-only Python bridge. Browser inspection verified the now-playing layout, search/type filtering, album/track detail, demo play, next, pause, queue listing/addition and Back navigation. These checks used silent demo fixtures, not the NDX.
+
+All 28 offline tests passed, including native-reference resolution before play and HTTP origin/host restrictions. The loopback test required local-socket permissions; it initially failed under the restricted network sandbox and passed with those permissions. No NDX commands were issued. Live UI integration, actual artwork display, queue-edit controls, embedded keyboard, physical touch usability and power measurements remain unverified or unimplemented as described in [prototype documentation](prototype-ui.md).
+
 Record date, firmware, initial state, exact operation, observed result and final state. Distinguish API acknowledgement from actual state change. Link sanitized fixtures or local report filenames as appropriate. Never mark a capability complete solely because an endpoint exists or returned HTTP 200.
