@@ -1,6 +1,8 @@
-# Naim Table Controller
+# NDX2-Controller
 
 A compact, battery-powered coffee-table touchscreen for native Naim music playback, starting with TIDAL.
+
+Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
 **Status: concept agreed; software feasibility prototype.** Native TIDAL browsing and one-track playback have been demonstrated on an NDX 2 using a computer. ESP32 firmware and the physical controller have not been built.
 

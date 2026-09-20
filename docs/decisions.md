@@ -24,6 +24,6 @@
 
 **Accepted workflow.** Complete native search, queue, volume and quality validation before final component purchase and enclosure CAD. A representative screen prototype then verifies that the interaction is pleasant enough.
 
-## D007 — Local repository first
+## D007 — Project repository
 
-**Repository setup, 19 September 2026.** Working name: Naim Table Controller. Remote hosting, public/private visibility and distribution licence have not been selected. Do not infer permission to publish personal device information. There is no affiliation with Naim or TIDAL implied by this working name.
+**Updated, 20 September 2026.** The user selected [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller) as the project repository. The original local project and existing GitHub initial commit are preserved in the combined history. Personal reports remain ignored locally. Repository visibility is unchanged; no distribution licence has been selected. There is no affiliation with Naim or TIDAL implied by the project name.

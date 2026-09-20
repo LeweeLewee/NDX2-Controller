@@ -39,4 +39,4 @@ Future live playback tests should inspect existing queue/playback first and expl
 
 ## Remote and licensing
 
-This is initially a local Git repository. A remote and public/private visibility can be selected later. No distribution licence has been chosen. The probe is project-authored; external implementations are cited as research references, not vendored code.
+The project remote is [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller), configured as `origin`. Its existing visibility is unchanged. No distribution licence has been chosen. The probe is project-authored; external implementations are cited as research references, not vendored code.
