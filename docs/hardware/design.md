@@ -11,7 +11,7 @@ Revision 0.2 — 20 September 2026. Proposal; not a wiring-ready schematic.
 | Selection | Preferred by user; awaiting prototype validation |
 | Display | 4.3-inch IPS LCD, 800 x 480, capacitive touch |
 | Computing | Integrated ESP32-S3, 16 MB flash, 8 MB PSRAM; no separate MCU or Wi-Fi board required |
-| Mechanical reference | Manufacturer board outline 112.4 x 75.1 mm; connector protrusions, depth, mounting and cable bends still to measure |
+| Mechanical reference | Manufacturer lens outline 112.4 x 75.1 mm; drawing maximum depth 17.4 +/-0.3 mm; VA 95.54 x 54.36 mm. Plugged connectors, mounting and cable bends still to verify; see River Stone study |
 | Cost reference | USD 36.99 without case, checked 20 September 2026; excludes shipping and tax |
 | Supply | Documented USB-C 5 V input, 7–36 V DC input and separate 3.7 V single-cell lithium battery connection |
 | Battery connector | MX1.25; confirm pin count, polarity and actual board revision before specifying the harness |
@@ -24,7 +24,7 @@ Sources: [product and price](https://www.waveshare.com/product/arduino/boards-ki
 
 ```mermaid
 flowchart LR
-    USB[Charging inlet or future dock] --> POWER[Charging and power path - route TBD]
+    USB[Rear charging inlet - proposal] --> POWER[Charging and power path - route TBD]
     BAT[Protected large battery in base] <--> POWER
     POWER --> DISPLAY[Waveshare display and ESP32-S3]
     DISPLAY -->|Wi-Fi commands and metadata| NDX[Naim NDX 2]
@@ -32,7 +32,7 @@ flowchart LR
     PI -. native commands .-> NDX
 ```
 
-The power block can be onboard or external; it does not imply a separate charger purchase. Naim and Pi power remain outside the handheld battery system.
+The power block can be onboard or external; it does not imply a separate charger purchase. Naim and Pi power remain outside the stationary controller battery system.
 
 ## Power routes to evaluate
 
@@ -50,7 +50,7 @@ For B, leave the onboard battery connector empty and verify the 5 V supply and p
 
 Proposed upper assembly: display supported by its board/mounting structure, with recessed perimeter protection; no clamping load on active glass.
 Proposed lower assembly: removable protected battery cradle, accessible power electronics and strain-relieved wiring.
-Proposed finish: charcoal, softly rounded edges, shallow tilt and non-slip silicone base.
+Current physical anchor: original 01 River Stone, stationary on the table; softly rounded mineral form and non-slip feet. See [dimensioned layout](river-stone/README.md). One main shell, underside cover and one battery; no removable handheld or charge-transfer dock.
 Keep Wi-Fi antenna clearance away from battery, wiring and any added ballast; follow the module's antenna guidance at CAD stage.
 Use a removable underside and reusable fasteners. Exact wall thickness, tilt, screw sizes and insert lengths follow component measurements.
 Use the display's existing touch cover initially; an additional overlay is optional and requires optical/touch testing.

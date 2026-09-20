@@ -51,6 +51,9 @@ Automatic track advancement and a new controller connection during playback pass
 
 ## M3 — Physical prototype
 
+- [x] Select original River Stone as stationary table enclosure and record dimensioned packaging study ([layout](hardware/river-stone/README.md)).
+- [ ] Surface the original asymmetric shell; verify real wall offsets, screen insertion, mounts, connectors, antenna and microphone space before releasing a fit print.
+
 - [ ] Finalize dimensions around measured components.
 - [ ] Print fit prototype; evaluate tilt, weight, touch stability and screen protection.
 - [ ] Integrate serviceable battery and charging access.

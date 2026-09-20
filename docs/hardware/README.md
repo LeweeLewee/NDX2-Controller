@@ -5,6 +5,8 @@ Last reviewed: 20 September 2026.
 
 The leading screen is the **Waveshare ESP32-S3-Touch-LCD-4.3B, standard version without case (SKU 27848)**. This is a preferred prototype candidate, not a tested or final production selection.
 
+Current enclosure: **original 01 River Stone, stationary on the table**. See [dimensioned packaging and construction study](river-stone/README.md).
+
 ## Design baseline
 
 - Compact coffee-table controller with a bespoke touch UI and a substantial, serviceable 3D-printed enclosure.

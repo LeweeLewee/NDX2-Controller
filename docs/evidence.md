@@ -114,3 +114,9 @@ Added exact TIDAL album/artist relationships from track IDs, including multiple-
 ## Album search-result hearts — 20 September 2026
 
 Album results now show separate saved-state heart buttons without nesting controls inside the album-opening button. Live UI checks saved Blue Lines (2012 Mix/Master), observed its filled heart while staying in search results, then removed it and observed the empty heart. The initial unsaved state was restored. Mezzanine remained saved. Search context and scroll position are retained; unknown state is not represented as unsaved. Five JavaScript tests pass, including distinct row identities and mutation targeting independent of the current detail selection. No backend or playback path changed.
+
+## River Stone mechanical reference and packaging - 20 September 2026
+
+Manufacturer 4.3B drawing visually inspected: lens 112.4 x 75.1 mm, VA 95.54 x 54.36 mm, maximum depth 17.4 +/-0.3 mm. The physical visible-area ratio must not be inferred from 800 x 480 pixels. [Source archive](https://files.waveshare.com/wiki/ESP32-S3-Touch-LCD-4.3B/ESP32-S3-Touch-LCD-4in3B_Drawing.zip).
+
+The reproducible [River Stone layout generator](../tools/river_stone_layout.py) checks three rectangular installation reservations against an inset elliptical footprint, each other and the rear plane of a 50-degree screen with 17.7 mm depth allowance. Checks pass; smallest normal clearance is 3.01 mm at the charger. This is partial analytical packaging evidence, not full shell fit, printed fit, component compatibility, stability, electrical validation or measured battery life. See [results](hardware/river-stone/clearance-checks.json).

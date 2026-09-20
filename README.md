@@ -29,6 +29,7 @@ The frozen reference is tagged `software-feasibility-v1`. Start the next phase f
 | [TIDAL collection](docs/tidal-library.md) | Real hearts, library saves, account connection and Back navigation |
 | [Prototype UI](docs/prototype-ui.md) | Run the 800 × 480 demo and configure the experimental live bridge |
 | [Product brief](docs/product-brief.md) | Requirements, constraints and unresolved choices |
+| [River Stone enclosure](docs/hardware/river-stone/README.md) | Stationary original 01 concept, dimensioned packaging and build constraints |
 | [Hardware and parts BOM](docs/hardware/README.md) | Design baseline, parts, sourcing and validation |
 | [Architecture](docs/architecture.md) | Control path, responsibilities and integration boundaries |
 | [Evidence](docs/evidence.md) | What the live tests actually established |

@@ -6,15 +6,15 @@ Revision 0.2 — 20 September 2026. Published baseline for parts investigation a
 
 **Waveshare ESP32-S3-Touch-LCD-4.3B, standard version without case (SKU 27848).** Use its 4.3-inch colour IPS touchscreen and 800 × 480 landscape canvas as the working prototype baseline. ESP32-S3, Wi-Fi and touch are integrated. This is the user's preferred prototype selection; hardware validation and final purchase selection remain open.
 
-This replaces the earlier approximately square e-paper screen assumption. The report structure and the restrained charcoal design direction remain unchanged. The enclosure follows the actual display assembly, rather than forcing square proportions.
+This replaces the earlier approximately square e-paper screen assumption. The physical direction is now the original 01 River Stone, stationary on the coffee table; see D014. The enclosure follows the actual display assembly, rather than forcing square proportions.
 
 See the [manufacturer's display documentation](https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3B) and the maintained [hardware design](hardware/design.md) for specifications and mechanical references. The [parts BOM](hardware/bom.md) is the authoritative component list; this concept does not duplicate prices or connector specifications.
 
 ## Physical character
 
-A low, softly rounded, matte charcoal object with a shallow display tilt. A substantial rechargeable battery sits low in the base, contributing stability and weight. The base is non-slip, the glass has perimeter protection, and a removable underside gives access to the battery and electronics. Final dimensions, fasteners, wall thickness and charging access follow component measurements.
+The original 01 River Stone: a low asymmetric pebble with inset landscape display and a refined mineral surface. It stays on the table; there is no separate handheld controller. The [dimensioned packaging study](hardware/river-stone/README.md) proposes a 220 x 155 x 105 mm envelope and 50-degree screen angle, both provisional. A substantial rechargeable battery sits low in the base, contributing stability and weight. The base is non-slip, the glass has perimeter protection, and a removable underside gives access to the battery and electronics. Final dimensions, fasteners, wall thickness and charging access follow component measurements.
 
-Cable-free coffee-table use remains mandatory. Charging may use accessible USB-C or a later dock; neither is a final mechanical commitment. Weeks of standby remains an unmeasured target. With the selected LCD, standby means the screen turns off. Touch wake and whole-board consumption must be demonstrated; an always-visible now-playing screen has a separate energy budget.
+Cable-free coffee-table use remains mandatory. A discreet rear cable charging inlet is the working proposal; controller-to-base charging is outside the stationary design. Weeks of standby remains an unmeasured target. With the selected LCD, standby means the screen turns off. Touch wake and whole-board consumption must be demonstrated; an always-visible now-playing screen has a separate energy budget.
 
 ## First UI prototype
 
@@ -40,7 +40,7 @@ Public catalogue search and pagination have passed live tests. Native collection
 | --- | --- | --- |
 | Display and embedded UI | Exact Waveshare candidate; 800 × 480 canvas | Touch usability, rendering, wake behaviour and firmware pin availability |
 | Battery and power | Large protected pack in base; existing onboard power path to assess first | Whole-board active/sleep measurements, charging rate, shutdown and runtime |
-| Enclosure | Charcoal, shallow tilt, serviceable underside, low battery placement | Actual board/connector/pack dimensions, antenna clearance, stability and fit |
+| Enclosure | Original River Stone, stationary, serviceable underside, low battery placement | Actual board/connector/pack dimensions, antenna clearance, stability and fit |
 | Software | Catalogue and native clients; working live evidence | Search-to-native handoff, app coexistence, recovery and audible amplifier control |
 
 Record parts and research in [Hardware](hardware/README.md), accepted changes in [Decisions](decisions.md), and measurements in [Evidence](evidence.md). Parts research can proceed alongside the UI; final purchases and enclosure CAD still follow the software feasibility gate.

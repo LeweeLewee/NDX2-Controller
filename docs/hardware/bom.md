@@ -24,7 +24,7 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 | HW-015 | Protective perimeter gasket / glass support | 1 set if needed | design | not ordered | TBD | Prevent point loads; avoid unnecessary touch overlay |
 | HW-016 | Additional base ballast | 0 or 1 | optional | not ordered | TBD if needed | Decide after battery mass and tilt-stability evaluation |
 | HW-017 | External USB charging adapter and cable | 1 set | research | not ordered | TBD | Inventory existing supply; select voltage/current after charging route |
-| HW-018 | Charging dock and contact pair | 0 or 1 set | optional | not ordered | TBD if chosen | USB access is initial proposal; dock selection deferred |
+| HW-018 | Charging dock and contact pair | 0 | excluded from current design | not ordered | N/A | Stationary River Stone uses a rear charging inlet proposal; no controller-to-base transfer |
 
 ## Existing system and included functions
 
@@ -46,7 +46,7 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 | Multimeter | 1 | inventory unverified | Polarity, voltage and continuity |
 | Caliper | 1 | inventory unverified | Mounting, connectors and enclosure fit |
 | Temperature probe | 1 | inventory unverified | Charging/enclosure thermal measurements |
-| 3D printer or print service | as needed | inventory unverified | Fit and finish prototypes |
+| Bambu Lab P1S, 0.4 mm nozzle | 1 existing | user-confirmed home printer | Fit and finish prototypes; filament selection remains open |
 
 ## Cost accounting
 

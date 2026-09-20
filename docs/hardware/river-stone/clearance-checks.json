@@ -1,0 +1,95 @@
+{
+  "status": "packaging allowances only; no full-shell collision or print validation",
+  "envelope_mm": [
+    220,
+    155,
+    105
+  ],
+  "screen_angle_deg": 50,
+  "screen_depth_including_drawing_tolerance_mm": 17.7,
+  "front_bottom_yz_mm": [
+    -42,
+    34
+  ],
+  "screen_section_yz_mm": [
+    [
+      -42,
+      34
+    ],
+    [
+      6.2733494874591,
+      91.52993767823524
+    ],
+    [
+      19.832336130665013,
+      80.1525969867835
+    ],
+    [
+      -28.441013356794087,
+      22.622659308548254
+    ]
+  ],
+  "bays": {
+    "Battery": {
+      "bounds_mm": [
+        -40,
+        40,
+        -10,
+        54,
+        6,
+        32
+      ],
+      "size_mm": [
+        80,
+        64,
+        26
+      ],
+      "inside_3mm_inset_ellipse": true,
+      "normal_clearance_to_module_rear_plane_mm": 8.1
+    },
+    "Charger": {
+      "bounds_mm": [
+        42,
+        92,
+        -20,
+        35,
+        6,
+        28
+      ],
+      "size_mm": [
+        50,
+        55,
+        22
+      ],
+      "inside_3mm_inset_ellipse": true,
+      "normal_clearance_to_module_rear_plane_mm": 3.01
+    },
+    "Converter": {
+      "bounds_mm": [
+        -92,
+        -42,
+        -5,
+        23,
+        6,
+        20
+      ],
+      "size_mm": [
+        50,
+        28,
+        14
+      ],
+      "inside_3mm_inset_ellipse": true,
+      "normal_clearance_to_module_rear_plane_mm": 19.64
+    }
+  },
+  "board_bays_mutually_disjoint": true,
+  "not_validated": [
+    "shell surface and wall offsets",
+    "mounts and fasteners",
+    "connector plugs and cable bends",
+    "antenna keepout",
+    "microphone hardware",
+    "heat and power",
+    "slicing and physical fit"
+  ]
+}
