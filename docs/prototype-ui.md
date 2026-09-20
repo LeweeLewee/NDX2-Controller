@@ -31,6 +31,8 @@ The bridge validates Host and Origin, accepts only JSON at its fixed API route, 
 
 ## Scope and remaining work
 
+Cover art currently previews a tonal treatment: charcoal shadows, sage midtones and warm sand highlights matching the controls. An SVG luminance filter applies at render time in both artwork views; the cached original JPEG remains unchanged. This is a browser design trial, not yet an embedded rendering implementation.
+
 | Available in this prototype | Remaining |
 | --- | --- |
 | Ranked search, type filters and catalogue next-page requests | Broader album/playlist and failure-recovery UI trials |
