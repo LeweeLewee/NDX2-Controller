@@ -48,3 +48,7 @@ Live Now Playing includes amplifier − / + controls. Each tap sends the audibly
 ## Verification
 
 42 offline tests pass, including native-resolution gating, artwork registration and album-name mapping, bounded amplifier requests, timeout handling, rejection of numeric volume setters, demo isolation and HTTP Host/Origin enforcement. The loopback HTTP test needs an environment that permits local sockets. Browser checks covered rendered now-playing layout, search filtering, album and track detail, demo play, next, pause, queue listing/addition and return navigation. After returning home, live TIDAL search → native Teardrop playback and AI suggestion → TIDAL → native artist browsing also passed. Live Now Playing artwork loaded at 640 × 640 and was visually verified without changing playback. The user confirmed that microphone input returned the correct transcript. See [voice and AI discovery](voice-discovery.md) for setup.
+
+## Collection and Back navigation
+
+Open Collection → Connect TIDAL library to enable real account hearts and saved albums, tracks, artists and playlists. The developer app needs the registered loopback callback and collection read/write scopes. See [setup, behavior and limitations](tidal-library.md). Back now remains in the top bar and restores browsing context, including AI discovery.

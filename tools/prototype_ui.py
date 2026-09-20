@@ -10,9 +10,10 @@ import hashlib
 from collections import OrderedDict
 
 from naim_client import NaimClient, native_ref, playback_state
-from tidal_catalog import TidalCatalog, ordered_items
+from tidal_catalog import TidalCatalog, CatalogError, ordered_items
 from music_discovery import MusicDiscovery, DiscoveryError, read_key
 from artwork_cache import ArtworkCache, validate_artwork_url
+from tidal_library import TidalLibrary, LibraryError
 
 UI = pathlib.Path(__file__).parents[1] / 'ui' / 'index.html'
 
@@ -28,6 +29,7 @@ class Bridge:
     def __init__(self, naim=None, catalog=None, ai=None):
         self.naim, self.catalog = naim, catalog
         self.ai = ai
+        self.library = None
         self.resolved = set()
         self.artwork = ArtworkCache()
         self.artwork_refs = OrderedDict()
@@ -51,8 +53,28 @@ class Bridge:
         return self.artwork.get(self.artwork_refs[path])
 
     def request(self, action, args):
+        if not isinstance(action, str):
+            raise ValueError('Expected an action')
+        if self.catalog and self.library is None:
+            self.library = TidalLibrary(self.catalog)
         if action == 'config':
-            return {'live': self.naim is not None, 'catalog': self.catalog is not None, 'ai': self.ai is not None}
+            return {'live': self.naim is not None, 'catalog': self.catalog is not None, 'ai': self.ai is not None,
+                    'library': bool(self.library and self.library.connected)}
+        if action.startswith('library_'):
+            if not self.library:
+                raise LibraryError('Configure this project’s TIDAL app before connecting your library.')
+            if action == 'library_connect':
+                return {'url': self.library.begin(self.oauth_redirect)}
+            if action == 'library_disconnect':
+                self.library.disconnect()
+                return {'message': 'TIDAL library disconnected from this controller session.'}
+            if action == 'library_page':
+                return self.library.page(args.get('kind', 'albums'), args.get('cursor'))
+            if action == 'library_state':
+                return {'saved': self.library.contains(args.get('reference'), args.get('fresh', False))}
+            if action == 'library_save':
+                return self.library.save(args.get('reference'), args.get('saved'))
+            raise ValueError('Unknown collection action')
         if action == 'discover':
             if not self.ai:
                 raise DiscoveryError('AI search is not configured on this server.')
@@ -86,6 +108,16 @@ class Bridge:
                     'artwork': self.cover(data.get('artwork')), 'state': playback_state(data)}
         if action == 'queue':
             return {'items': [native_item(i) for i in self.naim.queue().get('children', [])]}
+        if action == 'current_item':
+            data = self.naim.queue()
+            current = next((i for i in data.get('children', []) if i.get('ussi') == data.get('current')), {})
+            if current.get('class') != 'object.track.tidal' or current.get('serverId') != 'tidal':
+                raise LibraryError('The current item has no verified TIDAL track reference.')
+            from tidal_catalog import candidate_reference
+            reference = candidate_reference('tracks', str(current.get('track', '')))
+            if not reference:
+                raise LibraryError('The current track has no TIDAL identifier.')
+            return {'reference': reference, 'kind': 'tracks', 'title': current.get('name', '')}
         if action == 'browse':
             reference = args.get('reference', 'inputs/tidal/favourites')
             self.resolved.discard(reference)
@@ -129,6 +161,7 @@ class Bridge:
 
 def handler_for(bridge, port):
     hosts = {'127.0.0.1:' + str(port), 'localhost:' + str(port)}
+    bridge.oauth_redirect = 'http://127.0.0.1:' + str(port) + '/oauth/callback'
 
     class Handler(http.server.BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -141,6 +174,7 @@ def handler_for(bridge, port):
             self.send_header('Content-Length', str(len(raw)))
             self.send_header('Cache-Control', cache)
             self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Referrer-Policy', 'no-referrer')
             self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'")
             self.end_headers()
             self.wfile.write(raw)
@@ -152,7 +186,22 @@ def handler_for(bridge, port):
                 self.send(UI.read_bytes(), mime='text/html; charset=utf-8')
             elif self.path == '/api/config':
                 self.send(bridge.request('config', {}))
-            elif self.path in ('/discovery.js', '/discovery.css'):
+            elif urllib.parse.urlsplit(self.path).path == '/oauth/callback':
+                try:
+                    if not bridge.library:
+                        raise LibraryError('Start sign-in from Collection first.')
+                    bridge.library.finish(urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query))
+                    self.send_response(303)
+                    self.send_header('Location', '/?library=connected')
+                    self.send_header('Cache-Control', 'no-store')
+                    self.send_header('Referrer-Policy', 'no-referrer')
+                    self.end_headers()
+                except Exception:
+                    self.send(b'<h1>TIDAL sign-in was not completed</h1><p>Please return to Collection and connect again.</p><a href="/">Return to controller</a>',
+                              400, 'text/html; charset=utf-8')
+            elif self.path == '/?library=connected':
+                self.send(UI.read_bytes(), mime='text/html; charset=utf-8')
+            elif self.path in ('/discovery.js', '/discovery.css', '/library.js'):
                 self.send((UI.parent / self.path[1:]).read_bytes(), mime='text/javascript' if self.path.endswith('.js') else 'text/css')
             elif self.path.startswith('/artwork/'):
                 try:
@@ -187,7 +236,7 @@ def handler_for(bridge, port):
                 if not isinstance(data, dict) or not isinstance(data.get('args', {}), dict):
                     raise ValueError('Expected an object')
                 self.send(bridge.request(data.get('action'), data.get('args', {})))
-            except DiscoveryError as exc:
+            except (DiscoveryError, CatalogError) as exc:
                 self.send({'error': str(exc)}, 502)
             except (ValueError, TypeError):
                 self.send({'error': 'Request rejected. Check selection and configuration.'}, 400)

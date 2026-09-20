@@ -22,19 +22,21 @@ MAX_BYTES = 2 * 1024 * 1024
 
 
 class CatalogError(RuntimeError):
-    pass
+    def __init__(self, message, status=None, retry_after=None):
+        super().__init__(message)
+        self.status, self.retry_after = status, retry_after
 
 
 def ordered_items(page, kind):
     """Resolve a relationship page in result order, not included-object order."""
     included = {(item.get('type'), item.get('id')): item
-                for item in page.get('included', [])}
+                for item in (page.get('included') or []) if isinstance(item, dict)}
     items = []
-    for reference in page.get('data', []):
+    for reference in (page.get('data') or []):
         if reference.get('type') != kind:
             continue
         item = included.get((kind, reference.get('id')), reference)
-        attrs = item.get('attributes', {})
+        attrs = item.get('attributes') or {}
         items.append({'id': item.get('id'), 'title': attrs.get('title', attrs.get('name')),
                       'candidate_native_reference': candidate_reference(kind, item.get('id'))})
     return items
@@ -73,7 +75,12 @@ class TidalCatalog:
             return data
         except urllib.error.HTTPError as exc:
             # Never retain/print server bodies, which can reflect credentials.
-            raise CatalogError('TIDAL request failed (HTTP ' + str(exc.code) + ')') from None
+            try:
+                retry_after = float(exc.headers.get('Retry-After', '2'))
+            except (TypeError, ValueError):
+                retry_after = 2
+            raise CatalogError('TIDAL request failed (HTTP ' + str(exc.code) + ')',
+                               exc.code, retry_after) from None
         except (urllib.error.URLError, TimeoutError, OSError):
             raise CatalogError('TIDAL connection failed or timed out') from None
         except (ValueError, UnicodeError):

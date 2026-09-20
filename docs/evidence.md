@@ -98,3 +98,11 @@ The OpenAI project key was created securely and saved to the approved ignored de
 ## System Automation UI verification
 
 After user confirmation of both volume directions, Now Playing gained amplifier minus/plus controls. Browser inspection verified layout, disabled controls during each live request, re-enabled controls afterwards and a successful up-request acknowledgement. A down then up pair was exercised through the UI; playback continued. Exact physical starting-level restoration is not claimed. All 42 offline tests passed, including disabled-automation rejection, fixed burst length, stop-on-timeout without retry and rejection of numeric/extra volume parameters.
+
+## TIDAL collection and Back navigation — 20 September 2026
+
+The project's developer application now allows collection.read and collection.write with a loopback callback. The user completed music-account sign-in. OAuth PKCE and account collection reads worked. Initial full album and artist scans hit HTTP 429 after several pages; adding paced reads and a bounded Retry-After wait resolved the live checks. Null optional catalogue metadata is also handled defensively, but was not established as the cause of the live failure.
+
+Real save → read-back saved → remove → read-back unsaved round trips passed for an initially unsaved album, track, artist and playlist. The album was Blue Lines, track Teardrop, artist Massive Attack and playlist Massive Attack Essentials. Mezzanine was already saved and was left unchanged. All test-added items were restored to unsaved. The ignored report is local/evidence/tidal-library-live.json. These requests did not send transport or amplifier commands; playback remained native TIDAL. Synchronization timing in the Naim app has not been observed.
+
+Browser checks confirmed Back in AI discovery and album detail, restored search results after Back, and the real track heart changing from unsaved to saved and back to unsaved after UI clicks. Navigation tests cover query/type/cursor/scroll restoration and failed-browse recovery. The suite passes 49 Python tests and three JavaScript tests. This is computer-side proof; physical touchscreen and persistent sign-in deployment remain open.

@@ -6,7 +6,7 @@ Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/N
 
 **Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. ESP32 firmware and the physical controller have not been built.
 
-The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. Personalized cloud features remain untested.
+The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. TIDAL account collection controls and persistent Back navigation are implemented; see the collection documentation for live evidence and remaining feature coverage.
 
 ## The product
 
@@ -24,6 +24,7 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 | --- | --- |
 | [Updated design concept](docs/design-concept.md) | Selected Waveshare screen, physical direction and parallel investigation brief |
 | [Voice and AI discovery](docs/voice-discovery.md) | Describe a mood, refine suggestions and explore native TIDAL content |
+| [TIDAL collection](docs/tidal-library.md) | Real hearts, library saves, account connection and Back navigation |
 | [Prototype UI](docs/prototype-ui.md) | Run the 800 × 480 demo and configure the experimental live bridge |
 | [Product brief](docs/product-brief.md) | Requirements, constraints and unresolved choices |
 | [Hardware and parts BOM](docs/hardware/README.md) | Design baseline, parts, sourcing and validation |

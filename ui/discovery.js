@@ -46,15 +46,15 @@ async function voice(){
 }
 document.addEventListener('input',e=>{if(e.target.matches('#discovery-form textarea'))musicPrompt=e.target.value;if(e.target.matches('.search input'))query=e.target.value});
 // Cancel capture before the main navigation handler starts an async request.
-document.addEventListener('click',e=>{if(e.target.closest('[data-page]'))stopVoice(true)},true);
+document.addEventListener('click',e=>{if(e.target.closest('[data-page],[data-back]'))stopVoice(true)},true);
 document.addEventListener('submit',e=>{if(e.target.id!=='discovery-form')return;e.preventDefault();if(recording){notice('Stop recording before searching.');return}run(async()=>{const prompt=musicPrompt.trim();if(!prompt)throw Error('Describe the music you would like.');notice('Finding a few directions for you…');const data=await api('discover',{prompt,context:brief});brief=data.summary;suggestions=data.suggestions;musicPrompt='';notice('Suggestions ready. Explore one or describe a refinement.');})});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||busy)return;
  if(b.dataset.page||b.hasAttribute('data-discovery'))stopVoice(true);
- if(b.hasAttribute('data-discovery')){page='discover';render()}
+ if(b.hasAttribute('data-discovery')){goPage('discover');render();applyScroll()}
  if(b.hasAttribute('data-voice'))voice();
  if(b.hasAttribute('data-cancel-voice')){stopVoice(true);render();notice('Recording discarded.')}
  if(b.hasAttribute('data-new-brief')){stopVoice(true);brief='';musicPrompt='';suggestions=[];render()}
- if(b.dataset.explore!==undefined)run(async()=>{query=suggestions[Number(b.dataset.explore)].query;kind='artists';page='search';if(!config.catalog){results=[];cursor=null;notice('Live TIDAL is not configured. This artist is a suggestion, not a verified catalogue result.');return}await search()});
+ if(b.dataset.explore!==undefined)run(async()=>{goPage('search');query=suggestions[Number(b.dataset.explore)].query;kind='artists';if(!config.catalog){results=[];cursor=null;notice('Live TIDAL is not configured. This artist is a suggestion, not a verified catalogue result.');return}await search()});
 });
 window.addEventListener('pagehide',()=>stopVoice(true));
 document.addEventListener('visibilitychange',()=>{if(document.hidden){stopVoice(true);render()}});

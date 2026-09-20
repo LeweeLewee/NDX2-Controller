@@ -97,7 +97,7 @@ class BridgeTests(unittest.TestCase):
 
     def test_demo_backend_cannot_mutate_player(self):
         bridge = Bridge()
-        self.assertEqual(bridge.request('config', {}), {'live': False, 'catalog': False, 'ai': False})
+        self.assertEqual(bridge.request('config', {}), {'live': False, 'catalog': False, 'ai': False, 'library': False})
         with self.assertRaises(ValueError):
             bridge.request('transport', {'command': 'resume'})
 

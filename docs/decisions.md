@@ -45,3 +45,7 @@ Onboard power circuitry versus an external charger/converter remains a research 
 ## D011 — Bounded wired System Automation volume
 
 **Verified implementation, 20 September 2026.** Use the NDX automation IR commands for amplifier volume, preserving fixed audio output. Both directions were audibly confirmed using one press frame and four held frames, spaced 0.2 seconds apart. A UI tap sends this bounded sequence once; no continuous hold, retries, numeric slider or inferred amplifier level. Controls remain busy until completion. See [protocol evidence](research/system-automation.md).
+
+## D012 — Real TIDAL collection actions
+
+**Accepted implementation direction, 20 September 2026.** Hearts and library saves use the project's own TIDAL OAuth authorization, limited to collection read/write. Native Naim playback remains mandatory and independent. Do not implement cosmetic local hearts in live mode or silently assume a failed saved-state lookup means unsaved. Tokens stay in memory for this prototype. Provide persistent Back navigation with restored browsing context. See [collection design and setup](tidal-library.md).

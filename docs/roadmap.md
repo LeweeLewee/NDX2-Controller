@@ -26,6 +26,9 @@ Automatic track advancement and a new controller connection during playback pass
 - [x] Validate browser microphone capture and transcription (user confirmed correct transcript).
 - [x] Connect cached native artwork to the UI and verify live Now Playing display.
 - [ ] Complete queue-edit controls.
+- [x] Implement TIDAL collection hearts, album saves, artist/playlist saves and OAuth account connection; verify all four save/remove round trips live.
+- [x] Provide Back from discovery, nested browsing and main sections with restored browsing context.
+- [ ] Add playlist creation/editing, related album/artist links and shuffle/repeat/seek UI.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.
 
