@@ -7,7 +7,7 @@ import urllib.error
 import urllib.parse
 
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1] / 'tools'))
-from tidal_catalog import TidalCatalog, CatalogError, candidate_reference
+from tidal_catalog import TidalCatalog, CatalogError, candidate_reference, ordered_items
 
 
 class Opener:
@@ -25,6 +25,16 @@ TOKEN = {'access_token': 'test-token', 'expires_in': 100}
 
 
 class CatalogTests(unittest.TestCase):
+    def test_result_order_comes_from_relationship_not_metadata(self):
+        page = {'data': [{'type': 'artists', 'id': '2'}, {'type': 'artists', 'id': '1'},
+                         {'type': 'artists', 'id': '3'}],
+                'included': [{'type': 'artists', 'id': '1', 'attributes': {'name': 'Second'}},
+                             {'type': 'artists', 'id': '2', 'attributes': {'name': 'First'}},
+                             {'type': 'albums', 'id': '2', 'attributes': {'title': 'Unrelated'}}]}
+        items = ordered_items(page, 'artists')
+        self.assertEqual([item['id'] for item in items], ['2', '1', '3'])
+        self.assertEqual([item['title'] for item in items], ['First', 'Second', None])
+
     def test_search_is_metadata_only_and_caches_token(self):
         opener = Opener([TOKEN, {'data': []}, {'data': []}])
         catalog = TidalCatalog('id', 'secret', opener=opener)

@@ -16,7 +16,7 @@ Last updated: 20 September 2026.
 | Stop behaviour | Observed, asynchronous | Immediate read stale; subsequent state=1, position=0, no longer active playback |
 | Amplifier control | Unresolved; levels/room failed audible test | Readback accepted 13 → 5 → 13, but user confirmed no audible volume change. This endpoint does not establish working amplifier control in the current setup |
 | Full catalogue search | Unresolved | Exploratory GET query/path variants returned 400; correct syntax unknown. This does not prove search unavailable |
-| Separate TIDAL metadata search adapter | Offline tested only | Current public API schema consulted; own developer credentials and live search-to-Naim ID verification still required |
+| Separate TIDAL metadata search adapter | Live search and pagination passed | Own app authenticated; artists, tracks, albums and playlists returned results and a distinct next page. Search-to-Naim ID compatibility remains unverified |
 | Collection pagination | Observed | favourites/albums with offset=0 and 2, limit=2 returned distinct successive pages and totalCount |
 | Artwork retrieval and cache | Observed | Returned resources.tidal.com JPEG fetched (41,661 bytes), visually checked; second lookup reused cache. Host restriction, byte cap and eviction covered offline |
 | Album/playlist launch | Observed | cmd=play populated native queues of 11 and 50 tracks and started first tracks |
@@ -63,6 +63,14 @@ A follow-up recorder restricted to one phone and allowlisted status reads preven
 ## Away-from-home development
 
 The next service-discovery attempt timed out. The user confirmed the computer is away from the home network; this is not evidence of an NDX failure. No live mutations were attempted in that session. Independent development added a public TIDAL metadata adapter, bringing the passing offline suite to 22 tests. Live catalogue search remains unverified.
+
+## Live public TIDAL catalogue — 20 September 2026
+
+With explicit user approval, created the project's own NDX2-Controller developer application and used its client credentials for metadata requests. Searching for Massive Attack in GB returned 20 included resources for each of artists, tracks, albums and playlists. Each relationship endpoint returned 20 results and a distinct 20-result next page using the returned cursor. The report is kept in ignored local/evidence/tidal-live-catalog.json; credentials and access tokens were not written to project files.
+
+Live results exposed that included-object ordering differs from result ordering. The CLI now resolves metadata against relationship data order. A repeat live check with this helper returned Massive Attack first among artists, Teardrop among tracks, Mezzanine among albums and Massive Attack Essentials among playlists. The offline suite now contains 23 passing tests, including shuffled metadata and missing metadata coverage.
+
+These were catalogue-only requests: no audio manifest, audio transfer or NDX command was requested. The computer remains away from home, so candidate IDs have not been resolved or played on Naim. Personalized cloud resources, user OAuth and full TIDAL feature coverage remain unverified. The temporary loopback test service was stopped and the app secret left hidden in the portal.
 
 ## How to update this ledger
 

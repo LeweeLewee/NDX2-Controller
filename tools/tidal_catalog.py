@@ -1,7 +1,7 @@
 """Experimental TIDAL catalogue metadata adapter. No audio or player calls.
 
 Uses this project's own TIDAL developer credentials, never Naim credentials.
-Live search and compatibility of returned IDs with Naim remain unverified.
+Live search and pagination passed; returned IDs still need Naim verification.
 """
 import argparse
 import base64
@@ -23,6 +23,21 @@ MAX_BYTES = 2 * 1024 * 1024
 
 class CatalogError(RuntimeError):
     pass
+
+
+def ordered_items(page, kind):
+    """Resolve a relationship page in result order, not included-object order."""
+    included = {(item.get('type'), item.get('id')): item
+                for item in page.get('included', [])}
+    items = []
+    for reference in page.get('data', []):
+        if reference.get('type') != kind:
+            continue
+        item = included.get((kind, reference.get('id')), reference)
+        attrs = item.get('attributes', {})
+        items.append({'id': item.get('id'), 'title': attrs.get('title', attrs.get('name')),
+                      'candidate_native_reference': candidate_reference(kind, item.get('id'))})
+    return items
 
 
 def candidate_reference(kind, item_id):
@@ -114,14 +129,12 @@ def main():
     client_id = os.environ.get('TIDAL_CLIENT_ID') or getpass.getpass('TIDAL developer client ID: ')
     secret = os.environ.get('TIDAL_CLIENT_SECRET') or getpass.getpass('TIDAL developer client secret: ')
     try:
-        result = TidalCatalog(client_id, secret, args.country).search(args.query, args.kind)
-        items = []
-        for item in result.get('included', []):
-            if item.get('type') != args.kind:
-                continue
-            attrs = item.get('attributes', {})
-            items.append({'id': item.get('id'), 'title': attrs.get('title', attrs.get('name')),
-                          'candidate_native_reference': candidate_reference(args.kind, item.get('id'))})
+        catalog = TidalCatalog(client_id, secret, args.country)
+        result = catalog.search(args.query, args.kind)
+        resources = result.get('data', [])
+        if isinstance(resources, dict):
+            resources = [resources]
+        items = ordered_items(catalog.page(resources[0]['id'], args.kind), args.kind) if resources else []
         print(json.dumps({'items': items, 'native_playback_verified': False}, ensure_ascii=False, indent=2))
     except (CatalogError, ValueError) as exc:
         parser.exit(1, str(exc) + '\n')

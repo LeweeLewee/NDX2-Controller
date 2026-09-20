@@ -30,4 +30,4 @@
 
 ## D008 — Prototype catalogue search separately from playback
 
-**Provisional implementation, 20 September 2026.** Test TIDAL's public metadata API using this project's own developer application. Native Naim playback remains mandatory. The search adapter cannot play audio; candidate IDs require native resolution before handoff. Whether this becomes the final architecture depends on live API access, result compatibility and small-screen usability. Credentials are not provisioned yet.
+**Provisional implementation, 20 September 2026.** Test TIDAL's public metadata API using this project's own developer application. Native Naim playback remains mandatory. The search adapter cannot play audio; candidate IDs require native resolution before handoff. The developer app is now created and live catalogue search/pagination passed. Whether this becomes the final architecture still depends on native result compatibility and small-screen usability. Credentials were used in memory only; deployment storage is undecided.

@@ -54,7 +54,7 @@ Use an album ID obtained from native browsing. The output path must not already 
 
 ## Catalogue search prototype
 
-Create an application in the [TIDAL developer portal](https://developer.tidal.com/) to obtain this project's own client ID and client secret. Do not reuse Naim application credentials or paste secrets into chat, source code or command-line arguments. No developer application has been created by this project yet.
+The NDX2-Controller application has been created in the [TIDAL developer portal](https://developer.tidal.com/). Use its own client ID and client secret. Do not reuse Naim application credentials or paste secrets into chat, source code or command-line arguments. Live catalogue authentication, search and pagination passed on 20 September 2026. Credentials were used in memory and were not saved to project files.
 
 ```sh
 python tools/tidal_catalog.py "Massive Attack" --kind artists --country GB
@@ -62,6 +62,6 @@ python tools/tidal_catalog.py "Massive Attack" --kind artists --country GB
 
 The command prompts locally without echo for credentials unless TIDAL_CLIENT_ID and TIDAL_CLIENT_SECRET are already present in its environment. It keeps the token in memory and does not persist credentials. Supported types are artists, albums, tracks and playlists. Use the account's correct catalogue country; GB is a configurable initial assumption.
 
-The API class also exposes page(result_id, kind, cursor) for a result ID and cursor returned by TIDAL. It constructs requests to fixed TIDAL endpoints instead of following arbitrary returned URLs. The CLI currently shows the first response's included resources, not a complete paginated interactive UI.
+The API class also exposes page(result_id, kind, cursor) for a result ID and cursor returned by TIDAL. It constructs requests to fixed TIDAL endpoints instead of following arbitrary returned URLs. The CLI shows the first relationship page in returned result order, resolving metadata from included resources. The included array alone is not the result ranking. There is no complete paginated interactive UI yet.
 
 Search result references are explicitly candidates. Before playback, resolve a candidate through NaimClient.browse and verify the returned native object. A live search → native browse → native play test is still required. Catalogue access uses client credentials; personalized cloud resources would require separate user authorization. Existing native Naim collection browsing is already available.

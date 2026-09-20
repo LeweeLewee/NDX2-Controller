@@ -10,7 +10,8 @@
 
 ## M1 — Complete software control loop (next)
 
-- [ ] Identify catalogue search (collection pagination verified; separate public metadata adapter offline tested, credentials and live ID handoff pending).
+- [x] Verify public catalogue search and pagination using the project's own TIDAL app (artists, tracks, albums and playlists).
+- [ ] Verify search-result IDs through native Naim browse and playback on the home network.
 - [x] Retrieve artwork with bounded caching and no credential leakage (native TIDAL JPEG).
 - [x] Launch albums and playlists using native Naim semantics.
 - [x] Verify queue listing, add/remove/reorder and next/previous behaviour.
