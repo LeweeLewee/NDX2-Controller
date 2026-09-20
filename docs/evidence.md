@@ -110,3 +110,7 @@ Browser checks confirmed Back in AI discovery and album detail, restored search 
 ## Now Playing album and artist shortcuts — 20 September 2026
 
 Added exact TIDAL album/artist relationships from track IDs, including multiple-artist selection, plus clickable album and artist names on Now Playing. Live browser testing during Rhye playback opened Woman from its album name, then Rhye from the album detail link; both exposed the existing save/follow control and Back. No playback, volume or library mutation was needed for this check. Tests reject mismatched item IDs and unrelated included metadata, preserve multiple artists and keep metadata links separate from native playback authorization. All 52 Python tests and three JavaScript tests pass.
+
+## Album search-result hearts — 20 September 2026
+
+Album results now show separate saved-state heart buttons without nesting controls inside the album-opening button. Live UI checks saved Blue Lines (2012 Mix/Master), observed its filled heart while staying in search results, then removed it and observed the empty heart. The initial unsaved state was restored. Mezzanine remained saved. Search context and scroll position are retained; unknown state is not represented as unsaved. Five JavaScript tests pass, including distinct row identities and mutation targeting independent of the current detail selection. No backend or playback path changed.

@@ -42,3 +42,25 @@ test('unknown saved state never displays an empty or filled heart',()=>{
  c.run("savedStates.set(selected.reference,false)");
  assert.match(c.run('saveButton(selected)'),/aria-pressed="false"/);
 });
+test('album result hearts are separate controls with the correct row identity',()=>{
+ const c=controller();
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../ui/library.js'),'utf8'),c.context);
+ c.run("page='search';kind='albums';config.library=true;results=[{kind:'albums',reference:'inputs/tidal/albums/1',title:'First'},{kind:'albums',reference:'inputs/tidal/albums/2',title:'Second'}];savedStates.set(results[0].reference,true);savedStates.set(results[1].reference,false)");
+ const html=c.run('rows(results)');
+ assert.match(html,/data-album-save="0" data-intent="remove"/);
+ assert.match(html,/data-album-save="1" data-intent="add"/);
+ assert.match(html,/class="number">02/);
+ assert.match(html,/<\/button><button class="album-heart/);
+});
+test('saving a result targets that album and preserves the current detail selection',async()=>{
+ const c=controller();
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../ui/library.js'),'utf8'),c.context);
+ c.run("config.library=true;selected={reference:'inputs/tidal/tracks/9'};calls=[];api=async(action,args)=>{calls.push({action,args});return {saved:args.saved}};");
+ await c.run("changeSaved({reference:'inputs/tidal/albums/2'},'add')");
+ assert.equal(c.run('calls[0].args.reference'),'inputs/tidal/albums/2');
+ assert.equal(c.run('calls[0].args.saved'),true);
+ assert.equal(c.run('selected.reference'),'inputs/tidal/tracks/9');
+ assert.equal(c.run("savedStates.get('inputs/tidal/albums/2')"),true);
+ await c.run("changeSaved({reference:'inputs/tidal/albums/2'},'remove')");
+ assert.equal(c.run('calls[1].args.saved'),false);
+});

@@ -5,7 +5,7 @@ The heart is TIDAL's My Collection action: like a track, save an album or playli
 ## Prototype flow
 
 1. Open Collection → Connect TIDAL library. Sign in with the same account used in the Naim app.
-2. Open an album, track, artist or playlist from search or Collection. The detail page checks its saved state and offers a heart action.
+2. Album search results have a separate heart beside each row: outlined saves, filled removes. The list and scroll position stay in place. Unknown state uses a check button rather than guessing. You can also open an album, track, artist or playlist from search or Collection. The detail page checks its saved state and offers a heart action.
 3. Use Collection's Albums, Liked tracks, Artists and Playlists filters to browse saved music. More saved music follows the service's cursor.
 4. Tap the album or artist name on Now Playing to open its detail page and save/follow it. Track and album detail pages also show exact related album/artist links; multiple artists are offered individually. These links use TIDAL relationships, never text-search guesses.
 5. Now Playing → Track details / save resolves the current queue item's actual TIDAL ID. It does not infer an ID from the song title.
@@ -27,7 +27,7 @@ TIDAL clients may take time to show changes made by another client. The controll
 
 Implemented: collection read/save/remove for the four types, account sign-in/disconnect, native current-track details and persistent Back navigation. Pure demo hearts are explicitly simulated and reset with the page.
 
-Still planned: playlist creation and editing, queue editing in the UI, shuffle/repeat/seek UI, favourites directly on result rows, persistent sign-in for deployment, and physical touchscreen testing. Do not describe this prototype as complete TIDAL feature parity.
+Still planned: playlist creation and editing, queue editing in the UI, shuffle/repeat/seek UI, track/artist/playlist hearts on result rows, persistent sign-in for deployment, and physical touchscreen testing. Do not describe this prototype as complete TIDAL feature parity.
 
 Offline checks: `python -m unittest discover -s tests -v` and `node tests/test_navigation.cjs`. Save/remove round trips for all four types passed live with original test states restored. Live account evidence is recorded separately in [the evidence ledger](evidence.md).
 

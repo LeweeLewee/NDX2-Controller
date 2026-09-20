@@ -2,6 +2,43 @@
 const demoSaved=new Set(demo.filter(i=>i.kind==='albums').map(i=>i.reference));
 const savedStates=new Map();
 const libraryRender=render, nativeSelect=select;
+const plainRows=rows, plainSearch=search;
+function albumHeart(item,index){
+ if(!isLibraryItem(item))return '';
+ if(!config.library&&(config.live||config.catalog))return `<button data-library="connect" aria-label="Connect TIDAL to save ${esc(item.title)}">Connect</button>`;
+ const saved=config.library?savedStates.get(item.reference):demoSaved.has(item.reference);
+ const intent=saved===undefined?'refresh':saved?'remove':'add';
+ return `<button class="album-heart ${saved===true?'saved':''}" data-album-save="${index}" data-intent="${intent}" ${saved===undefined?'':`aria-pressed="${saved}"`} aria-label="${saved===undefined?'Check saved state for':saved?'Unsave':'Save'} album ${esc(item.title)}" title="${saved===undefined?'Check saved state':saved?'Remove from library':'Save album'}">${saved===undefined?'…':saved?'♥':'♡'}</button>`;
+}
+rows=function(items){
+ if(page!=='search'||kind!=='albums')return plainRows(items);
+ return items.map((item,index)=>`<div class="album-result">${plainRows([item]).replace('data-select="0"',`data-select="${index}"`).replace('class="number">01',`class="number">${String(index+1).padStart(2,'0')}`)}${albumHeart(item,index)}</div>`).join('')||'<div class="empty">No items to show.</div>';
+};
+search=async function(more=false){
+ await plainSearch(more);
+ if(config.library&&kind==='albums'){
+  results.forEach(item=>savedStates.delete(item.reference));
+  for(const item of results){
+   if(!isLibraryItem(item))continue;
+   try{savedStates.set(item.reference,(await api('library_state',{reference:item.reference})).saved)}
+   catch(e){savedStates.delete(item.reference);notice('Some saved states are unavailable. Use … to check again.');break}
+  }
+ }
+ render();
+};
+async function changeSaved(item,intent){
+ const reference=item.reference;
+ if(config.library){
+  savedStates.delete(reference);
+  const data=await api(intent==='refresh'?'library_state':'library_save',intent==='refresh'?{reference,fresh:true}:{reference,saved:intent==='add'});
+  savedStates.set(reference,data.saved);
+  if(!data.saved)history.forEach(h=>{if(h.page==='collection')h.results=h.results.filter(i=>i.reference!==reference)});
+  if(data.message)notice(data.message);
+ }else if(!config.live&&!config.catalog){
+  if(demoSaved.has(reference))demoSaved.delete(reference);else demoSaved.add(reference);
+  notice('Demo collection updated · no TIDAL account changes.');
+ }
+}
 function isLibraryItem(item){return /^inputs\/tidal\/(tracks|albums|artists|playlists)\/[A-Za-z0-9_-]+$/.test(item?.reference||'')}
 function saveButton(item){
  if(!isLibraryItem(item))return '';
@@ -46,7 +83,7 @@ render=function(){
  if(busy)$('#view').querySelectorAll('button').forEach(b=>b.disabled=true);
 };
 document.addEventListener('click',e=>{
- const b=e.target.closest('button');if(!b||!b.matches('[data-library],[data-save],[data-library-kind],[data-library-more],[data-current],[data-related],[data-current-related]'))return;
+ const b=e.target.closest('button');if(!b||!b.matches('[data-library],[data-save],[data-library-kind],[data-library-more],[data-current],[data-related],[data-current-related],[data-album-save]'))return;
  run(async()=>{
   if(b.dataset.library==='connect'){const d=await api('library_connect');const url=new URL(d.url);if(url.origin!=='https://login.tidal.com'||url.pathname!=='/authorize')throw Error('Invalid TIDAL sign-in URL');window.location.assign(d.url);return}
   if(b.dataset.library==='disconnect'){notice((await api('library_disconnect')).message);savedStates.clear();await collection();return}
@@ -62,13 +99,14 @@ document.addEventListener('click',e=>{
    return;
   }
   if(b.hasAttribute('data-current')){await select(await api('current_item'));return}
+  if(b.dataset.albumSave!==undefined){
+   const item=results[Number(b.dataset.albumSave)];
+   if(page!=='search'||kind!=='albums'||item?.kind!=='albums'||!isLibraryItem(item))return;
+   pendingScroll=$('#view').scrollTop;
+   await changeSaved(item,b.dataset.intent);return;
+  }
   if(b.dataset.save){
-   const reference=selected.reference;
-   if(config.library){
-    savedStates.delete(reference);
-    const data=await api(b.dataset.save==='refresh'?'library_state':'library_save',b.dataset.save==='refresh'?{reference,fresh:true}:{reference,saved:b.dataset.save==='add'});
-    savedStates.set(reference,data.saved);if(!data.saved)history.forEach(h=>{if(h.page==='collection')h.results=h.results.filter(i=>i.reference!==reference)});if(data.message)notice(data.message);
-   }else if(!config.live&&!config.catalog){if(demoSaved.has(reference))demoSaved.delete(reference);else demoSaved.add(reference);notice('Demo collection updated · no TIDAL account changes.')}
+   await changeSaved(selected,b.dataset.save);
   }
  });
 });
