@@ -10,13 +10,15 @@
 
 ## M1 — Complete software control loop (next)
 
-- [ ] Identify native catalogue search and pagination.
-- [ ] Retrieve artwork with bounded caching and no credential leakage.
-- [ ] Launch albums and playlists using native Naim semantics.
-- [ ] Verify queue listing, add/remove/reorder and next/previous behaviour.
+- [ ] Identify native catalogue search (collection pagination verified).
+- [x] Retrieve artwork with bounded caching and no credential leakage (native TIDAL JPEG).
+- [x] Launch albums and playlists using native Naim semantics.
+- [x] Verify queue listing, add/remove/reorder and next/previous behaviour.
 - [ ] Identify and test actual amplifier System Automation volume control.
-- [ ] Verify high-resolution playback where the service and recording support it.
+- [x] Verify high-resolution playback where the service and recording support it (24-bit/44.1 kHz observed).
 - [ ] Check gapless transitions, native app coexistence and recovery after reconnect.
+
+Automatic track advancement and a new controller connection during playback passed. Audible gaplessness, app concurrency and actual network outage recovery remain open. Switching the Naim app from High to Max changed the native API setting to losslessHd and enabled 24-bit playback through the same native command. Higher sample rates remain untested.
 - [ ] Build a small computer-side UI covering search → select → native play → now playing.
 
 **Exit criterion:** all core interactions work on the actual NDX 2, preserve native playback and have recorded evidence. An acknowledged request alone is insufficient.

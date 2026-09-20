@@ -4,7 +4,7 @@ A compact, battery-powered coffee-table touchscreen for native Naim music playba
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
-**Status: concept agreed; software feasibility prototype.** Native TIDAL browsing and one-track playback have been demonstrated on an NDX 2 using a computer. ESP32 firmware and the physical controller have not been built.
+**Status: software feasibility prototype.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Catalogue search and amplifier control remain unresolved. ESP32 firmware and the physical controller have not been built.
 
 ## The product
 
@@ -39,4 +39,4 @@ python tools/naim_native_probe.py NDX_IP --output local/naim-inventory.json
 
 Replace `NDX_IP` with the streamer's private IPv4 address. The probe is read-only and saves a filtered interface inventory. It does not prove native playback by itself. See [development notes](docs/development.md) before using it.
 
-Live reports and device-specific configuration belong in ignored `local/`. No credentials or raw network captures belong in Git. The initial code is a diagnostic tool, not a production control library.
+Live reports and device-specific configuration belong in ignored `local/`. No credentials or raw network captures belong in Git. `tools/naim_client.py` is an experimental native control client; `tools/check_transition.py` is an explicit live playback test. Neither is production firmware. See the development notes for authorized live use.

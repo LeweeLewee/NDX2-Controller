@@ -40,3 +40,14 @@ Future live playback tests should inspect existing queue/playback first and expl
 ## Remote and licensing
 
 The project remote is [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller), configured as `origin`. Its existing visibility is unchanged. No distribution licence has been chosen. The probe is project-authored; external implementations are cited as research references, not vendored code.
+## Native client and explicit transition test
+
+`tools/naim_client.py` exposes native collection browsing, playback, transport and queue edits. It validates native references, bounds JSON responses, disallows redirects and never automatically retries a mutation. Search, volume and authentication are not implemented. Calls return device acknowledgements; verify subsequent status before presenting success.
+
+After explicit authorization to replace playback, this live test starts a returned album reference, seeks near the end, samples a transition and recreates the controller connection. It stops playback in cleanup and records whether stop was confirmed:
+
+```sh
+python tools/check_transition.py NDX_IP inputs/tidal/albums/ALBUM_ID --replace-playback --output local/evidence/transition.json
+```
+
+Use an album ID obtained from native browsing. The output path must not already exist. This is a live test, excluded from offline test discovery. It cannot prove audible gaplessness. See [command evidence](research/native-command-tests.md).
