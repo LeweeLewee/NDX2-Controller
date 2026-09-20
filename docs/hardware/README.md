@@ -21,6 +21,7 @@ The leading screen is the **Waveshare ESP32-S3-Touch-LCD-4.3B, standard version 
 | [Hardware design](design.md) | Electrical boundaries, physical layout and screen record |
 | [Parts BOM](bom.md) | Authoritative part IDs, quantities, status, sourcing and costs |
 | [Research and selection](research.md) | Open decisions, candidate routes and next actions |
+| [Power component review](power-review.md) | Source findings, shortlist and compatibility gates |
 | [Power budget and validation](validation.md) | Runtime assumptions and hardware acceptance checks |
 
 ## BOM management

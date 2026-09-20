@@ -1,6 +1,6 @@
 # Parts BOM
 
-Revision 0.1 — 20 September 2026. Planning BOM, not a purchase list.
+Revision 0.2 — 20 September 2026. Planning BOM, not a purchase list.
 All new items are **not ordered**. Hardware ownership is only recorded where established; inventory still needs checking.
 
 ## Controller parts
@@ -9,12 +9,12 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 | --- | --- | --- | --- | --- | --- | --- |
 | HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | preferred | not ordered | USD 36.99; 2026-09-20; shipping/tax excluded | Validate screen, board revision, touch wake and consumption |
 | HW-002 | Protected rechargeable battery pack, base mounted; 5,000–10,000 mAh at nominal 3.7 V is an initial range only | 1 pack | research | not ordered | TBD | Select chemistry, topology, Wh, dimensions, protection and connector after load/charge assessment |
-| HW-003 | Charger and power-path function: onboard HW-001 first; external alternative conditional | 1 function; 0 or 1 extra board | research | not ordered | Included if onboard; otherwise TBD | Verify schematic, charge rate, simultaneous use/charge and termination |
-| HW-004 | Regulated supply / load switching: onboard first; external 5 V converter conditional | 1 function; 0 or 1 extra board | research | not ordered | Included if onboard; otherwise TBD | Measure idle losses and startup peaks; avoid duplicate power hardware |
+| HW-003 | Charger and power path: external route leads; Adafruit BQ24074 4755 candidate | 1 function; 0 or 1 extra board | research | not ordered | Candidate USD 14.95; 2026-09-20; shipping/tax excluded | Verify schematic, charge rate, simultaneous use/charge and termination |
+| HW-004 | Regulated 5 V supply / load switching: external converter candidate; Pololu U3V70F5 reference | 1 function; 0 or 1 extra board | research | not ordered | TBD for external converter | Measure idle losses and startup peaks; avoid duplicate power hardware |
 | HW-005 | Battery state monitoring: onboard capability to investigate; external fuel gauge conditional | 0 or 1 extra board | research | not ordered | TBD if needed | Confirm voltage/status access and low-battery behaviour |
-| HW-006 | Internal battery/power harness with correctly keyed mating connectors and strain relief | 1 assembly | design | not ordered | TBD | Confirm HW-001 MX1.25 polarity and HW-002 connector; size wire for measured peak current |
+| HW-006 | Internal battery/power harness with correctly keyed mating connectors and strain relief | 1 assembly | design | not ordered | TBD | Specify external charger/pack/5 V connections; leave HW-001 battery socket empty for route B; verify polarity and measured peaks |
 | HW-007 | Accessible charging inlet: existing USB-C port initially; extension or dock conditional | 0 or 1 extra inlet | design | not ordered | TBD if needed | Resolve port access without compromising enclosure or serviceability |
-| HW-008 | Service power isolation switch, if onboard switch cannot remain accessible | 0 or 1 | research | not ordered | TBD if needed | Confirm disconnect coverage and accessibility |
+| HW-008 | Service power isolation for external base pack; exact switch TBD | 0 or 1 | research | not ordered | TBD if needed | Do not assume Waveshare battery switch isolates external 5 V; verify coverage and accessibility |
 | HW-009 | External wake device or low-power latch, only if touch wake cannot meet energy target | 0 or 1 | optional | not ordered | TBD if needed | Validate native touch wake before adding hardware; preserve touch-wake requirement |
 | HW-010 | Custom printed upper housing / bezel | 1 | design | not ordered | TBD | Fit print after display measurements; choose material/finish |
 | HW-011 | Custom printed base / removable underside | 1 assembly | design | not ordered | TBD | Size around selected pack, charge electronics and antenna clearance |
@@ -51,7 +51,9 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 ## Cost accounting
 
 Known preferred new-part subtotal: **USD 36.99 for HW-001 only**. This is not the total build cost.
-All other costs are unknown or conditional. No GBP conversion, stock guarantee, shipping or tax estimate has been assumed.
+External-route candidate prices: HW-002 Adafruit 353 USD 24.50; HW-003 Adafruit 4755 USD 14.95, checked 2026-09-20, shipping/tax excluded. These are unselected alternatives within their functional rows, not extra parts. HW-004 price remains TBD. Screen + these two candidates = USD 76.44, an incomplete scenario subtotal excluding converter, monitoring, harness, enclosure and charging supply. See [power review](power-review.md) for limits.
+
+All remaining costs are unknown or conditional. No GBP conversion, stock guarantee, shipping or tax estimate has been assumed.
 Keep original quote currency. If a converted budget is added, record exchange rate and date.
 Add exact supplier, part/revision, quantity, quote date, paid cost and procurement state to each row as selection progresses.
 Do not sum alternative power routes or count included functions twice.

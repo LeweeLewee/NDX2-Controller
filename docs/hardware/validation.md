@@ -25,6 +25,8 @@ For 28-day pure standby, with no active use:
 
 At 30 minutes/day at 2.25 W, active use alone consumes 1.125 Wh/day. The 10 Ah scenario then provides at most 26.3 days even with zero standby/wake consumption. Four weeks is an illustrative scenario, not the agreed target. Large battery size cannot replace a usage profile or measurement.
 
+Additional 6.6 Ah and active-use scenarios, touch pin mapping and external-route checks are recorded in the [power review](power-review.md).
+
 ## Bench sequence
 
 1. **Identity and fit:** photograph/record SKU and PCB revision, verify display and connector dimensions, map schematic sources. Record public results here; private photos/receipts can remain in local/.

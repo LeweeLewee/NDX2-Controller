@@ -1,6 +1,6 @@
 # Hardware design
 
-Revision 0.1 — 20 September 2026. Proposal; not a wiring-ready schematic.
+Revision 0.2 — 20 September 2026. Proposal; not a wiring-ready schematic.
 
 ## Preferred display assembly — HW-001
 
@@ -42,7 +42,9 @@ The power block can be onboard or external; it does not imply a separate charger
 | B: protected 1S pack with separate charger/power path and regulated 5 V into board USB-C supply | Allows independent power sizing and charge-rate choice | Converter idle current, peak current, true shutdown, USB power routing, touch wake and extra volume/cost |
 | C: regulated USB battery pack for bench comparison | Quick removable power source | Low-load auto-off, restart behaviour, pass-through charging and sleep consumption; not selected for final build |
 
-Start by assessing A; choose B only if the measurements or charging requirements justify it. Never connect the pack to the 7–36 V input as though it were the battery connector. If using B, isolate the unused onboard battery/charging path according to a verified schematic. No dual-charger connection is approved.
+Route B is now the leading research proposal: Waveshare recommends a single cell of no more than 2,000 mAh on its battery connector, outside our initial 5–10 Ah range. Route A is on hold for the large base pack pending manufacturer clarification. This is a documented recommendation, not proof of a hard electrical capacity limit. See [power review](power-review.md).
+
+For B, leave the onboard battery connector empty and verify the 5 V supply and programming-USB paths before wiring. Never connect a 1S pack to the 7–36 V DC input. Do not connect two chargers to the same pack. The external converter must remain enabled during touch-wake standby; full shutdown would remove touch power.
 
 ## Physical arrangement
 

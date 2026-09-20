@@ -6,7 +6,7 @@
 
 | ID | Priority / BOM | Decision and current position | Evidence needed to close |
 | --- | --- | --- | --- |
-| R01 | First / HW-001,003,004 | Establish actual Waveshare board revision and power topology. Onboard battery route is first to assess. | Revision-matched schematic, supply paths, battery polarity, charger/load-sharing behaviour, backlight/touch power control and accessible wake interrupt |
+| R01 | First / HW-001,003,004 | Establish actual Waveshare board revision and power topology. Manufacturer guidance limits the recommended onboard cell to 2 Ah; external 5 V route now leads research. | Revision-matched schematic, supply paths, battery polarity, charger/load-sharing behaviour, backlight/touch power control and accessible wake interrupt |
 | R02 | First / HW-001,009 | Validate touch wake with lowest viable standby draw. A fully unpowered board cannot detect touch. | Wake trials from each intended sleep state, total current and reconnect latency; external wake circuit only if justified |
 | R03 | First / HW-002 | Choose battery energy and pack geometry after R01/R02 and usage profile. Protected assembled 1S pack is a candidate route, not a final chemistry/topology choice. | Wh and current ratings, charge compatibility, protection, dimensions, mass, sourcing/shipping and measured runtime |
 | R04 | First / HW-003,004,017 | Decide onboard charging versus separate charger/converter. Avoid treating battery presence as proof of good power management. | Charge duration, thermal performance, low-load losses, peak-load stability and concurrent use/charging |
@@ -19,9 +19,11 @@
 
 ## Initial power research
 
+The [power component review](power-review.md) supersedes the initial onboard-first priority. R01–R06 remain open: documentary findings narrow the route but do not establish electrical compatibility or measured standby.
+
 | Option | What is established | Selection position |
 | --- | --- | --- |
-| Waveshare onboard 1S battery input | Official documentation shows a battery connection switch and 3.7 V single-cell MX1.25 connection. Legacy wiki search evidence quotes 580 mA charging; verify against the actual schematic/revision before relying on it. | First route to inspect; not yet electrically validated |
+| Waveshare onboard 1S battery input | Official documentation shows a battery connection switch and 3.7 V single-cell MX1.25 connection. Legacy wiki search evidence quotes 580 mA charging; verify against the actual schematic/revision before relying on it. | On hold for the large base pack: current user guide recommends ≤2,000 mAh; see power review |
 | [Adafruit 353 protected 3.7 V 6600 mAh pack](https://www.adafruit.com/product/353) | Manufacturer describes a parallel assembled pack with over/under-voltage and over-current protection; represents roughly 24.4 Wh nominal energy. | Reference candidate within initial capacity range; not selected. Verify UK sourcing, dimensions, continuous current and connector adaptation |
 | [Adafruit BQ24074 charger board, 4755](https://www.adafruit.com/product/4755) | Manufacturer documents load sharing and up to 1.5 A load draw. | External charger reference if onboard charging is unsuitable; not a regulated 5 V output or complete drop-in power system |
 | [Pololu U3V70F5 5 V boost regulator, 2891](https://www.pololu.com/product/2891) | Manufacturer lists a true-shutdown option. | External converter reference only; likely more current capacity than needed. Compare low-load efficiency, quiescent current, size and cost before selecting |
