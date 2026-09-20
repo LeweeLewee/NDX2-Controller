@@ -11,10 +11,10 @@ Last updated: 20 September 2026.
 | Native single-track launch | Observed | Returned track reference plus cmd=play caused native queue and advancing playback |
 | Native source identification | Observed | sourceDetail=tidal and queue class object.track.tidal |
 | Audio carried by our test process | None | Process made JSON requests only; no audio fetch, decode or relay |
-| Audible output / packet-level cloud route | Not independently checked | Device state supplied the playback evidence |
+| Audible output | User confirmed | Music was audible during the volume trial; packet-level cloud route not independently checked |
 | Playback quality | Observed at 24-bit/44.1 kHz | User corrected Naim app setting from High to Max; API changed lossless to losslessHd. Same native track command then returned FLAC 24-bit/44.1 kHz, playing state, error=0 |
 | Stop behaviour | Observed, asynchronous | Immediate read stale; subsequent state=1, position=0, no longer active playback |
-| Amplifier control | Unresolved | automation.enabled=1 observed; exact volume command and physical effect not established. No volume command sent |
+| Amplifier control | Unresolved | levels/room accepted 13 → 11 → 13; user heard music but could not judge a volume change. Numeric readback does not prove System Automation |
 | Full catalogue search | Unresolved | Exploratory GET query/path variants returned 400; correct syntax unknown. This does not prove search unavailable |
 | Collection pagination | Observed | favourites/albums with offset=0 and 2, limit=2 returned distinct successive pages and totalCount |
 | Artwork retrieval and cache | Observed | Returned resources.tidal.com JPEG fetched (41,661 bytes), visually checked; second lookup reused cache. Host restriction, byte cap and eviction covered offline |
@@ -49,10 +49,16 @@ An additional album remained 16-bit/44.1 kHz with Max enabled; Max does not impl
 
 Queue selection with PUT current also passed: the returned second-track reference became current and started playback. Final device state after that test was stopped (state=1, position=0), with the 17-track test album queued. Max was retained; no amplifier-volume command was sent by our scripts.
 
-## How to update this ledger
+## Audible volume trial
+
+The user authorized an audible volume comparison. With output mode unchanged, a native TIDAL track played while PUT /levels/room changed the reported setting from 13 to 11 and back to 13. Subsequent reads confirmed those values and advancing playback. Cleanup confirmed volume=13, mute=0, stopped state=1, position=0 and error=0. The user confirmed audible music but said the change was unclear. This result is inconclusive for amplifier control; it is not a pass or proof of no effect.
+
+A second trial used a larger reduction, 13 → 5 → 13, without exceeding the starting setting. Readback confirmed each level; final state again showed stopped, position=0, volume=13, mute=0 and error=0. User assessment of this second trial is pending. Neither trial changed the fixed/variable output mode.
 
 ### Capture-only recorder limitation
 
 A follow-up recorder restricted to one phone and allowlisted status reads prevented the Naim app from showing the NDX. Its log showed blocked device-description requests on a separate advertised port, plus startup reads and paginated input/favourite queries outside the allowlist. This capture cannot establish amplifier command behaviour. The recorder was stopped immediately after the user reported the problem. Direct system, power and now-playing requests all returned HTTP 200; the streamer remained on and stopped with error=0. The user turned the phone proxy Off, reopened Naim and confirmed that the NDX was visible again. App access is restored. Do not repeat this restricted proxy workflow as a working capture procedure.
+
+## How to update this ledger
 
 Record date, firmware, initial state, exact operation, observed result and final state. Distinguish API acknowledgement from actual state change. Link sanitized fixtures or local report filenames as appropriate. Never mark a capability complete solely because an endpoint exists or returned HTTP 200.
