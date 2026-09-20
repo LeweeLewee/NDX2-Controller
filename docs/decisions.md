@@ -6,7 +6,7 @@
 
 ## D002 — Small bespoke controller
 
-**Accepted.** A conventional tablet is too large. Use a compact square touch interface in a purpose-made printed enclosure. Exact diagonal and dimensions are pending hardware evaluation.
+**Updated, 20 September 2026.** A conventional tablet is too large. Use a compact touch interface in a purpose-made printed enclosure. Rectangular and square proportions are both acceptable; screen quality and usability take priority. Exact dimensions follow hardware evaluation.
 
 ## D003 — Battery life and physical substance
 
@@ -14,7 +14,7 @@
 
 ## D004 — E-paper and ESP32 remain candidates
 
-**Provisional.** E-paper suits persistent information and low standby display power. Interaction latency, touch availability and refreshing need testing. ESP32-S3 is a credible candidate for the observed HTTP control path; no firmware demonstration has occurred.
+**Updated, 20 September 2026; see D009.** E-paper remains an alternative for persistent information. The leading display is now a colour LCD with integrated ESP32-S3. Neither ESP32 Naim firmware nor display/battery performance has been demonstrated.
 
 ## D005 — Pi is available, not mandatory
 
@@ -31,3 +31,9 @@
 ## D008 — Prototype catalogue search separately from playback
 
 **Provisional implementation, 20 September 2026.** Test TIDAL's public metadata API using this project's own developer application. Native Naim playback remains mandatory. The search adapter cannot play audio; candidate IDs require native resolution before handoff. The developer app is now created and live catalogue search/pagination passed. Whether this becomes the final architecture still depends on native result compatibility and small-screen usability. Credentials were used in memory only; deployment storage is undecided.
+## D009 — Preferred display and base battery
+
+**Accepted preference, 20 September 2026; final hardware selection pending validation.** The user prefers Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case. Responsive browsing, search and colour artwork motivate the choice. The large battery will be separate and mounted in the base; an included battery is not required or a selection advantage. Screen aspect ratio is flexible. Do not confuse this model with Waveshare's 4B or other 4.3 variants.
+
+Onboard power circuitry versus an external charger/converter remains a research choice. Touch wake, screen-off standby, charging and runtime must be measured. No purchase is recorded. See [hardware design and BOM](hardware/README.md).
+

@@ -28,7 +28,8 @@ Last updated: 20 September 2026.
 | Long-term reliability and app coexistence | Not fully tested | Native app comparison pending; no concurrent command stress or authentication renewal test |
 | Home Assistant reachable | Observed | Recognized page, HTTP 200; no login/configuration changes |
 | ESP32 implementation | Not built | Computer-side HTTP prototype only |
-| Battery and display performance | Not measured | Hardware not selected |
+| Battery and display performance | Not measured | Waveshare ESP32-S3-Touch-LCD-4.3B is the preferred candidate; final selection and physical validation pending |
+| Hardware design and BOM | Planning record only | Manufacturer references and user preferences recorded in docs/hardware; no purchase, touch-wake or runtime evidence |
 
 ## Test conditions
 

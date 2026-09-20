@@ -26,12 +26,14 @@ Automatic track advancement and a new controller connection during playback pass
 
 ## M2 — Touch display and power prototype
 
-- [ ] Select a small display plus matching touch hardware.
-- [ ] Demonstrate browse/search input and now-playing on e-paper.
+- [x] Record hardware design baseline and initial parts BOM ([hardware](hardware/README.md)); Waveshare ESP32-S3-Touch-LCD-4.3B is preferred.
+- [ ] Validate and finalize the display/touch selection.
+- [ ] Demonstrate browse/search input and now-playing on the preferred LCD; evaluate e-paper fallback only if needed.
 - [ ] Measure full-board sleep, connected idle, browsing and refresh consumption.
 - [ ] Implement wake/reconnect and stale-state handling.
 - [ ] Decide direct ESP32 control versus optional Pi bridge.
-- [ ] Select battery and charging electronics based on measured load and packaging.
+- [ ] Resolve onboard versus external power path, then select the large base battery and charging electronics from measured load and packaging.
+- [ ] Resolve wiring, charging access, low-battery handling and service isolation; track open choices in the hardware research register.
 
 **Exit criterion:** usable interaction, reliable wake and a measured energy budget supporting the agreed usage profile. Confirm the desired daily interaction time and listening hours before promising runtime.
 

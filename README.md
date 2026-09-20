@@ -10,8 +10,8 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 
 ## The product
 
-- Small square form, bespoke touch interface and a substantial, well-finished 3D-printed enclosure.
-- E-paper is the leading display direction, pending interaction testing.
+- Compact form with flexible proportions, bespoke touch interface and a substantial, well-finished 3D-printed enclosure.
+- Waveshare ESP32-S3-Touch-LCD-4.3B (without case) is the leading display candidate, pending hardware validation.
 - Large rechargeable battery and deliberate weight; cable-free use on the coffee table.
 - Weeks of standby is a target, not a measured specification.
 - Full TIDAL browsing and native playback; other sources can follow.
@@ -23,6 +23,7 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 | Document | Purpose |
 | --- | --- |
 | [Product brief](docs/product-brief.md) | Requirements, constraints and unresolved choices |
+| [Hardware and parts BOM](docs/hardware/README.md) | Design baseline, parts, sourcing and validation |
 | [Architecture](docs/architecture.md) | Control path, responsibilities and integration boundaries |
 | [Evidence](docs/evidence.md) | What the live tests actually established |
 | [Decisions](docs/decisions.md) | Agreed decisions and their rationale |
