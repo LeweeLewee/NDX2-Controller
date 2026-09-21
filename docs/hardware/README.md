@@ -1,11 +1,13 @@
 # Hardware
 
 Status: concept and parts planning; no physical build or purchases recorded.
-Last reviewed: 20 September 2026.
+Last reviewed: 21 September 2026.
 
 The leading screen is the **Waveshare ESP32-S3-Touch-LCD-4.3B, standard version without case (SKU 27848)**. This is a preferred prototype candidate, not a tested or final production selection.
 
 Current enclosure: **original 01 River Stone, stationary on the table**. See [dimensioned packaging and construction study](river-stone/README.md).
+
+Repurposed phones are excluded from the current design for visual reasons; a dismantled-phone approach is not being pursued. Use a dedicated display assembly; see [decision D015](../decisions.md#d015--dedicated-display-repurposed-phone-route-ruled-out).
 
 ## Design baseline
 

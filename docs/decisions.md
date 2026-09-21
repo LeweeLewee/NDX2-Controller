@@ -57,3 +57,9 @@ Onboard power circuitry versus an external charger/converter remains a research 
 ## D014 - Original River Stone, stationary on the coffee table
 
 **Accepted by user, 20 September 2026.** Resume the original 01 River Stone rather than its four later variations or Crescent embrace. The controller stays on the table. Preserve its asymmetric pebble form, inset landscape display and premium appearance; manufacture at home on the Bambu Lab P1S with 0.4 mm nozzle and favour minimal finishing. This removes the separate handheld, second battery and controller-to-base charging interface. One shell plus recessed underside cover, low battery and rear cable charging are the working construction proposal. Dimensions, screen angle, filament and electrical parts remain provisional. The user authorized continued development without repeated confirmation and requested repository updates. See [River Stone layout](hardware/river-stone/README.md).
+
+## D015 — Dedicated display; repurposed phone route ruled out
+
+**Accepted by user, 21 September 2026.** Visual identity is a primary requirement. Rule out an intact Android phone or iPhone inset into the enclosure: the user considers its recognizable phone proportions and details incompatible with the purpose-built audio-controller appearance. Do not pursue a dismantled-phone route in the current design; no concrete integration approach has demonstrated sufficient visual benefit to justify the additional packaging and servicing complexity. Reconsider only if a specific proposal resolves that visual concern.
+
+Continue with a dedicated display assembly and the original River Stone enclosure direction. Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case, remains the leading candidate pending physical screen, touch-wake and power validation. This is a design decision, not evidence that phone battery life is inadequate; no phone standby trial was performed.
