@@ -56,9 +56,9 @@ STL validation is recorded separately in `mesh-validation.json`. Passing geometr
 Use Python with `cadquery==2.8.0`; the renderer additionally needs numpy and Pillow. The mesh checker needs trimesh and its graph dependencies (scipy/networkx). Run from the repository root:
 
 ```text
-python tools/river_stone_shell.py --supplier-step PATH_TO_MANUFACTURER_STEP
-python tools/render_river_stone.py
-python tools/check_river_stone_meshes.py
+python tools/river_stone_shell.py --revision v1 --supplier-step PATH_TO_MANUFACTURER_STEP
+python tools/render_river_stone.py --revision v1
+python tools/check_river_stone_meshes.py --revision v1
 ```
 
 `--deps PATH` optionally points to a local installation directory. `preview-meshes.json` is a generated renderer intermediate, ignored by Git. Omitting the supplier argument generates the envelope-only study; it does not reproduce the supplier registration preview. The STEP fit checks intentionally use the larger explicit envelope, not a union of hundreds of supplier solids.

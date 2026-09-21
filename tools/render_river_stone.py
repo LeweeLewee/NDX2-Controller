@@ -1,9 +1,10 @@
 """Render actual CAD tessellations with a depth buffer. Requires numpy and Pillow."""
 from pathlib import Path
-import json,math
+import json,math,argparse
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
-OUT=Path(__file__).resolve().parents[1]/'docs/hardware/river-stone/shell-v1'
+p=argparse.ArgumentParser();p.add_argument('--revision',choices=['v1','v2'],default='v2');args=p.parse_args()
+OUT=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/shell-'+args.revision)
 data=json.loads((OUT/'preview-meshes.json').read_text())
 im=Image.new('RGB',(1600,1100),'#f3f0e9')
 def font(n):
@@ -35,14 +36,14 @@ label(45,25,'RIVER STONE / shell and assembly study',32)
 label(45,77,'CAD geometry, not a finish render | Waveshare 4.3B | original 01 remains the aesthetic reference',20)
 render([('shell',sand,(0,0,0)),('module',black,(0,0,0)),('glass',(23,30,33),(0,0,0)),('va',(61,92,103),(0,0,0))] if 'glass' in data else [('shell',sand,(0,0,0)),('module',black,(0,0,0))],(425,475),2.8,-22,24)
 label(145,595,'Assembled front / recessed landscape display',22)
-render([('shell',sand,(0,0,0))],(1190,275),2.5,-22,-50)
-label(930,595,'Underside / cover removed',22)
+render([('shell',sand,(0,0,0))]+[(n,(134,153,137),(0,0,0)) for n in ['retainer-left','retainer-right'] if n in data],(1190,275),2.5,-22,-50)
+label(930,595,'Underside / removable retainers' if 'retainer-left' in data else 'Underside / cover removed',22)
 items=[('section',sand,(0,0,0)),('module',black,(0,0,0)),('battery',green,(0,0,0)),('charger',gold,(0,0,0)),('converter',blue,(0,0,0)),('cover',sand,(0,0,-15))]
 if 'section' in data:render(items,(450,995),2.5,-90,0)
 label(80,1035,'Section / battery space / cover lowered for illustration',19)
 label(880,745,'One main shell + removable underside cover',24)
 label(880,790,'Four cover screws; no separate controller dock',21)
-label(880,835,'Screen retention and cable openings still to detail',21)
+label(880,835,'Retainer pads and fasteners require a fit trial' if 'retainer-left' in data else 'Screen retention and cable openings still to detail',21)
 label(880,880,'Study files are not a production or powered-build release',20)
 label(880,925,'Colour identifies geometry; filament finish is not simulated',18)
 im.save(OUT/'assembly-preview.png')

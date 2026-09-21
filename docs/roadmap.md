@@ -60,6 +60,7 @@ Automatic track advancement and a new controller connection during playback pass
 
 - [x] Select original River Stone as stationary table enclosure and record dimensioned packaging study ([layout](hardware/river-stone/README.md)).
 - [x] Create the first River Stone shell/cover solids and check conservative display insertion and component-envelope collisions ([study](hardware/river-stone/shell-v1/README.md)).
+- [x] Model provisional removable screen retainers and fit coupons; check meshes, insertion and sampled wall/overhang geometry ([v2 study](hardware/river-stone/shell-v2/README.md)).
 - [ ] Refine the exterior and verify minimum wall thickness, screen retention, connectors, antenna, microphone, print supports and physical fit before releasing a build.
 
 - [ ] Finalize dimensions around measured components.

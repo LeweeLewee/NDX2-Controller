@@ -1,0 +1,177 @@
+{
+  "shell-study": {
+    "sha256": "5db8487221614ffbb4b41ff5352329665273ea9dd1855f9b3efe6131fad3d824",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 206.26290319686257,
+    "bounds_mm": [
+      [
+        -109.92791748046875,
+        -70.52938842773438,
+        -2.4147350785597155e-15
+      ],
+      [
+        110.12991333007812,
+        81.87285614013672,
+        103.0
+      ]
+    ],
+    "size_mm": [
+      220.05783081054688,
+      152.4022445678711,
+      103.0
+    ],
+    "within_256mm_cube": true
+  },
+  "cover-study": {
+    "sha256": "d4f7d399b99f44e17157436bebb58e25f149aa2a1d71151dffbb2d2c17ccaf64",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 65.89482252421674,
+    "bounds_mm": [
+      [
+        -100.69737243652344,
+        -65.66210174560547,
+        0.20000000298023224
+      ],
+      [
+        100.69999694824219,
+        70.69894409179688,
+        3.200000047683716
+      ]
+    ],
+    "size_mm": [
+      201.39736938476562,
+      136.36104583740234,
+      3.0000000447034836
+    ],
+    "within_256mm_cube": true
+  },
+  "module-envelope": {
+    "sha256": "814b86e87eaf5e719b5bd737c82929897f6935f91ed8868e6e2a98d91009d916",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 149.84251581112753,
+    "bounds_mm": [
+      [
+        -56.29999923706055,
+        -40.68539810180664,
+        21.3890380859375
+      ],
+      [
+        56.29999923706055,
+        21.275495529174805,
+        90.44952392578125
+      ]
+    ],
+    "size_mm": [
+      112.5999984741211,
+      61.960893630981445,
+      69.06048583984375
+    ],
+    "within_256mm_cube": true
+  },
+  "retainer-left": {
+    "sha256": "6dd1250e016f708241619fc642735edf3a16d346633fdbabda5961d57ac0d13c",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 2.778406178574473,
+    "bounds_mm": [
+      [
+        -68.0,
+        -30.626235961914062,
+        36.68977737426758
+      ],
+      [
+        -52.79999923706055,
+        6.785599708557129,
+        78.73606872558594
+      ]
+    ],
+    "size_mm": [
+      15.200000762939453,
+      37.41183567047119,
+      42.04629135131836
+    ],
+    "within_256mm_cube": true
+  },
+  "retainer-right": {
+    "sha256": "b599c6a3ad04f488ae95527af337bed33e256740d796ec394c98adcd507564c3",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 2.778406178574473,
+    "bounds_mm": [
+      [
+        52.79999923706055,
+        -30.626235961914062,
+        36.68977737426758
+      ],
+      [
+        68.0,
+        6.785599708557129,
+        78.73606872558594
+      ]
+    ],
+    "size_mm": [
+      15.200000762939453,
+      37.41183567047119,
+      42.04629135131836
+    ],
+    "within_256mm_cube": true
+  },
+  "retainer-mount-coupon": {
+    "sha256": "f444f12acc7bfe6f1daa9bf24aa5160d9c71dfa3ec5ff6c9ff7ea2e42b9226ec",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 1.6015731273221014,
+    "bounds_mm": [
+      [
+        -9.0,
+        -12.0,
+        9.797174820681343e-16
+      ],
+      [
+        10.0,
+        12.0,
+        10.0
+      ]
+    ],
+    "size_mm": [
+      19.0,
+      24.0,
+      9.999999999999998
+    ],
+    "within_256mm_cube": true
+  },
+  "retainer-strip-coupon": {
+    "sha256": "955ef18021fcb08490ce74a24a151b02d8fca2214e3aca79bb105d3d8fa02403",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 0.9386031052731983,
+    "bounds_mm": [
+      [
+        -7.199999809265137,
+        -8.0,
+        0.0
+      ],
+      [
+        8.0,
+        8.0,
+        9.399999618530273
+      ]
+    ],
+    "size_mm": [
+      15.199999809265137,
+      16.0,
+      9.399999618530273
+    ],
+    "within_256mm_cube": true
+  }
+}
