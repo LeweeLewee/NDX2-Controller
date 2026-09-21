@@ -3,11 +3,15 @@
 Revision 0.2 — 20 September 2026. Planning BOM, not a purchase list.
 All new items are **not ordered**. Hardware ownership is only recorded where established; inventory still needs checking.
 
+D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
+
 ## Controller parts
 
 | ID | Item / exact candidate | Qty per unit | Selection | Procurement | Price reference | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | preferred | not ordered | USD 36.99; 2026-09-20; shipping/tax excluded | Validate screen, board revision, touch wake and consumption |
+| HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | selected | not ordered | USD 36.99; 2026-09-20; shipping/tax excluded | HP-01 after procurement; validate revision, touch wake and power |
+| HW-019 | Old Android phone | 0 | excluded | not ordered | Not included | Ruled out by user, D017; no further phone trial |
+| HW-020 | Microphone function for HW-001; exact module TBD | 1 function; module count TBD | research | not ordered | TBD | Audit available hardware/pins, voltage/bus, capture and power before selecting |
 | HW-002 | Protected rechargeable battery pack, base mounted; 5,000–10,000 mAh at nominal 3.7 V is an initial range only | 1 pack | research | not ordered | TBD | Select chemistry, topology, Wh, dimensions, protection and connector after load/charge assessment |
 | HW-003 | Charger and power path: external route leads; Adafruit BQ24074 4755 candidate | 1 function; 0 or 1 extra board | research | not ordered | Candidate USD 14.95; 2026-09-20; shipping/tax excluded | Verify schematic, charge rate, simultaneous use/charge and termination |
 | HW-004 | Regulated 5 V supply / load switching: external converter candidate; Pololu U3V70F5 reference | 1 function; 0 or 1 extra board | research | not ordered | TBD for external converter | Measure idle losses and startup peaks; avoid duplicate power hardware |
@@ -31,7 +35,7 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 | ID | Item | Status / cost treatment |
 | --- | --- | --- |
 | SYS-001 | Naim NDX 2 | Existing; outside controller BOM cost |
-| SYS-002 | Existing Naim amplifier and System Automation connection | Existing amplifier; exact model/cable inventory and working command path unresolved; do not order a new cable speculatively |
+| SYS-002 | Existing Naim amplifier and System Automation connection | Wired down/up verified (D011); preserve connection. Exact model/cable inventory is separate; no new cable needed by this plan |
 | SYS-003 | Existing Home Assistant Pi | Available optional command/metadata bridge; outside base battery and new-parts subtotal |
 | INC-001 | ESP32-S3, Wi-Fi/BLE, touch controller and LCD interface | Included in HW-001; no separate MCU/Wi-Fi/touch board |
 | INC-002 | microSD slot and onboard RTC | Included in HW-001; card and RTC backup cell not selected; add only if justified |
@@ -50,7 +54,7 @@ All new items are **not ordered**. Hardware ownership is only recorded where est
 
 ## Cost accounting
 
-Known preferred new-part subtotal: **USD 36.99 for HW-001 only**. This is not the total build cost.
+Selected display reference subtotal: **USD 36.99 for HW-001 only**, quoted 20 September 2026. This is not a refreshed price or total build cost.
 External-route candidate prices: HW-002 Adafruit 353 USD 24.50; HW-003 Adafruit 4755 USD 14.95, checked 2026-09-20, shipping/tax excluded. These are unselected alternatives within their functional rows, not extra parts. HW-004 price remains TBD. Screen + these two candidates = USD 76.44, an incomplete scenario subtotal excluding converter, monitoring, harness, enclosure and charging supply. See [power review](power-review.md) for limits.
 
 All remaining costs are unknown or conditional. No GBP conversion, stock guarantee, shipping or tax estimate has been assumed.

@@ -31,19 +31,26 @@ Automatic track advancement and a new controller connection during playback pass
 
 **Closeout:** the user accepted software feasibility as achieved. The essential control path has live evidence and native playback is preserved. This is not production readiness or full feature parity. Unfinished UI and reliability work is carried forward below; no failed or untested item is marked proven. Frozen reference: `software-feasibility-v1`; see [handover](milestone-handover.md).
 
-## M2 — Detailed design, deployment and hardware proof (next)
+## M2 — Detailed design, deployment and hardware proof (started)
+
+- [x] Audit frozen reference and publish [phase plan](detailed-design-plan.md) with deliverables, dependencies and acceptance gates.
+- [x] Resolve display choice: Waveshare selected, Android ruled out (D017, 21 September 2026).
+- [x] Reconcile detailed-design records with published main; retain D015 for dedicated display and use D018 for the provisional bridge partition.
+- [ ] Implement the hardware-independent software workstream: development-host bridge, fixture-backed controller contract, recovery/security tests and embedded UI/build foundation. Physical and host deployment gates remain open.
+- [ ] Confirm HW-001/measurement inventory, obtain purchasing approval if required, then execute HP-01.
+- [ ] Deferred B01: album-save visibility differs in laptop browser versus Codex preview; cause undocumented. Investigate only when relevant; no caching assumption or speculative fix.
 
 - [ ] Decide where the bridge runs and specify secure credential storage and persistent sign-in.
 - [ ] Validate gapless transitions, native app coexistence and disconnect/reconnect recovery.
 - [ ] Define interaction flows and touch targets on the actual 4.3-inch display.
 - [ ] Carry forward queue-edit controls and playlist creation/editing, shuffle/repeat/seek UI; prioritize only when required by the detailed design.
 
-- [x] Record hardware design baseline and initial parts BOM ([hardware](hardware/README.md)); Waveshare ESP32-S3-Touch-LCD-4.3B is preferred.
-- [ ] Validate and finalize the display/touch selection.
+- [x] Record hardware baseline and BOM ([hardware](hardware/README.md)); Waveshare selected (D017), hardware proof pending.
+- [ ] Validate the selected Waveshare display/touch hardware.
 - [ ] Demonstrate browse/search input and now-playing on the preferred LCD; evaluate e-paper fallback only if needed.
 - [ ] Measure full-board sleep, connected idle, browsing and refresh consumption.
 - [ ] Implement wake/reconnect and stale-state handling.
-- [ ] Decide direct ESP32 control versus optional Pi bridge.
+- [ ] Validate provisional bridge partition (D018), select host after Pi inventory and implement Waveshare embedded UI.
 - [ ] Resolve onboard versus external power path, then select the large base battery and charging electronics from measured load and packaging.
 - [ ] Resolve wiring, charging access, low-battery handling and service isolation; track open choices in the hardware research register.
 

@@ -4,7 +4,7 @@ A compact, battery-powered coffee-table touchscreen for native Naim music playba
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
-**Status: software feasibility complete; moving to detailed design.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. ESP32 firmware and the physical controller have not been built.
+**Status: software feasibility complete; detailed design underway, ready for parallel software implementation.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. ESP32 firmware and the physical controller have not been built.
 
 The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. TIDAL account collection controls and persistent Back navigation are implemented; see the collection documentation for live evidence and remaining feature coverage.
 
@@ -13,7 +13,7 @@ The frozen reference is tagged `software-feasibility-v1`. Start the next phase f
 ## The product
 
 - Compact form with flexible proportions, bespoke touch interface and a substantial, well-finished 3D-printed enclosure.
-- Waveshare ESP32-S3-Touch-LCD-4.3B (without case) is the leading display candidate, pending hardware validation.
+- Selected display: Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case, 800 × 480 (D017). Android ruled out; hardware validation and procurement remain outstanding.
 - Large rechargeable battery and deliberate weight; cable-free use on the coffee table.
 - Weeks of standby is a target, not a measured specification.
 - Full TIDAL browsing and native playback; other sources can follow.
@@ -21,6 +21,8 @@ The frozen reference is tagged `software-feasibility-v1`. Start the next phase f
 **The NDX 2 must use its native Naim TIDAL playback path.** The controller and any supporting Pi handle commands and metadata, never audio relay or transcoding. Alternative playback protocols do not satisfy this requirement.
 
 ## Documentation
+
+Start current work with the [detailed-design plan](docs/detailed-design-plan.md), [display selection history](docs/hardware/display-comparison.md), [deployment design](docs/deployment-design.md) and [physical interaction trials](docs/interaction-design.md).
 
 | Document | Purpose |
 | --- | --- |

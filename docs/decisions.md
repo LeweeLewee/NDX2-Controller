@@ -31,12 +31,14 @@
 ## D008 — Prototype catalogue search separately from playback
 
 **Provisional implementation, 20 September 2026.** Test TIDAL's public metadata API using this project's own developer application. Native Naim playback remains mandatory. The search adapter cannot play audio; candidate IDs require native resolution before handoff. The developer app is now created and live catalogue search/pagination passed. Whether this becomes the final architecture still depends on native result compatibility and small-screen usability. Credentials were used in memory only; deployment storage is undecided.
+
 ## D009 — Preferred display and base battery
 
 **Accepted preference, 20 September 2026; final hardware selection pending validation.** The user prefers Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case. Responsive browsing, search and colour artwork motivate the choice. The large battery will be separate and mounted in the base; an included battery is not required or a selection advantage. Screen aspect ratio is flexible. Do not confuse this model with Waveshare's 4B or other 4.3 variants.
 
 Onboard power circuitry versus an external charger/converter remains a research choice. Touch wake, screen-off standby, charging and runtime must be measured. No purchase is recorded. See [hardware design and BOM](hardware/README.md).
 
+**Reopened, 20 September 2026; superseded selection status by D016.** The user confirmed the Waveshare has not been purchased and requested comparison with an old Android phone. Preserve this entry as history, not a final selection instruction.
 
 ## D010 — Voice and AI discovery
 
@@ -63,3 +65,21 @@ Onboard power circuitry versus an external charger/converter remains a research 
 **Accepted by user, 21 September 2026.** Visual identity is a primary requirement. Rule out an intact Android phone or iPhone inset into the enclosure: the user considers its recognizable phone proportions and details incompatible with the purpose-built audio-controller appearance. Do not pursue a dismantled-phone route in the current design; no concrete integration approach has demonstrated sufficient visual benefit to justify the additional packaging and servicing complexity. Reconsider only if a specific proposal resolves that visual concern.
 
 Continue with a dedicated display assembly and the original River Stone enclosure direction. Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case, remains the leading candidate pending physical screen, touch-wake and power validation. This is a design decision, not evidence that phone battery life is inadequate; no phone standby trial was performed.
+
+## D016 — Reopen display selection: Waveshare versus old Android phone
+
+**Superseded by D017, 21 September 2026.** Renumbered from a duplicate D014 to preserve the existing River Stone decision ID; this entry is historical.
+
+**Accepted user direction, 20 September 2026.** No Waveshare purchase has occurred. Compare the exact ESP32-S3-Touch-LCD-4.3B without case against an old Android phone; phone model, Android version, ownership/condition and dimensions remain to be recorded. Neither candidate is selected. The compact bespoke touchscreen, substantial printed enclosure, large base battery, cable-free table use and touch-wake intent remain. A phone is not approval to switch to a conventional tablet or drop these requirements.
+
+Validate both routes for seated usability, touch wake, real energy consumption, microphone, charging and recovery before selecting. A phone's existing internal battery does not establish compatibility with the intended base battery or weeks of standby. Do not remove/bypass its battery or assume always-on charging is suitable. See [candidate comparison](hardware/display-comparison.md). Existing Waveshare research remains useful candidate-specific evidence, not the governing selection.
+
+## D017 — Waveshare selected; Android ruled out
+
+**Accepted user decision, 21 September 2026.** Select Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case (SKU 27848), 800 × 480. Repurposed phones are ruled out for the visual-design reasons recorded in D015; no failed phone trial is claimed. This supersedes the D016 comparison and closes display choice while retaining D015's rationale. Continue with HP-01 screen/touch/wake/power proof, embedded UI, microphone selection and River Stone packaging. Selection is not purchase authorization or proof of touch wake, battery runtime, charging compatibility or enclosure fit. Procurement remains not ordered pending a recorded update. All native Naim playback and existing System Automation requirements remain unchanged.
+
+## D018 — Bridge partition for detailed-design trials
+
+**Repository reconciliation, 21 September 2026:** this draft previously used D015. Renumbered to D018 to preserve the published D015 dedicated-display decision from commit `4e487da`; the two decisions address different subjects.
+
+**Provisional engineering direction, 20 September 2026; host selection conditional.** Put provider credentials, metadata/artwork processing, voice/AI requests and native Naim adapters on an always-on bridge. Evaluate the existing home-automation Pi first after private read-only inventory; no installation or host migration is approved by this record. Use embedded UI firmware for the selected Waveshare (D017); the earlier Android browser/kiosk branch is retired. Keep native music playback entirely on the NDX 2 and retain D011 amplifier semantics. [Deployment design](deployment-design.md) defines security and recovery gates; no LAN-ready implementation is claimed.

@@ -1,5 +1,9 @@
 # Architecture
 
+## Detailed-design status — 21 September 2026
+
+D017 selects Waveshare ESP32-S3-Touch-LCD-4.3B without case and rules out Android. D018 specifies a provisional embedded-controller/always-on-bridge partition; Pi reuse depends on private host inventory. See [deployment design](deployment-design.md) for credentials, pairing, renewal and recovery gates, and [phase plan](detailed-design-plan.md) for dependencies. No deployment is implemented or host selected. The optional/direct paths below describe feasibility-era architecture, not the current deployment recommendation.
+
 ## Required playback path
 
 ```mermaid

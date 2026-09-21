@@ -2,6 +2,8 @@
 
 20 September 2026. Open work; candidate links do not mean selected or approved for wiring.
 
+**D017 update, 21 September 2026:** Waveshare selected; Android ruled out. Close R11 selection and proceed with [HP-01](first-experiment.md). Electrical/mechanical validation gates remain open.
+
 ## Work order
 
 | ID | Priority / BOM | Decision and current position | Evidence needed to close |
@@ -15,7 +17,9 @@
 | R07 | Next / HW-010–015 | Enclosure, battery restraint, feet and fasteners | Measured parts, initial layout, screen support, RF clearance, fit print, touch stability and finish sample |
 | R08 | Later / HW-018 | Dock versus accessible connector | User convenience, contact alignment/polarity, contact rating and charging behaviour; no dock architecture chosen |
 | R09 | Later / HW-016 | Extra weight | Actual assembled mass and stability; do not buy ballast just because weight is desirable |
-| R10 | Software dependency / SYS-002,003 | Amplifier control and optional Pi role | Verified native amplifier control; decide bridge from metadata workload, not from display choice |
+| R10 | Software dependency / SYS-002,003 | Wired amplifier control verified D011; bridge host pending | Preserve bounded amplifier behavior; inspect Pi suitability and validate deployment/recovery |
+| R11 | Closed selection / HW-001,019 | Waveshare selected; Android excluded by user (D017) | No comparative hardware test claimed; R01/R02 and HP-01 still pending |
+| R12 | Next / HW-020 | Microphone/acoustic packaging | Candidate-specific capture, pin/bus budget if external, music interference, power and privacy controls |
 
 ## Initial power research
 
@@ -36,7 +40,7 @@ Do not casually parallel separate packs or attach two chargers. Specify one comp
 
 ## Display alternatives retained
 
-The user prefers HW-001; these are fallback research references, not additional BOM purchases.
+HW-001 is selected (D017); Android HW-019 is excluded. The following older alternatives are historical fallback references only, not active selection work or purchases.
 
 | Candidate | Reason to retain / reason not preferred now |
 | --- | --- |

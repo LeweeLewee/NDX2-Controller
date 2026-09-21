@@ -2,13 +2,15 @@
 
 Revision 0.2 — 20 September 2026. Proposal; not a wiring-ready schematic.
 
+**D017 update, 21 September 2026:** Waveshare is selected and Android ruled out. The design below is active, but remains unvalidated electrically and mechanically. Selection does not authorize purchase.
+
 ## Preferred display assembly — HW-001
 
 | Property | Record |
 | --- | --- |
 | Manufacturer / exact model | Waveshare ESP32-S3-Touch-LCD-4.3B |
 | Variant | Standard, without case; SKU 27848 |
-| Selection | Preferred by user; awaiting prototype validation |
+| Selection | Selected by user (D017); physical validation pending |
 | Display | 4.3-inch IPS LCD, 800 x 480, capacitive touch |
 | Computing | Integrated ESP32-S3, 16 MB flash, 8 MB PSRAM; no separate MCU or Wi-Fi board required |
 | Mechanical reference | Manufacturer lens outline 112.4 x 75.1 mm; drawing maximum depth 17.4 +/-0.3 mm; VA 95.54 x 54.36 mm. Plugged connectors, mounting and cable bends still to verify; see River Stone study |

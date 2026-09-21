@@ -1,6 +1,10 @@
 # Evidence ledger
 
-Last updated: 20 September 2026.
+Last updated: 21 September 2026.
+
+## Detailed-design entry audit — 20 September 2026
+
+Repository inspection confirmed `software-feasibility-v1` resolves to commit `aa070fc0af4a616f769a7c0f15790831c90c112c`, matching HEAD at phase entry. No code or tag was changed. The user confirmed Waveshare was not purchased and reopened the display choice to include an old Android phone (D016). Model/version and hardware inventory remain unknown. New phase, deployment, interaction and candidate experiment documents are plans only: no board current, touch wake, microphone, Pi deployment or enclosure fit was tested in this audit. Existing untracked packaging work was left untouched. The album-save browser discrepancy is recorded as deferred B01 with unknown cause.
 
 | Claim | Status | Evidence / limitation |
 | --- | --- | --- |
@@ -120,3 +124,13 @@ Album results now show separate saved-state heart buttons without nesting contro
 Manufacturer 4.3B drawing visually inspected: lens 112.4 x 75.1 mm, VA 95.54 x 54.36 mm, maximum depth 17.4 +/-0.3 mm. The physical visible-area ratio must not be inferred from 800 x 480 pixels. [Source archive](https://files.waveshare.com/wiki/ESP32-S3-Touch-LCD-4.3B/ESP32-S3-Touch-LCD-4in3B_Drawing.zip).
 
 The reproducible [River Stone layout generator](../tools/river_stone_layout.py) checks three rectangular installation reservations against an inset elliptical footprint, each other and the rear plane of a 50-degree screen with 17.7 mm depth allowance. Checks pass; smallest normal clearance is 3.01 mm at the charger. This is partial analytical packaging evidence, not full shell fit, printed fit, component compatibility, stability, electrical validation or measured battery life. See [results](hardware/river-stone/clearance-checks.json).
+
+## Display selection update — 21 September 2026
+
+The user ruled out repurposed phones for the visual-design reasons recorded in D015 and selected Waveshare ESP32-S3-Touch-LCD-4.3B without case (D017). This is a design decision, not hardware evidence; no phone test failure is claimed. No purchase or new bench measurement is recorded; HP-01 is the next experiment.
+
+## Repository reconciliation — 21 September 2026
+
+Reconciled the detailed-design drafts with published commit `4e487da`. Preserved D015's dedicated-display rationale and assigned the draft bridge partition D018, updating its references. The River Stone layout was already tracked in `ef2576c`; corrected the phase plan's stale untracked-work description. The frozen `software-feasibility-v1` reference is unchanged. This is documentation reconciliation, not new firmware, deployment or hardware evidence.
+
+Validation: 52 Python tests and five JavaScript navigation tests passed on the development computer. Documentation local-file links resolved and decision IDs were unique. Python 3.14 emitted a non-failing ResourceWarning while cleaning up a synthetic HTTPError fixture; no production code was changed. No live device commands were run.
