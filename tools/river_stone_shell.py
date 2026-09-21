@@ -4,7 +4,7 @@ Usage: python tools/river_stone_shell.py --deps PATH --supplier-step PATH
 """
 from pathlib import Path
 import argparse,sys,json,math
-p=argparse.ArgumentParser();p.add_argument('--deps');p.add_argument('--supplier-step');p.add_argument('--revision',choices=['v1','v2'],default='v2');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--deps');p.add_argument('--supplier-step');p.add_argument('--revision',choices=['v1','v2','v3'],default='v3');args=p.parse_args()
 if args.deps:sys.path.insert(0,str(Path(args.deps).resolve()))
 import cadquery as cq
 OUT=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/shell-'+args.revision)
@@ -27,11 +27,16 @@ wires=[cq.Workplane('XY',origin=(x,y,z)).ellipse(rx,ry).val() for z,rx,ry,x,y in
 outer=cq.Solid.makeLoft(wires,False)
 outer=cq.Workplane(obj=outer).faces('>Z').edges().fillet(6).val()
 outer=outer.cut(pose(block(-250,250,-250,250,0,300)))
-# Front-edge fillet deferred: the freeform transition produced non-watertight meshes.
+# A small bevel is evaluated separately from the failed broad v2 fillet.
+if args.revision=='v3':
+    facet=[f for f in outer.Faces() if f.geomType()=='PLANE' and f.normalAt().y<-.5 and f.normalAt().z>.4][0]
+    outer=cq.Workplane(obj=outer).newObject(facet.Edges()).chamfer(2).val()
 assert outer.isValid();log('Outer loft and screen facet valid')
 # Explicit cavity loft avoids an unstable freeform offset. Wall thickness varies;
 # 4 mm radial profile inset is NOT a constant 4 mm normal wall thickness.
 inner_profiles=[(-5,100,70,0,0)]+[(z,rx-4,ry-4,x,y) for z,rx,ry,x,y in profiles[1:-1]]+[(99,26,21,-6,10)]
+if args.revision=='v3':
+    inner_profiles=[(-5,100,70,0,0)]+[(z-(3 if z>=85 else 0),rx-4,ry-4,x,y) for z,rx,ry,x,y in profiles[1:-1]]+[(97,26,21,-6,10)]
 inner=cq.Solid.makeLoft([cq.Workplane('XY',origin=(x,y,z)).ellipse(rx,ry).val() for z,rx,ry,x,y in inner_profiles],False)
 inner=inner.cut(pose(block(-250,250,-250,250,-3,300)))
 log('Cavity valid='+str(inner.isValid()))
@@ -52,15 +57,19 @@ log('Opened shell valid='+str(shell.isValid())+' solids='+str(len(shell.Solids()
 flange=ellipse(110,82,3.5,4).cut(ellipse(90,56,3.4,4.2)).intersect(outer)
 log('Flange valid='+str(flange.isValid())+' volume='+str(flange.Volume()))
 shell=shell.fuse(flange,tol=.001).clean()
+if args.revision=='v3':
+    rim=ellipse(110,82,0,3.5).cut(ellipse(100,70,-.1,3.7)).intersect(outer)
+    shell=shell.fuse(rim,tol=.001).clean()
 fasteners=[(-45,-54),(45,-54),(-52,46),(52,46)]
 for x,y in fasteners:
-    boss=cq.Workplane('XY',origin=(x,y,7)).circle(6).extrude(5).val()
+    boss_z=3.5 if args.revision=='v3' else 7
+    boss=cq.Workplane('XY',origin=(x,y,boss_z)).circle(6).extrude(12-boss_z).val()
     hole=cq.Workplane('XY',origin=(x,y,0)).circle(1.7).extrude(13).val()
     nut=cq.Workplane('XY',origin=(x,y,9)).polygon(6,5.8/math.cos(math.pi/6)).extrude(3.2).val()
     shell=shell.fuse(boss).cut(hole).cut(nut)
 assert shell.isValid();log('Shell, flange and cover-fastener bosses valid')
 keepers={};coupons={}
-if args.revision=='v2':
+if args.revision!='v1':
     for side in [-1,1]:
         # Local screen coordinates: t=0 is the front facet; rear is negative t.
         rail=block(52.8,56,14,61,-10.1,-3.1)
@@ -135,7 +144,7 @@ assert shell.isValid() and len(shell.Solids())==1
 checks['continuous_insertion_sweep_shell_overlap_mm3']=overlap(sweep,shell)
 assert checks['continuous_insertion_sweep_shell_overlap_mm3']<.01,checks
 log('Continuous insertion sweep clear')
-if args.revision=='v2':
+if args.revision!='v1':
     glass_keepout=pose(rounded(112.6,75.3,3.9,-2.5,.7,37.55))
     pcb_proxy=pose(block(-52.5,52.5,-.1,75.2,-19.5,-2.5))
     for name,k in keepers.items():
@@ -169,6 +178,8 @@ preview.update({n:mesh(k) for n,k in keepers.items()})
 (OUT/'preview-meshes.json').write_text(json.dumps(preview))
 report={'status':'engineering study; not released for printing or powered assembly','cadquery_version':cq.__version__,'wall_construction':{'radial_profile_inset_mm':4,'facet_inset_mm':3,'lip_mm':1,'constant_normal_wall_thickness':False},'profiles_z_rx_ry_cx_cy_mm':profiles,'shell':bounds(shell),'cover':bounds(cover),'cover_ellipse_radii_mm':[rx,ry],'screen_angle_deg':50,'lens_front_recess_mm':1.8,'fastener_centres_xy_mm':fasteners,'solid_validity':{'shell':shell.isValid(),'cover':cover.isValid(),'shell_solids':len(shell.Solids()),'cover_solids':len(cover.Solids())},'checks':checks,'discrete_insertion_5mm':insertion,'continuous_insertion':{'travel_mm':120,'method':'Convex hull of rectangular module envelope endpoints, extruded across 112.6 mm width','relief_clearance_mm':.4,'relief_removed_mm3':relief_removed,'housing_state':'empty, cover removed; display inserted before power parts'},'supplier':supplier_info,'limitations':['Retainer contact and glass loads require physical validation; electrical ports and acoustic opening unresolved','Battery and board reservations are not selected parts','Print supports, dimensional tolerance, glass loads and thermal/RF behaviour untested','Freeform wall uses separate cavity loft; minimum normal thickness is not certified']}
 report['revision']=args.revision
+report['inner_profiles_z_rx_ry_cx_cy_mm']=inner_profiles
+report['refinement']={'screen_facet_bevel_mm':2 if args.revision=='v3' else 0,'lower_rim_reinforcement_height_mm':3.5 if args.revision=='v3' else 0,'upper_cavity_lowered':args.revision=='v3','cover_boss_base_z_mm':3.5 if args.revision=='v3' else 7}
 report['retention']={'included':bool(keepers),'glass_back_t_mm':-2.5,'pad_face_t_mm':-3.1,'hard_stop_pad_gap_mm':.6,'proposed_uncompressed_pad_mm':.8,'pcb_proxy_width_mm':105,'actual_supplier_retainer_collision_checked':False,'fasteners':'Provisional M3-size holes/nut pockets; actual hardware and glass loads not validated'}
 (OUT/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 log('Exported study and validation')

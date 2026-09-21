@@ -40,7 +40,7 @@ Use CadQuery 2.8.0 for solids; numpy/Pillow for preview; trimesh plus scipy/netw
 python tools/river_stone_shell.py --revision v2
 python tools/render_river_stone.py --revision v2
 python tools/check_river_stone_meshes.py --revision v2
-python tools/audit_river_stone_print.py
+python tools/audit_river_stone_print.py --revision v2
 ```
 
 The supplier reference is documented and illustrated in v1; this run uses its conservative envelope. Generated `preview-meshes.json` is ignored. The original v1 files remain historical evidence.

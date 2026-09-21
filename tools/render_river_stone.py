@@ -3,7 +3,7 @@ from pathlib import Path
 import json,math,argparse
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
-p=argparse.ArgumentParser();p.add_argument('--revision',choices=['v1','v2'],default='v2');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--revision',choices=['v1','v2','v3'],default='v3');args=p.parse_args()
 OUT=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/shell-'+args.revision)
 data=json.loads((OUT/'preview-meshes.json').read_text())
 im=Image.new('RGB',(1600,1100),'#f3f0e9')
@@ -32,7 +32,7 @@ def render(items,origin,scale,az,el):
             pixels[region][mask]=tuple(int(c*shade) for c in col);zbuf[region][mask]=zz[mask]
     im.paste(Image.fromarray(pixels))
 sand=(192,184,163);black=(35,43,46);green=(145,173,147);blue=(133,159,181);gold=(191,165,116)
-label(45,25,'RIVER STONE / shell and assembly study',32)
+label(45,25,'RIVER STONE / shell and assembly study '+args.revision,32)
 label(45,77,'CAD geometry, not a finish render | Waveshare 4.3B | original 01 remains the aesthetic reference',20)
 render([('shell',sand,(0,0,0)),('module',black,(0,0,0)),('glass',(23,30,33),(0,0,0)),('va',(61,92,103),(0,0,0))] if 'glass' in data else [('shell',sand,(0,0,0)),('module',black,(0,0,0))],(425,475),2.8,-22,24)
 label(145,595,'Assembled front / recessed landscape display',22)

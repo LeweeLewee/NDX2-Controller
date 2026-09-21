@@ -1,0 +1,351 @@
+{
+  "status": "engineering study; not released for printing or powered assembly",
+  "cadquery_version": "2.8.0",
+  "wall_construction": {
+    "radial_profile_inset_mm": 4,
+    "facet_inset_mm": 3,
+    "lip_mm": 1,
+    "constant_normal_wall_thickness": false
+  },
+  "profiles_z_rx_ry_cx_cy_mm": [
+    [
+      0,
+      104,
+      74,
+      0,
+      0
+    ],
+    [
+      8,
+      109,
+      80,
+      0,
+      0
+    ],
+    [
+      22,
+      110,
+      82,
+      0,
+      0
+    ],
+    [
+      40,
+      108,
+      79,
+      -1,
+      1
+    ],
+    [
+      65,
+      99,
+      69,
+      -3,
+      3
+    ],
+    [
+      85,
+      83,
+      59,
+      -5,
+      6
+    ],
+    [
+      97,
+      60,
+      44,
+      -6,
+      9
+    ],
+    [
+      103,
+      30,
+      25,
+      -6,
+      10
+    ]
+  ],
+  "shell": {
+    "min": [
+      -109.96456488358407,
+      -69.24381224065445,
+      -2.220446049250313e-16
+    ],
+    "max": [
+      110.13112777063562,
+      81.87427600078782,
+      103.00000000000006
+    ],
+    "size": [
+      220.0956926542197,
+      151.11808824144225,
+      103.00000000000006
+    ],
+    "method": "tessellation, 0.05 mm tolerance"
+  },
+  "cover": {
+    "min": [
+      -99.69930383118108,
+      -65.66210129219584,
+      0.2
+    ],
+    "max": [
+      99.7,
+      69.69636913234078,
+      3.2
+    ],
+    "size": [
+      199.3993038311811,
+      135.35847042453662,
+      3.0
+    ],
+    "method": "tessellation, 0.05 mm tolerance"
+  },
+  "cover_ellipse_radii_mm": [
+    99.7,
+    69.7
+  ],
+  "screen_angle_deg": 50,
+  "lens_front_recess_mm": 1.8,
+  "fastener_centres_xy_mm": [
+    [
+      -45,
+      -54
+    ],
+    [
+      45,
+      -54
+    ],
+    [
+      -52,
+      46
+    ],
+    [
+      52,
+      46
+    ]
+  ],
+  "solid_validity": {
+    "shell": true,
+    "cover": true,
+    "shell_solids": 1,
+    "cover_solids": 1
+  },
+  "checks": {
+    "module_shell_overlap_mm3": 0.0,
+    "cover_shell_overlap_mm3": 0.0,
+    "battery_shell_overlap_mm3": 0.0,
+    "battery_module_overlap_mm3": 0.0,
+    "charger_shell_overlap_mm3": 0.0,
+    "charger_module_overlap_mm3": 0.0,
+    "converter_shell_overlap_mm3": 0.0,
+    "converter_module_overlap_mm3": 0.0,
+    "battery_charger_overlap_mm3": 0.0,
+    "battery_converter_overlap_mm3": 0.0,
+    "charger_converter_overlap_mm3": 0.0,
+    "continuous_insertion_sweep_shell_overlap_mm3": 0.0,
+    "retainer-left_shell_overlap_mm3": 0.0,
+    "retainer-left_glass_overlap_mm3": 0.0,
+    "retainer-left_pcb_proxy_overlap_mm3": 0.0,
+    "retainer-left_battery_overlap_mm3": 0.0,
+    "retainer-left_charger_overlap_mm3": 0.0,
+    "retainer-left_converter_overlap_mm3": 0.0,
+    "retainer-right_shell_overlap_mm3": 0.0,
+    "retainer-right_glass_overlap_mm3": 0.0,
+    "retainer-right_pcb_proxy_overlap_mm3": 0.0,
+    "retainer-right_battery_overlap_mm3": 0.0,
+    "retainer-right_charger_overlap_mm3": 0.0,
+    "retainer-right_converter_overlap_mm3": 0.0
+  },
+  "discrete_insertion_5mm": [
+    {
+      "z_translation_mm": -120,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -115,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -110,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -105,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -100,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -95,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -90,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -85,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -80,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -75,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -70,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -65,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -60,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -55,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -50,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -45,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -40,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -35,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -30,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -25,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -20,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -15,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -10,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": -5,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "z_translation_mm": 0,
+      "shell_overlap_mm3": 0.0
+    }
+  ],
+  "continuous_insertion": {
+    "travel_mm": 120,
+    "method": "Convex hull of rectangular module envelope endpoints, extruded across 112.6 mm width",
+    "relief_clearance_mm": 0.4,
+    "relief_removed_mm3": 186.05055078353413,
+    "housing_state": "empty, cover removed; display inserted before power parts"
+  },
+  "supplier": null,
+  "limitations": [
+    "Retainer contact and glass loads require physical validation; electrical ports and acoustic opening unresolved",
+    "Battery and board reservations are not selected parts",
+    "Print supports, dimensional tolerance, glass loads and thermal/RF behaviour untested",
+    "Freeform wall uses separate cavity loft; minimum normal thickness is not certified"
+  ],
+  "revision": "v3",
+  "inner_profiles_z_rx_ry_cx_cy_mm": [
+    [
+      -5,
+      100,
+      70,
+      0,
+      0
+    ],
+    [
+      8,
+      105,
+      76,
+      0,
+      0
+    ],
+    [
+      22,
+      106,
+      78,
+      0,
+      0
+    ],
+    [
+      40,
+      104,
+      75,
+      -1,
+      1
+    ],
+    [
+      65,
+      95,
+      65,
+      -3,
+      3
+    ],
+    [
+      82,
+      79,
+      55,
+      -5,
+      6
+    ],
+    [
+      94,
+      56,
+      40,
+      -6,
+      9
+    ],
+    [
+      97,
+      26,
+      21,
+      -6,
+      10
+    ]
+  ],
+  "refinement": {
+    "screen_facet_bevel_mm": 2,
+    "lower_rim_reinforcement_height_mm": 3.5,
+    "upper_cavity_lowered": true,
+    "cover_boss_base_z_mm": 3.5
+  },
+  "retention": {
+    "included": true,
+    "glass_back_t_mm": -2.5,
+    "pad_face_t_mm": -3.1,
+    "hard_stop_pad_gap_mm": 0.6,
+    "proposed_uncompressed_pad_mm": 0.8,
+    "pcb_proxy_width_mm": 105,
+    "actual_supplier_retainer_collision_checked": false,
+    "fasteners": "Provisional M3-size holes/nut pockets; actual hardware and glass loads not validated"
+  }
+}
