@@ -1,0 +1,16 @@
+{
+  "slicer_release": "OrcaSlicer 2.4.2",
+  "source_url": "https://github.com/OrcaSlicer/OrcaSlicer/releases/tag/v2.4.2",
+  "zip_sha256": "feba3009dfb9d268779cca5758a1a5bc3b7d0722bf8fa48d5c57340de975d6be",
+  "base_profiles": {
+    "machine": "Bambu Lab P1S 0.4 nozzle",
+    "process": "0.20mm Standard @BBL X1C",
+    "filament": "Generic PLA"
+  },
+  "purpose": "Offline slicing study; Generic PLA is provisional, not a selected finish",
+  "source_stl_sha256": {
+    "shell-study": "9235656cbca0ed459762bea9e8689a0b8764e936dad6c9d23bc67dacb927bdb0",
+    "retainer-mount-coupon": "f444f12acc7bfe6f1daa9bf24aa5160d9c71dfa3ec5ff6c9ff7ea2e42b9226ec",
+    "retainer-strip-coupon": "955ef18021fcb08490ce74a24a151b02d8fca2214e3aca79bb105d3d8fa02403"
+  }
+}

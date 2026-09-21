@@ -65,6 +65,7 @@ Automatic track advancement and a new controller connection during playback pass
 - [ ] Refine the exterior and verify minimum wall thickness, screen retention, connectors, antenna, microphone, print supports and physical fit before releasing a build.
 
 - [ ] Finalize dimensions around measured components.
+- [x] Slice small mounting coupons and compare supported shell orientations on the P1S baseline ([slicing study](hardware/river-stone/slice-v1/README.md)); actual material/plate and physical checks remain pending.
 - [ ] Print fit prototype; evaluate tilt, weight, touch stability and screen protection.
 - [ ] Integrate serviceable battery and charging access.
 - [ ] Iterate finish and assembly.

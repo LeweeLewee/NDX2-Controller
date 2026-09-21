@@ -2,7 +2,9 @@
 
 Status: dimensioned packaging study, 20 September 2026. Original visual concept selected by the user; stays on the coffee table. Dimensions and construction details below are engineering proposals, not user-approved measurements or manufacturing release.
 
-**Latest revision:** [v3 reinforced shell, matching cover and screen-edge bevel](shell-v3/README.md). Full-shell print release remains pending.
+**Latest manufacturing check:** [P1S slicing study and small fit-trial 3MF](slice-v1/README.md). Provisional Generic PLA; physical testing pending.
+
+**Latest CAD revision:** [v3 reinforced shell, matching cover and screen-edge bevel](shell-v3/README.md). Full-shell print release remains pending.
 
 **Shell baseline, 21 September 2026:** see the [shell and assembly study](shell-v1/README.md) for actual solids, revised component positions and insertion clearance. The plan-view study below is retained as its starting point.
 

@@ -1,0 +1,130 @@
+{
+  "fit-coupons": {
+    "gcode_sha256": "585e2a9c4a9e3f1e97a2171f34921935efaec753e3789603725fa7341aae7720",
+    "extrusion_length_by_feature_mm": {
+      "Inner wall": 283.55973999999793,
+      "Outer wall": 154.54467000000056,
+      "Bottom surface": 37.840499999999956,
+      "Gap infill": 6.34942000000006,
+      "Internal solid infill": 234.02845999999985,
+      "Sparse infill": 50.59379000000001,
+      "Internal Bridge": 64.34602000000018,
+      "Top surface": 52.320199999999986
+    },
+    "support_commanded_volume_cm3": 0.0,
+    "method": "Sum positive extrusion on XY/arc moves tagged by feature; excludes Custom startup/purge; commanded volume, not measured use",
+    "slicer_warnings": [
+      {
+        "msg": "bed_temperature_too_high_than_filament",
+        "level": "3",
+        "error_code": "1000C001"
+      }
+    ],
+    "plate_metadata": {
+      "index": "1",
+      "extruder_type": "0",
+      "nozzle_volume_type": "0",
+      "printer_model_id": "",
+      "nozzle_diameters": "0.4",
+      "timelapse_type": "0",
+      "prediction": "949",
+      "weight": "2.73",
+      "first_layer_time": "-5.964355",
+      "outside": "false",
+      "support_used": "false",
+      "label_object_enabled": "true",
+      "enable_filament_dynamic_map": "false",
+      "has_filament_switcher": "false",
+      "filament_maps": "1",
+      "limit_filament_maps": "0"
+    }
+  },
+  "shell-underside-down": {
+    "gcode_sha256": "85ca29a596e22c0a49820631df07ac58d81208fc3226aef21515f5c3baa364d1",
+    "extrusion_length_by_feature_mm": {
+      "Support": 29054.27015999901,
+      "Outer wall": 13453.956800001843,
+      "Inner wall": 28588.385469999586,
+      "Gap infill": 216.55614999999784,
+      "Bottom surface": 44.073799999999956,
+      "Internal solid infill": 12369.236949999655,
+      "Sparse infill": 8619.868149998527,
+      "Support interface": 1894.480219999904,
+      "Overhang wall": 172.86808000000025,
+      "Bridge": 679.7603000000012,
+      "Internal Bridge": 1081.4722999999983,
+      "Top surface": 716.1326599999986
+    },
+    "support_commanded_volume_cm3": 74.44046835543526,
+    "method": "Sum positive extrusion on XY/arc moves tagged by feature; excludes Custom startup/purge; commanded volume, not measured use",
+    "slicer_warnings": [
+      {
+        "msg": "bed_temperature_too_high_than_filament",
+        "level": "3",
+        "error_code": "1000C001"
+      }
+    ],
+    "plate_metadata": {
+      "index": "1",
+      "extruder_type": "0",
+      "nozzle_volume_type": "0",
+      "printer_model_id": "",
+      "nozzle_diameters": "0.4",
+      "timelapse_type": "0",
+      "prediction": "27839",
+      "weight": "289.08",
+      "first_layer_time": "0.000000",
+      "outside": "false",
+      "support_used": "true",
+      "label_object_enabled": "true",
+      "enable_filament_dynamic_map": "false",
+      "has_filament_switcher": "false",
+      "filament_maps": "1",
+      "limit_filament_maps": "0"
+    }
+  },
+  "shell-facet-down": {
+    "gcode_sha256": "3792c6aea7cc008699675eb5792c69a335fab918e40f5f776d4e394efe3befcb",
+    "extrusion_length_by_feature_mm": {
+      "Support interface": 610.6443000000374,
+      "Support": 8468.176009999403,
+      "Inner wall": 26946.790969999307,
+      "Outer wall": 12630.337699999976,
+      "Bottom surface": 975.5100699999942,
+      "Overhang wall": 17.297750000000004,
+      "Internal solid infill": 13571.96448999987,
+      "Sparse infill": 9581.523759998976,
+      "Top surface": 997.0657799999937,
+      "Internal Bridge": 1466.4421800000073,
+      "Gap infill": 60.90351999999969,
+      "Bridge": 30.42764
+    },
+    "support_commanded_volume_cm3": 21.837121941697603,
+    "method": "Sum positive extrusion on XY/arc moves tagged by feature; excludes Custom startup/purge; commanded volume, not measured use",
+    "slicer_warnings": [
+      {
+        "msg": "bed_temperature_too_high_than_filament",
+        "level": "3",
+        "error_code": "1000C001"
+      }
+    ],
+    "plate_metadata": {
+      "index": "1",
+      "extruder_type": "0",
+      "nozzle_volume_type": "0",
+      "printer_model_id": "",
+      "nozzle_diameters": "0.4",
+      "timelapse_type": "0",
+      "prediction": "22682",
+      "weight": "224.85",
+      "first_layer_time": "0.000000",
+      "outside": "false",
+      "support_used": "true",
+      "label_object_enabled": "true",
+      "enable_filament_dynamic_map": "false",
+      "has_filament_switcher": "false",
+      "filament_maps": "1",
+      "limit_filament_maps": "0"
+    }
+  }
+}
