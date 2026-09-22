@@ -59,3 +59,7 @@ Proportions are flexible, integrated batteries are not a ranking advantage, and 
 - Acceptable recharge duration and preference for cable versus dock.
 
 These do not block documentation, software development or bench planning. Use explicitly labelled scenarios until agreed; do not turn assumptions into requirements.
+
+## UK procurement and microphone follow-up — 21 September 2026
+
+[Microphone review](microphone-review.md) proposes SPH0645LM4H with microSD-sniffer access to GPIO11/12/13; this is untested and would reserve the SD interface. [Full procurement coverage](prototype-shopping-list.md) records supplier baskets, stock, owned tools/wires and outstanding power/mechanical selection. Screen not ordered; user waiting stock and wants consolidated purchase. No additional accepted hardware selection or closed physical-validation gate is implied.

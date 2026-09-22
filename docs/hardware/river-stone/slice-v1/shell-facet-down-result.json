@@ -1,0 +1,19 @@
+{
+  "job": "shell-facet-down",
+  "exit_code": 0,
+  "input_sha256": "996e3010a7201b5264ecf11bd8382bd1a9354998d36d5294575218e427b502c5",
+  "gcode_sha256": "3792c6aea7cc008699675eb5792c69a335fab918e40f5f776d4e394efe3befcb",
+  "profile_sha256": {
+    "process-shell.json": "85b1135c94b90020832aa2cccd00beae46cd578ddab9b7e355a40eedeaa334fd",
+    "machine.json": "8abcc786f19decaaabee6604a92c8b4f966952be8a352bb7df3e4a6b493c2ea0",
+    "filament.json": "941ec2ee3b64ed906004338c921690ebf373f2feba1f8194a93a1f449684e09f"
+  },
+  "gcode_summary": [
+    "; model printing time: 6h 11m 46s; total estimated time: 6h 18m 2s",
+    "; total layer number: 855",
+    "; max_z_height: 111.40",
+    "; filament used [mm] = 75388.49",
+    "; filament used [cm3] = 181.33",
+    "; filament used [g] = 224.85"
+  ]
+}

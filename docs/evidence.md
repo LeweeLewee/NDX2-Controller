@@ -154,3 +154,31 @@ The approved direction is now implemented as native C/LVGL slices: Playing layou
 
 
 Final firmware validation, 22 September 2026: `python tools/build_m2.py esp32` **passed** with the final shared sources, pinned ESP-IDF v5.2 and LVGL 8.4.0. Application image `0x925b0` bytes fits the `0x100000` partition with 43% free. No flashing or efuse operation was run. This is compiler/linker evidence only; the default-disabled protected network path and physical behavior remain unvalidated.
+
+## River Stone shell geometry - 21 September 2026
+
+Created shell/cover STEP solids and STL meshes around the selected Waveshare (D017). The manufacturer STEP imported with 694 solids; the fit calculation uses a conservative 112.6 x 75.3 x 17.7 mm module envelope. A real cavity exposed collisions not captured by the previous plan-view approximation. Revised power reservations and cover-fastener positions now clear the shell and display. A continuous 120 mm vertical insertion sweep through the empty shell passes after hidden internal clearance relief. See [CAD study and exact checks](hardware/river-stone/shell-v1/README.md).
+
+The delivered shell uses a separate inner loft after the constant-offset approach failed downstream solid operations; normal wall thickness is not certified. Shell, cover and module-envelope STL meshes are watertight, consistently wound, positive-volume single components within 256 mm bounds. No slicing, physical fit, retention-load, electrical, antenna or thermal test was performed. The exterior facet/crown, screen retention, ports, microphone space and print support requirements remain unresolved; these are study files rather than a build release.
+
+## River Stone retention and print audit - 21 September 2026
+
+[v2 study](hardware/river-stone/shell-v2/README.md) adds two internal retainers, four bosses and two small fastener-fit coupons. All seven exported meshes pass watertightness, winding, positive-volume and single-component checks. Retainers clear glass/PCB proxies and reserved power volumes; the continuous insertion sweep clears fixed bosses with retainers removed. Actual supplier-detail contact and glass loads remain unverified.
+
+A proposed front-edge fillet produced open STL meshes despite passing CAD validity and was removed. The delivered exterior retains the v1 surface. A 2,048-ray audit found minimum sampled directional depth 0.764 mm at the lower rim and a 0.938 mm crown sample. This does not certify global minimum thickness. Overhang area above a 45-degree criterion is approximately 14,874 mm2 underside-down and 3,950 mm2 screen-facet-down; these are not slicer support estimates. Wall refinement, actual slicing and physical fit remain required before full-shell printing. No physical, electrical or live-device tests were performed.
+
+## River Stone reinforced shell - 21 September 2026
+
+[v3 CAD study](hardware/river-stone/shell-v3/README.md) reinforces the lower rim, lowers the upper cavity to add crown material, extends the cover bosses through the ledge, and adds a 2 mm screen-facet bevel. The matching cover is smaller to clear the reinforced rim. The bevel passes both CAD and mesh validation, unlike the earlier broad fillet. Seven meshes are valid closed single components; all applicable envelope clearances and continuous display insertion checks pass.
+
+The final seeded 10,000-ray audit reports minimum sampled normal depth approximately 1.000 mm at the screen lip, with zero samples below 1 mm at 0.0001 mm numerical tolerance. First/fifth percentiles are 2.065/3.000 mm. An intermediate 0.746 mm screw-hole/ledge junction was reinforced before this final check. The audit and mesh reports identify the same final STL hash. Discrete sampling does not establish a global minimum or strength. Overhang screening remains substantial: 13,795 mm2 underside-down and 5,328 mm2 facet-down. No slicing, physical fit, glass-load or powered testing occurred; full build release remains pending.
+
+## River Stone offline P1S slicing - 21 September 2026
+
+[OrcaSlicer 2.4.2 study](hardware/river-stone/slice-v1/README.md) uses the bundled P1S 0.4 mm machine profile, compatible 0.20 mm process and provisional Generic PLA/textured-PEI settings, with three walls and 15% infill. Coupon slice exits successfully, reports inside-bed placement and no supports, and estimates 15m49s / 2.73 g. The committed 3MF contains the same G-code hash as its result report. Selected toolpath layers were rendered and inspected; nut-pocket/screw geometry remains present. No physical fit has been proven.
+
+Normal automatic-support baseline estimates: underside-down 7h43m59s / 289.08 g; facet-down 6h18m02s / 224.85 g. Feature-tagged extrusion sums give 74.44 and 21.84 cm3 of commanded support respectively, excluding Custom startup/purge. Facet-down trades lower estimates for contact between the textured bed and visible front. No final orientation or finish was selected. All slices retain warning 1000C001 (bed temperature versus filament) with the inherited 55 C PLA plate setting; this has not been suppressed or physically resolved. Full-shell printing remains unreleased. No printer commands or physical tests were performed.
+
+## 22 September 2026 — Larger battery source review
+
+Reference evidence only, no physical test: [larger battery review](hardware/larger-battery-review.md) records visually inspected PKCELL drawings. BAT0014 maximum 69.5 x 57 x 20.5 mm body is dimensionally contained by the current 80 x 64 x 26 mm reserved battery box; cradle/cable fit remains unverified. BAT0015 maximum 75 x 69.5 x 20.5 mm body exceeds its short dimension. Live Pimoroni variant data reports BAT0014 £25 and available. Adafruit BQ24074 published Eagle schematic blob a97e12c1628a74e95eb0af333206ff6f3706126c connects TMR to GND; TI states this disables safety timers. This resolves the source timer question, not actual delivered board revision or charging behaviour.

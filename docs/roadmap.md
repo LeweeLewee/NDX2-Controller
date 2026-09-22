@@ -65,9 +65,13 @@ Automatic track advancement and a new controller connection during playback pass
 ## M3 — Physical prototype
 
 - [x] Select original River Stone as stationary table enclosure and record dimensioned packaging study ([layout](hardware/river-stone/README.md)).
-- [ ] Surface the original asymmetric shell; verify real wall offsets, screen insertion, mounts, connectors, antenna and microphone space before releasing a fit print.
+- [x] Create the first River Stone shell/cover solids and check conservative display insertion and component-envelope collisions ([study](hardware/river-stone/shell-v1/README.md)).
+- [x] Model provisional removable screen retainers and fit coupons; check meshes, insertion and sampled wall/overhang geometry ([v2 study](hardware/river-stone/shell-v2/README.md)).
+- [x] Reinforce rim/crown and cover-boss junctions; add a valid screen-edge bevel and rerun geometry/mesh checks ([v3 study](hardware/river-stone/shell-v3/README.md)).
+- [ ] Refine the exterior and verify minimum wall thickness, screen retention, connectors, antenna, microphone, print supports and physical fit before releasing a build.
 
 - [ ] Finalize dimensions around measured components.
+- [x] Slice small mounting coupons and compare supported shell orientations on the P1S baseline ([slicing study](hardware/river-stone/slice-v1/README.md)); actual material/plate and physical checks remain pending.
 - [ ] Print fit prototype; evaluate tilt, weight, touch stability and screen protection.
 - [ ] Integrate serviceable battery and charging access.
 - [ ] Iterate finish and assembly.
