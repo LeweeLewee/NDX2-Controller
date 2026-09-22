@@ -1,7 +1,7 @@
 # Parts BOM
 
-Revision 0.6 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
-Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. Battery and microSD sniffer remain not ordered.
+Revision 0.7 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
+Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. MicroSD sniffer is ordered from SK Pang, user confirmed 22 September; battery remains not ordered.
 
 D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
 
@@ -12,7 +12,7 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 | HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | selected | ordered from Pi Hut, user confirmed 2026-09-22 | USD 36.99; 2026-09-20; shipping/tax excluded | HP-01 after procurement; validate revision, touch wake and power |
 | HW-019 | Old Android phone | 0 | excluded | not ordered | Not included | Ruled out by user, D017; no further phone trial |
 | HW-020 | Adafruit 3421 SPH0645LM4H I2S microphone | 1 | evaluation candidate | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut £6.70 incl VAT, 2026-09-21 | [Microphone review](microphone-review.md); proposed microSD pin reuse requires validation |
-| HW-021 | SparkFun microSD Sniffer TOL-09419 / SK Pang USD-SNIFFER | 1 conditional | evaluation candidate | not ordered | £8.52 incl VAT, 2026-09-21 | Experimental mic pin access; confirm fit, continuity and stock |
+| HW-021 | SparkFun microSD Sniffer TOL-09419 / SK Pang USD-SNIFFER | 1 | evaluation candidate | ordered from SK Pang, user confirmed 2026-09-22 | £8.52 incl VAT, 2026-09-21 | Experimental mic pin access; confirm delivery, fit and continuity |
 | HW-022 | External battery-temperature NTC probe compatible with charger | 1 conditional | research | not ordered | Unquoted | Specify sensor curve and mounting; separate from bench thermometer |
 | HW-002 | Pimoroni BAT0014 protected 10,050 mAh / 3.7 V pack | 1 pack | leading prototype candidate | not ordered | £25, available in supplier data 2026-09-22; delivery excluded | [Larger battery review](larger-battery-review.md): body fits reserved envelope; polarity, restraint and power tests pending |
 | HW-003 | Adafruit BQ24074 4755 charger and power path | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut basket £14.40 incl VAT | Validate delivered revision, charge rate, simultaneous use/charge and termination |
