@@ -1,7 +1,7 @@
 # Prototype procurement BOM — UK
 Updated 22 September 2026. Covers one controller and bench bring-up. Nothing ordered by this task.
 
-User inventory: tools and wires already owned, including the supplies/meters asked about; regulated USB PSU missing. Screen not ordered, awaiting stock. Consolidate purchases when the screen is available. Exact meter capability should still be recorded with measurements.
+User inventory: tools and wires already owned, including the supplies/meters asked about; USB-C power supplies already owned (user confirmed 22 September; HW-017 fulfilled, no purchase needed). Screen not ordered, awaiting stock. Consolidate purchases when the screen is available. Exact meter capability should still be recorded with measurements.
 
 ## Proposed supplier baskets
 
@@ -12,16 +12,16 @@ Prices are listed GBP item prices checked 21 September, excluding delivery. Pi H
 | HW-001 | [Pi Hut Waveshare display listing](https://thepihut.com/products/esp32-s3-development-board-with-4-3-capacitive-touch-lcd-display-800-x-480): **ESP32-S3-Touch-LCD-4.3B, without case, Waveshare 27848** | 1 | Exact bare-board quote pending | Selected; user reports waiting stock. Do not substitute plain 4.3 or case variant |
 | HW-020 | [Adafruit 3421 SPH0645LM4H I2S microphone — Pi Hut](https://thepihut.com/collections/audio/products/adafruit-i2s-mems-microphone-breakout-sph0645lm4h) | 1 | £6.70 | Listed in stock; evaluation candidate, integration untested |
 | HW-021 | [SparkFun microSD Sniffer — SK Pang](https://www.skpang.co.uk/products/microsd-sniffer), USD-SNIFFER / SparkFun TOL-09419 | 1 | £8.52 incl VAT | Orderable listing; availability not explicitly confirmed. Experimental pin access, not a microphone interface |
-| HW-017 | [Official Raspberry Pi 15 W USB-C PSU, UK plug — Pi Hut](https://thepihut.com/products/raspberry-pi-psu-uk), white SC0443 | 1 | £7.70 | Listed in stock; 5.1 V / 3 A, captive USB-C cable. For display bench power |
+| HW-017 | Existing user-owned USB-C power supply | 1 owned; 0 to buy | £0 incremental | Fulfilled from existing stock, user confirmed 22 September. Use normal 5 V USB output with a suitable cable for the BQ24074 USB-C input |
 | HW-002 | [Pimoroni BAT0014 10,050 mAh](https://shop.pimoroni.com/products/high-capacity-lithium-ion-battery-pack?variant=32012684623955), protected 3.7 V pack | 1 | £25.00 | Available in live supplier data 22 September; leading candidate. Body fits reserved envelope; confirm polarity and cradle/lead routing |
 | HW-003 | [Adafruit BQ24074 4755 charger — Pi Hut](https://thepihut.com/products/adafruit-universal-usb-dc-solar-lithium-ion-polymer-charger-bq24074) | 1 | £14.40 | 11 listed available at research time; external-power evaluation candidate |
 | HW-004 | [Pololu U3V16F5 4941 converter — Pi Hut](https://thepihut.com/products/pololu-5v-step-up-voltage-regulator-u3v16f5) | 1 alternative | £6.70 | Sold out; candidate only, load capacity must be measured. Existing U3V70F5 remains another candidate; do not buy both |
 | HW-022 | 10 kΩ NTC battery-temperature probe suitable for BQ24074 | 1 conditional | Unquoted | Part curve and attachment to pack still to specify; not a generic interchangeable thermistor purchase |
 
-**Subtotal for microphone + sniffer + PSU: £22.92**, excluding screen and delivery. Pi Hut portion £14.40; SK Pang portion £8.52.
-BAT0014 battery + charger + U3V16F5 add £46.10 at listed prices: **£69.02 partial electronics scenario**, excluding screen, shipping, any VAT adjustment on the battery, NTC and remaining assembly items. This is not a complete build total or a released battery-powered design.
+**Subtotal for microphone + sniffer: £15.22**, excluding screen and delivery. Pi Hut portion £6.70; SK Pang portion £8.52. HW-017 PSU is already owned (£0 new spend).
+BAT0014 battery + charger + U3V16F5 add £46.10 at listed prices: **£61.32 partial electronics scenario (historical U3V16F5 option, excluding owned PSU)**, excluding screen, shipping, any VAT adjustment on the battery, NTC and remaining assembly items. This is not a complete build total or a released battery-powered design.
 
-Target primary basket: Pi Hut screen, microphone, PSU and whichever power parts pass selection. Use SK Pang for the sniffer only if that access route is retained. Pimoroni battery creates a third delivery unless a suitable pack becomes available from the primary supplier. This is a consolidation proposal, not a proven cheapest landed basket: delivery depends on destination and battery carriage. Do not place separate small orders while screen stock remains the gating item.
+Target primary basket: Pi Hut screen, microphone and whichever power parts pass selection. Use SK Pang for the sniffer only if that access route is retained. Pimoroni battery creates a third delivery unless a suitable pack becomes available from the primary supplier. This is a consolidation proposal, not a proven cheapest landed basket: delivery depends on destination and battery carriage. Do not place separate small orders while screen stock remains the gating item.
 
 ## Full remaining assembly coverage
 
@@ -40,12 +40,12 @@ Owned wires/tools are not automatic proof that all specialised connectors and me
 | HW-014 feet | 4 non-slip silicone feet or 1 cut base pad | Select thickness after base stability check; same-supplier consumable if available |
 | HW-015 glass support | 2 compliant strips at retainer contacts; provisional 0.8 mm material | CAD assumes 0.2 mm compression; stiffness/load not validated. No pad over active display or touch surface |
 | HW-016 ballast | 0 initially | Battery adds mass; decide after tilt test |
-| HW-017 charging cable | PSU includes USB-C cable for screen; charger input cable may differ by board | Existing wire/cable stock first. Do not assume USB-C PSU connects directly to every candidate charger |
+| HW-017 charging cable | Reuse existing suitable USB cable for owned PSU | BQ24074 has USB-C input; no separate Raspberry Pi PSU purchase. Confirm cable availability during assembly |
 | HW-020 mic mounting | 1 small printed mount + compliant support; 1 acoustic opening | Keep bottom acoustic port unobstructed. Locate away from touch vibration and converter; no membrane/mesh selected yet |
 | HW-021 sniffer restraint | 1 insulating support/strain relief | Exposed contacts and card overhang require fit check; no SD card inserted during mic use |
 | HW-022 temperature sensing | 1 external probe if external charging route retained | Sensor for charging control differs from owned bench temperature measurement; confirm part and thermal contact |
 | Filament / finish | Approximately one prototype's material, plus coupons/reprints | Existing filament inventory unspecified; no full new spool assumed. Slicer study does not cover a released complete assembly |
-| Bench tools/wire/meters | Existing; £0 new acquisition allowance | User-confirmed. PSU above is missing item. Record meter model/range when running tests |
+| Bench tools/wire/meters | Existing; £0 new acquisition allowance | User-confirmed. USB-C PSU also owned. Record meter model/range when running tests |
 | HW-018/019, EXC-001 | 0 dock, phone, speaker, DAC or amplifier | Excluded; native NDX 2 playback |
 | SYS-001/002/003, INC-001/002 | Existing Naim system/Pi and included display MCU/radio/touch/RTC | No duplicate purchases; microSD card and RTC cell not required for first trial |
 

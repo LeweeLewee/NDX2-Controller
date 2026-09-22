@@ -1,7 +1,7 @@
 # Parts BOM
 
-Revision 0.4 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
-All new items are **not ordered**. User confirms tools and wires already owned, except the regulated PSU. Screen is not ordered, awaiting stock; intention is to order together.
+Revision 0.5 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
+All new items are **not ordered**. User confirms tools and wires already owned, and confirms USB-C power supplies already owned on 22 September; HW-017 is fulfilled with no purchase needed. Screen is not ordered, awaiting stock; intention is to order together.
 
 D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
 
@@ -29,7 +29,7 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 | HW-014 | Non-slip silicone feet or base pad | 1 set | design | not ordered | TBD | Compare grip/stability, adhesive and removable-pad options |
 | HW-015 | Protective perimeter gasket / glass support | 1 set if needed | design | not ordered | TBD | Prevent point loads; avoid unnecessary touch overlay |
 | HW-016 | Additional base ballast | 0 or 1 | optional | not ordered | TBD if needed | Decide after battery mass and tilt-stability evaluation |
-| HW-017 | Official Raspberry Pi 15 W USB-C PSU, UK SC0443; charger input cable conditional | 1 supply | bench candidate | not ordered | Pi Hut £7.70 incl VAT, 2026-09-21 | 5.1 V/3 A display supply; captive cable included; charger connection depends on final route |
+| HW-017 | Existing user-owned USB-C power supply and suitable cable | 1 supply | reuse existing | owned / fulfilled, user confirmed 2026-09-22 | £0 incremental | Use normal 5 V USB output into BQ24074 USB-C input; no Raspberry Pi PSU purchase needed. Exact owned model and bench behaviour not yet recorded |
 | HW-018 | Charging dock and contact pair | 0 | excluded from current design | not ordered | N/A | Stationary River Stone uses a rear charging inlet proposal; no controller-to-base transfer |
 
 ## Existing system and included functions
@@ -47,7 +47,7 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 
 | Item | Quantity | Status | Purpose |
 | --- | --- | --- | --- |
-| USB data cable and suitable 5 V source | 1 each | cable owned; PSU required, HW-017 | Firmware and first powered tests |
+| USB data cable and suitable 5 V source | 1 each | cable and USB-C PSU owned, HW-017 | Firmware and first powered tests |
 | Current profiler / meter with suitable sleep-current range and peak capture | 1 | user reports tools owned; record model/range at test | Measure standby and wake energy; basic USB meter alone may miss microamp sleep or short peaks |
 | Multimeter | 1 | owned, user confirmed | Polarity, voltage and continuity |
 | Caliper | 1 | inventory unverified | Mounting, connectors and enclosure fit |
@@ -68,7 +68,7 @@ Do not sum alternative power routes or count included functions twice.
 
 [Consolidated UK shopping list](prototype-shopping-list.md) covers all functional rows and assembly consumables. BAT0008 6600 mAh (£15 listed) is a UK battery candidate; confirm variant availability, polarity and fit. BQ24074 (£14.40) remains an external charger candidate. Smaller U3V16F5 (£6.70, sold out) is an alternative converter for load testing, not a selected replacement for U3V70F5. Do not sum alternative converters. Combined BQ25185/boost board rejected for this basket because fixed six-hour charging timeout is a poor match for the large pack. No power route is released or runtime validated.
 
-Known microphone + sniffer + display PSU subtotal is £22.92 before delivery and screen. Historic USD figures above remain historical; no complete build price is claimed.
+Microphone + sniffer new-purchase subtotal is £15.22 before delivery and screen; display/charger PSU is now owned (£0 incremental), superseding the previous £22.92 subtotal. Historic USD figures above remain historical; no complete build price is claimed.
 
 ## Larger battery follow-up — 22 September
 
