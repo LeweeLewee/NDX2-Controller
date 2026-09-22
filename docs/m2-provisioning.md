@@ -50,3 +50,7 @@ For ESP32, the existing `controller` NVS namespace and secure-boot/flash-encrypt
 Run the Python suite and `python tools/m2_provisioning_demo.py` from repo root; the demo uses temporary synthetic state and never provisions a real device. Logs/captures remain ignored under `local/m2/`. No live Naim/provider/Pi access, real credential changes, audio, hardware write or physical acceptance occurred. HP-01 and physical P3/P4/P5 remain open.
 
 Next offline slice: an operator-facing host enrollment flow using this library, with private code entry and explicit recovery guidance, while keeping the approved controller UI intact. Live read-only metadata/artwork validation can resume when NDX network access and private configuration are available. Physical installation and certificate rotation deployment need separate validation.
+
+## Operator flow follow-up
+
+The subsequent [host setup console](m2-setup.md) now wraps this library with private input and explicit recovery. Earlier next-work statements above describe the foundation checkpoint. No physical installer or native UI provisioning is implied.

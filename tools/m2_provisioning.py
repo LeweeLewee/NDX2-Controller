@@ -42,10 +42,10 @@ def controller_client(vault, url, trust):
 
 
 class Enrollment:
-    def __init__(self, vault, url, trust):
+    def __init__(self, vault, url=None, trust=None):
         self.vault,self.url,self.trust=vault,url,trust
         self.storage_uncertain=False
-        _,self.target=binding(url,trust)
+        self.target=binding(url,trust)[1] if url is not None and trust is not None else None
 
     def status(self):
         with self.vault.lock:
@@ -75,6 +75,7 @@ class Enrollment:
             if self.status()['state']!='unpaired': raise EnrollmentError('LOCAL_RECOVERY_REQUIRED')
             if not isinstance(code,str) or not re.fullmatch('[A-Za-z0-9_-]{32}',code):
                 raise EnrollmentError('INVALID_SETUP_CODE')
+            if self.target is None: raise EnrollmentError('INVALID_ORIGIN')
             client,target=binding(self.url,self.trust)
             if target!=self.target: raise EnrollmentError('TRUST_CHANGED')
             # This durable intent precedes the one and only remote pairing request.

@@ -107,3 +107,5 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 ## D024 - Durable host enrollment and explicit device recovery
 
 **Authorized offline design/fixture slice, 22 September 2026.** Persist setup intent before a single pairing request; lost replies remain uncertain and require local inventory/revocation decisions, never automatic re-pairing. Bind newly persisted controller authorization to independently supplied origin/trust, keep status redacted, and distinguish local forgetting from bridge revocation. No new HTTP admin endpoint or physical secret installer. Preserve legacy fixture compatibility without claiming retroactive binding. [Provisioning design and evidence](m2-provisioning.md) records recovery and production gates.
+
+D024 implementation follow-up: the [host setup console](m2-setup.md) now requires private terminal code entry and explicit local trust/forget confirmations, sends no automatic verification or command, and supports local recovery without a trust file. Native UI and physical provisioning gates are unchanged.
