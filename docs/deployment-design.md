@@ -1,6 +1,6 @@
 # Deployment design — initial selection
 
-20 September 2026. Design direction accepted for implementation planning; no Pi installation, LAN exposure, persistent token store or ESP32 service client implemented by this document.
+20 September 2026 design; implementation update 21 September. The [M2 software workstream](m2-software.md) implements authenticated development-host TLS, pairing/revocation, protected persistence, atomic/single-flight renewal and command recovery with synthetic tests. No Pi installation, live LAN deployment or networked ESP32 service client has been validated.
 
 ## Responsibility boundary
 
@@ -22,7 +22,7 @@ This partition keeps provider secrets off the controller, avoids embedding cloud
 - Use authenticated HTTPS for controller-to-bridge traffic with provisioned trust; validate certificates and define renewal before deployment. No public port forwarding. Restrict listening/firewall exposure to intended local clients; LAN membership alone is not authentication. Browser administration also requires authentication, origin/CSRF defenses and bounded requests.
 - Preserve OAuth state, PKCE and collection-only scopes. Register a supported exact deployment callback after host identity and the provider's current callback rules are checked. The existing loopback redirect cannot simply become a remote callback. Complete account login in a trusted browser, then return only status to the controller. Never work around this with captured Naim tokens.
 
-Current evidence: the prototype binds `127.0.0.1`, constrains Host/Origin, stores tokens in memory and contains refresh logic. None of that proves secure LAN service deployment or long-running renewal.
+Current evidence: the prototype binds `127.0.0.1`, constrains Host/Origin, stores tokens in memory and contains refresh logic. The separate M2 service now adds tested TLS/controller authentication and durable single-flight renewal. Neither implementation proves secure host deployment or long-running provider renewal.
 
 ## Recovery contract
 
@@ -42,6 +42,12 @@ Proposed active-state polling: 2 s now-playing, queue refresh on entry/known cha
 
 ## Deployment acceptance
 
+The shared native controller now has an asynchronous, bounded HTTPS transport implemented for ESP-IDF and an authenticated SDL desktop transport. The ESP32 source compiles; only the desktop path has executed against TLS fixtures. Default firmware is offline unless encrypted NVS, secure boot, flash encryption and provisioned host trust/device authorization are present. No efuse changes or real controller provisioning have been performed. The protected NVS field contract and pinned build commands are in [firmware instructions](../firmware/README.md); physical trust bootstrap, revocation and recovery remain acceptance work.
+
 Produce fixture tests for restart/atomic rotation, concurrent renewal, revoked tokens, forbidden unauthenticated clients, expired setup codes, wrong server certificates, duplicate/time-out commands and sanitized logs. Then run a private host trial: restart bridge and controller; expire/renew authorization; disconnect Wi-Fi and NDX independently; alter playback in Naim app; recover without duplicate mutations. Exercise known bounded volume only as an announced audible test, never a CI step. Verify actual native playback state, not HTTP success alone.
 
-Run a proposed 24-hour host coexistence trial including voice/search bursts; record resource use and Home Assistant health before/during/after. This is an initial integration gate, not production reliability proof. M4 retains long-duration operation and battery testing. Current host suitability, callback registration, pairing implementation and durable credential protection remain open.
+Run a proposed 24-hour host coexistence trial including voice/search bursts; record resource use and Home Assistant health before/during/after. This is an initial integration gate, not production reliability proof. M4 retains long-duration operation and battery testing. Current host suitability, callback registration and ESP32 credential provisioning remain open. Pairing, revocation and durable bridge storage now have development-host synthetic tests; they do not establish Pi or physical-controller deployment acceptance.
+
+## Settings design boundary — 22 September 2026
+
+Approved Settings screens illustrate display preferences, Wi-Fi, pairing/revocation and device diagnostics. The browser review implements local fixture behavior only; it provisions no real network or credential. Native UI integration must use the protected provisioning/trust interfaces above and clearly report unavailable hardware capabilities. Approval does not close host selection or on-device deployment gates. See [continuation](continuation-prompt.md).

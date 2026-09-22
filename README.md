@@ -4,11 +4,13 @@ A compact, battery-powered coffee-table touchscreen for native Naim music playba
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).
 
-**Status: software feasibility complete; detailed design underway, ready for parallel software implementation.** Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. ESP32 firmware and the physical controller have not been built.
+**Status: M2 hardware-independent software implemented and tested on the development host; hardware validation remains open.** See the [M2 runbook](docs/m2-software.md), [v1 contract](docs/controller-contract-v1.md) and [native firmware foundation](firmware/README.md). Native TIDAL collection browsing, album/playlist playback, queue edits, transport control and 24-bit playback have been demonstrated on an NDX 2 using a computer. Public TIDAL catalogue search and pagination also pass live tests. Search-result handoff to native Naim playback has passed through the UI; wired System Automation volume down/up are now audibly confirmed and available in the UI. The ESP32 fixture firmware and shared desktop LVGL UI now compile; the physical controller remains unbuilt and unvalidated.
 
 The project's TIDAL developer app is created. Its metadata-only adapter retrieves ranked artists, tracks, albums and playlists. The prototype also supports voice input and live AI music discovery; microphone transcription is user-confirmed. TIDAL account collection controls and persistent Back navigation are implemented; see the collection documentation for live evidence and remaining feature coverage.
 
 The frozen reference is tagged `software-feasibility-v1`. Start the next phase from the [milestone closeout and detailed-design handover](docs/milestone-handover.md).
+
+**Current checkpoint, 22 September 2026:** [M2 closeout](docs/m2-closeout.md) and [continuation prompt](docs/continuation-prompt.md). The [desktop UI is approved](docs/ui-review/approval.md); the [shared LVGL port and fixture evidence](docs/m2-ui-parity.md) now cover the approved core screens and interactions. Approval does not imply native UI parity or physical acceptance.
 
 ## The product
 

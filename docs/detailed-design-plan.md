@@ -1,6 +1,6 @@
 # Detailed design and hardware proof
 
-Started 20 September 2026. Planning and repository audit only; no new hardware or deployment proof is claimed.
+Started 20 September 2026. Updated 21 September: parallel M2 software implementation is now present; see [implementation, validation and hardware-arrival checklist](m2-software.md). No hardware or Pi deployment proof is claimed.
 
 **Scope update, 21 September 2026:** Waveshare ESP32-S3-Touch-LCD-4.3B without case is selected; Android is ruled out (D017). The [comparison](hardware/display-comparison.md) is retained as history. HP-01 is the first hardware experiment; purchase and hardware proof remain outstanding.
 
@@ -42,7 +42,7 @@ P2 starts with a thin controller UI plus an always-on metadata/control bridge as
 
 ## Parallel software preparation
 
-While hardware is unavailable, the next software task can implement a development-host bridge, fixture-backed controller contract, recovery/security tests and an embedded UI/build foundation using the selected Waveshare assumption. This extends parallel preparation beyond specification; it does not pass P1, physical P3 or Pi deployment acceptance. Keep hardware-specific interfaces replaceable and distinguish simulation, compilation and live observations. Implementation has not started as part of the repository cleanup.
+While hardware is unavailable, the next software task can implement a development-host bridge, fixture-backed controller contract, recovery/security tests and an embedded UI/build foundation using the selected Waveshare assumption. This extends parallel preparation beyond specification; it does not pass P1, physical P3 or Pi deployment acceptance. Keep hardware-specific interfaces replaceable and distinguish simulation, compilation and live observations. Implementation started after repository cleanup: protected bridge state, authenticated TLS fixtures, navigation/recovery and native UI/build sources are now available. The shared desktop LVGL TLS flow, two native C tests and ESP32 fixture compilation now pass; provisioning and on-device network validation remain open. P2 software tests proceed independently of P0/P1; host suitability and physical gates remain open.
 
 ## First practical action and evidence discipline
 
@@ -61,3 +61,12 @@ Store private captures, host inventory, addresses, receipts and recordings under
 | B05 | Dock, ballast, e-paper alternative | Deferred unless measured charging convenience, stability or LCD energy failure makes one relevant |
 
 Hardware availability is the immediate information dependency. Pi OS/install type/resources are the next deployment dependency. Purchasing, a host migration or a measured requirement tradeoff needs a concrete proposal for user decision; reversible documentation and fixture work continue independently.
+
+## Current continuation — 22 September 2026
+
+Desktop UI design is approved (D020). [M2 closeout](m2-closeout.md) records delivered software, prior validation and remaining gates; [the continuation prompt](continuation-prompt.md) starts the approved shared-LVGL implementation. The subsequent [native port](m2-ui-parity.md) implements the core layouts, Settings/detail navigation and immediate-record Stop & search, with integration limits recorded explicitly. This checkpoint does not close HP-01 or physical P3/P4/P5.
+
+
+## Shared approved UI implementation — 22 September 2026
+
+The approved direction is now implemented as native C/LVGL slices: Playing layout and controls, filtered search, nested details and membership, collection/queue reads, immediate-record voice search and Settings. See the [parity inventory and actual evidence](m2-ui-parity.md) for implemented behavior and remaining integration gaps. Desktop evidence: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo and expanded native LVGL/TLS smoke passed. HP-01 and physical P3/P4/P5 remain open; the hardware-arrival checklist is unchanged.

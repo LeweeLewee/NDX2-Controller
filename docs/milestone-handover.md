@@ -59,3 +59,16 @@ TIDAL app credentials and account tokens are held in the running process. Restar
 ## Conversation retention
 
 Archive the completed prototype conversation as supporting history rather than deleting it. Start detailed design in a fresh task against this repository and this handover. Archiving is organizational; the repository remains the source of truth regardless of whether the historical conversation is retained. No task creation or chat archive is implied by this document.
+
+## M2 continuation — 21 September 2026
+
+The next workstream has begun: [M2 software deliverables/runbook](m2-software.md), [v1 contract](controller-contract-v1.md), and [native fixture/build foundation](../firmware/README.md). The frozen reference and runnable demo remain intact. Desktop synthetic authentication/recovery and the silent TLS slice are new evidence; desktop LVGL and ESP32 fixture compilation now pass. Physical hardware, protected on-device networking, host/Pi deployment and live Naim trials remain distinct unfinished gates. Use the runbook's precise hardware-arrival checklist rather than restarting feasibility or expanding B01/feature parity.
+
+## Current continuation — 22 September 2026
+
+Desktop UI design is approved (D020). [M2 closeout](m2-closeout.md) records delivered software, prior validation and remaining gates; [the continuation prompt](continuation-prompt.md) starts the approved shared-LVGL implementation. The subsequent [native port](m2-ui-parity.md) implements the core layouts, Settings/detail navigation and immediate-record Stop & search, with integration limits recorded explicitly. This checkpoint does not close HP-01 or physical P3/P4/P5.
+
+
+## Shared approved UI implementation — 22 September 2026
+
+The approved direction is now implemented as native C/LVGL slices: Playing layout and controls, filtered search, nested details and membership, collection/queue reads, immediate-record voice search and Settings. See the [parity inventory and actual evidence](m2-ui-parity.md) for implemented behavior and remaining integration gaps. Desktop evidence: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo and expanded native LVGL/TLS smoke passed. HP-01 and physical P3/P4/P5 remain open; the hardware-arrival checklist is unchanged.

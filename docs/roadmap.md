@@ -36,13 +36,19 @@ Automatic track advancement and a new controller connection during playback pass
 - [x] Audit frozen reference and publish [phase plan](detailed-design-plan.md) with deliverables, dependencies and acceptance gates.
 - [x] Resolve display choice: Waveshare selected, Android ruled out (D017, 21 September 2026).
 - [x] Reconcile detailed-design records with published main; retain D015 for dedicated display and use D018 for the provisional bridge partition.
-- [ ] Implement the hardware-independent software workstream: development-host bridge, fixture-backed controller contract, recovery/security tests and embedded UI/build foundation. Physical and host deployment gates remain open.
+- [x] Implement the initial hardware-independent M2 workstream: development-host bridge, fixture-backed v1 contract, protected authentication/recovery tests, desktop HTTPS slice and native LVGL/build foundation. See [deliverables and evidence limits](m2-software.md).
+- [x] Compile shared SDL/LVGL and ESP32 fixture targets with pinned tools; exercise actual LVGL pixels over authenticated TLS and add the bounded ESP32 HTTPS worker.
+- [ ] Validate protected ESP32 provisioning and network transport on hardware; perform physical display/touch acceptance. Physical and host deployment gates remain open.
 - [ ] Confirm HW-001/measurement inventory, obtain purchasing approval if required, then execute HP-01.
 - [ ] Deferred B01: album-save visibility differs in laptop browser versus Codex preview; cause undocumented. Investigate only when relevant; no caching assumption or speculative fix.
 
-- [ ] Decide where the bridge runs and specify secure credential storage and persistent sign-in.
+- [x] Implement protected development-host credentials and synthetic persistent-authorization/rotation tests.
+- [ ] Select deployment host after inventory and complete trusted OAuth administration, callback registration and long-running sign-in validation.
 - [ ] Validate gapless transitions, native app coexistence and disconnect/reconnect recovery.
 - [ ] Define interaction flows and touch targets on the actual 4.3-inch display.
+- [x] Complete desktop visual design review: user approved the [UI baseline](ui-review/approval.md) on 22 September 2026.
+- [x] Implement the approved core layouts/interactions in shared LVGL and exercise silent end-to-end slices; see [parity and remaining integration](m2-ui-parity.md).
+- [ ] Complete real artwork, production device preferences/provisioning and physical touch acceptance.
 - [ ] Carry forward queue-edit controls and playlist creation/editing, shuffle/repeat/seek UI; prioritize only when required by the detailed design.
 
 - [x] Record hardware baseline and BOM ([hardware](hardware/README.md)); Waveshare selected (D017), hardware proof pending.
@@ -73,3 +79,12 @@ Automatic track advancement and a new controller connection during playback pass
 - [ ] Real battery-life trial and charging behaviour.
 - [ ] Build/assembly documentation and reproducible firmware process.
 - [ ] Evaluate additional native music sources.
+
+## Current continuation — 22 September 2026
+
+Desktop UI design is approved (D020). [M2 closeout](m2-closeout.md) records delivered software, prior validation and remaining gates; [the continuation prompt](continuation-prompt.md) starts the approved shared-LVGL implementation. The subsequent [native port](m2-ui-parity.md) implements the core layouts, Settings/detail navigation and immediate-record Stop & search, with integration limits recorded explicitly. This checkpoint does not close HP-01 or physical P3/P4/P5.
+
+
+## Shared approved UI implementation — 22 September 2026
+
+The approved direction is now implemented as native C/LVGL slices: Playing layout and controls, filtered search, nested details and membership, collection/queue reads, immediate-record voice search and Settings. See the [parity inventory and actual evidence](m2-ui-parity.md) for implemented behavior and remaining integration gaps. Desktop evidence: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo and expanded native LVGL/TLS smoke passed. HP-01 and physical P3/P4/P5 remain open; the hardware-arrival checklist is unchanged.

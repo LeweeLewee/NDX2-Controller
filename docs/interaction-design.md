@@ -6,6 +6,8 @@ D017 selects Waveshare and rules out Android. The 800 × 480 layout and external
 
 ## Canvas and tasks
 
+**Desktop design approved, 22 September 2026.** The [approved review baseline](ui-review/approval.md) records the final layout and interaction decisions and supersedes earlier proposals below where they differ. Porting to shared LVGL and physical acceptance remain separate open work.
+
 Use landscape 800 × 480 on the actual HW-001. Start with a 56 px top strip (Back, title, connection/battery status), 360 px content and 64 px bottom navigation (Now Playing, Find, Collection, Queue). Coordinates are a trial layout, not a manufacturing drawing. Reserve at least 8 px gaps and start at 72 × 72 px for primary touch targets; verify physical millimetres on the actual panel rather than assuming square pixels or a desktop scale. Start body text at 24 px and secondary text at 20 px; adjust after seated reading. Keyboard is a separate full-width mode with navigation temporarily replaced by input controls.
 
 | Screen | Initial content and interaction |
@@ -32,3 +34,16 @@ Audit HW-001 occupied RGB/touch/storage/expander pins and available peripheral b
 First capture bounded mono PCM clips locally with the display/Wi-Fi active; record sample rate/format, dropped samples, clipping, RAM/stream buffer and active/standby power. A provisional 16 kHz/16-bit/30 s mono clip is 960,000 payload bytes: validate the chosen transcription route and buffer strategy rather than assuming browser WebM support on ESP32. Do not add cloud/API configuration just to validate electrical capture.
 
 Then test ten representative music queries from seated distance in quiet and ten with music playing at an ordinary level, using the existing authorized bridge setup. Record correct key artist/title/mood words, correction effort and capture failures; initial target ≥9/10 usable transcripts in each condition with review before action. Include Cancel, timeout, leaving the screen and network loss: capture must stop, discard cancelled audio and never play automatically. Recordings remain transient/private. Compare a provisional enclosure microphone opening against bare-board capture before final placement. No always-listening or wake word is added.
+
+## M2 fixture implementation — 21 September 2026
+
+[Desktop HTTPS harness and shared native UI sources](m2-software.md) now implement the initial silent interaction slice. Query/filter/page/scroll restoration, unknown collection state, wake release suppression, stale/offline mutation gating and voice review/cancel have desktop model tests. The shared C/LVGL target uses provisional 72 px actions and charcoal/sage/sand, with a full-width keyboard overlay; its layout varies from the initial top-strip proposal to preserve target size. It now compiles for SDL and ESP32. The compiled desktop TLS flow and framebuffer captures provide initial rendering evidence; physical acceptance remains open. Tk is a development harness, not a proposed ESP32 runtime. All physical task/latency/microphone criteria above remain open.
+
+## Voice interaction refinement — 22 September
+
+User-directed review design: tapping the microphone enters Voice and immediately records. Actions are Stop & search, Restart and Cancel. Stop & search transcribes and searches; no automatic playback. Restart discards the attempt, Cancel/Back discards and restores context, and the 30-second limit stops recording without automatic submission. This supersedes mandatory transcript review for this search interaction. The review board implements a timed silent fixture; physical capture, transcription error handling and shared LVGL integration remain pending.
+
+
+## Native implementation update — 22 September 2026
+
+The [shared LVGL port](m2-ui-parity.md) implements the approved 64 px top / 336 px content / 80 px bottom direction, four sections, right-side unboxed transport and amplifier controls, detail/library/follow states, and immediate-record voice fixtures. The older table above remains trial history where superseded by D020. Desktop capture/test evidence is separate from the physical task and microphone criteria. No queue-edit action is introduced.

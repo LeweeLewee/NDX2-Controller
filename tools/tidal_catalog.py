@@ -22,9 +22,10 @@ MAX_BYTES = 2 * 1024 * 1024
 
 
 class CatalogError(RuntimeError):
-    def __init__(self, message, status=None, retry_after=None):
+    def __init__(self, message, status=None, retry_after=None, oauth_error=None):
         super().__init__(message)
         self.status, self.retry_after = status, retry_after
+        self.oauth_error = oauth_error
 
 
 def ordered_items(page, kind):
@@ -75,12 +76,21 @@ class TidalCatalog:
             return data
         except urllib.error.HTTPError as exc:
             # Never retain/print server bodies, which can reflect credentials.
+            oauth_error = None
+            try:
+                body = exc.read(8193)
+                if len(body) <= 8192 and json.loads(body).get('error') == 'invalid_grant':
+                    oauth_error = 'invalid_grant'
+            except (ValueError, AttributeError, OSError):
+                pass
+            finally:
+                exc.close()
             try:
                 retry_after = float(exc.headers.get('Retry-After', '2'))
             except (TypeError, ValueError):
                 retry_after = 2
             raise CatalogError('TIDAL request failed (HTTP ' + str(exc.code) + ')',
-                               exc.code, retry_after) from None
+                               exc.code, retry_after, oauth_error) from None
         except (urllib.error.URLError, TimeoutError, OSError):
             raise CatalogError('TIDAL connection failed or timed out') from None
         except (ValueError, UnicodeError):

@@ -1,6 +1,6 @@
 # HP-01 — USB-powered display, touch wake and energy baseline
 
-Status: ready-to-execute protocol, not executed. 20 September 2026. No procurement recorded. Dependencies: HW-001 exact model available, measurement equipment inventoried, revision-matched schematic and example reviewed.
+Status: ready-to-execute protocol, not executed. [Native fixture build recipe and diagnostic hooks](../../firmware/README.md) are prepared; compilation and hardware trials remain open. 20 September 2026. No procurement recorded. Dependencies: HW-001 exact model available, measurement equipment inventoried, revision-matched schematic and example reviewed.
 
 ## Question and setup
 

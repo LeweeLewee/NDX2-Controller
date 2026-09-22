@@ -134,3 +134,23 @@ The user ruled out repurposed phones for the visual-design reasons recorded in D
 Reconciled the detailed-design drafts with published commit `4e487da`. Preserved D015's dedicated-display rationale and assigned the draft bridge partition D018, updating its references. The River Stone layout was already tracked in `ef2576c`; corrected the phase plan's stale untracked-work description. The frozen `software-feasibility-v1` reference is unchanged. This is documentation reconciliation, not new firmware, deployment or hardware evidence.
 
 Validation: 52 Python tests and five JavaScript navigation tests passed on the development computer. Documentation local-file links resolved and decision IDs were unique. Python 3.14 emitted a non-failing ResourceWarning while cleaning up a synthetic HTTPError fixture; no production code was changed. No live device commands were run.
+
+## 21 September 2026 — M2 software fixtures (no live hardware)
+
+Development-host synthetic tests and `python tools/m2_demo.py` pass a real localhost TLS/pairing slice: authoritative Now Playing, paginated search, album native-resolution simulation, one play request, refreshed player/queue state, Back context, three collection states, voice review/cancel/search and wake with no command replay. Protected Windows DPAPI restart/rotation, single-flight renewal, replacement failure, revocation, wrong server trust, durable duplicate/uncertain-command handling and stale-state gating are covered by offline tests. No real Naim or provider command was sent.
+
+Official Waveshare archive downloaded privately and checksum-pinned; preparation generated an ESP-IDF 5.2.0/LVGL 8.4.0 fixture tree. Follow-up tooling installation enabled successful ESP32 firmware and Windows SDL/LVGL compilation, with two passing native C tests. The compiled UI passed a paired localhost TLS fixture flow, including Back, one silent native-play request, refreshed state and voice review/cancel; six framebuffer captures remain in ignored local storage. The album-detail capture was inspected for long-title readability. The final Python rerun passed 69 tests after one prior Windows 10053 failure in an existing HTTP test; JavaScript passed five tests. These are desktop and compilation results only. No flashing, Pi inventory, physical screen/touch/sleep/battery/microphone, power or P3/P4/P5 evidence was added. See [implementation limits](m2-software.md) and [vendor review/build instructions](../firmware/README.md).
+
+Final M2 validation: 69 Python tests, five JavaScript tests and all five silent HTTPS demo stages passed; Python compileall and Git whitespace checks passed. The reference tag remains unchanged.
+
+## 22 September 2026 — UI design approval and chat closeout
+
+The user explicitly approved the final browser review after icon-only Search. [Approval](ui-review/approval.md) records the SHA-256 of the unchanged source; [closeout](m2-closeout.md) consolidates implementation and prior validation. This is desktop design acceptance, not native LVGL parity, new live observations or hardware evidence. Closeout edits documentation only; no new full-suite run, audible test, flash or physical trial was performed. Superseded review notes are retained as history.
+
+
+## Shared approved UI implementation — 22 September 2026
+
+The approved direction is now implemented as native C/LVGL slices: Playing layout and controls, filtered search, nested details and membership, collection/queue reads, immediate-record voice search and Settings. See the [parity inventory and actual evidence](m2-ui-parity.md) for implemented behavior and remaining integration gaps. Desktop evidence: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo and expanded native LVGL/TLS smoke passed. HP-01 and physical P3/P4/P5 remain open; the hardware-arrival checklist is unchanged.
+
+
+Final firmware validation, 22 September 2026: `python tools/build_m2.py esp32` **passed** with the final shared sources, pinned ESP-IDF v5.2 and LVGL 8.4.0. Application image `0x925b0` bytes fits the `0x100000` partition with 43% free. No flashing or efuse operation was run. This is compiler/linker evidence only; the default-disabled protected network path and physical behavior remain unvalidated.
