@@ -1,5 +1,5 @@
 # Prototype procurement BOM — UK
-Updated 22 September 2026. Covers one controller and bench bring-up. User confirms six Pi Hut items ordered on 22 September; receipt/delivery not yet confirmed.
+Updated 22 September 2026. Covers one controller and bench bring-up. All eight named prototype parts are ordered: six from Pi Hut, one microSD sniffer from SK Pang, and one BAT0014 battery from Pimoroni. User confirmed 22 September; receipt/delivery not yet confirmed.
 
 User inventory: tools and wires already owned, including the supplies/meters asked about; USB-C power supplies already owned (user confirmed 22 September; HW-017 fulfilled, no purchase needed). Screen became available and is included in the confirmed Pi Hut order. Exact meter capability should still be recorded with measurements.
 
@@ -50,7 +50,7 @@ Owned wires/tools are not automatic proof that all specialised connectors and me
 
 ## Purchase readiness and power findings
 
-The USB-powered screen/voice evaluation can be specified now. A fully finalised battery and enclosure order cannot yet be promised: pin access, charge duration, load peaks, cutoff and mechanical fit remain untested. Keep the candidates in one procurement record instead of treating them as approved substitutions.
+The eight prototype parts have been ordered for evaluation. Pin access, charge duration, load peaks, cutoff and mechanical fit remain untested. Monitoring, temperature sensing and final enclosure fittings still need resolution; the finished-build BOM is not yet complete.
 
 The [Pimoroni-linked BAT0008 datasheet](https://cdn.shopify.com/s/files/1/0174/1800/files/PKcell_ICR18650_6600mAh_Final.pdf) specifies 3.7 V nominal, 4.2 V charging, 3.0 V discharge endpoint and 3 A maximum continuous charge/discharge. This supports further evaluation with a 1 A charger; it does not establish connector polarity or fit in the existing Adafruit-353-derived CAD reservation.
 
