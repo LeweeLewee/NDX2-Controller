@@ -18,6 +18,29 @@ static bool last_ready, deferred_read;
 static bridge_action_t deferred_action;
 static char deferred_text[257];
 static unsigned voice_second;
+static char artwork_target[81];
+static uint64_t artwork_until;
+static bool artwork_loaded, artwork_attempted;
+static lv_color_t artwork_pixels[BRIDGE_ART_PIXELS];
+static lv_img_dsc_t artwork_image;
+static lv_obj_t *artwork_widget;
+static const char *wanted_artwork(void) {
+    if(!state.online||io->now_ms()>=state.fresh_until) return "";
+    if(state.context.screen==NOW) return state.current.artwork;
+    if(state.context.screen==DETAILS&&strcmp(state.context.selected.kind,"artists")) return state.context.selected.artwork;
+    return "";
+}
+static void clear_artwork(void) {
+    artwork_loaded=artwork_attempted=false; artwork_target[0]=0; artwork_until=0;
+    if(artwork_widget) lv_obj_add_flag(artwork_widget,LV_OBJ_FLAG_HIDDEN);
+    lv_img_cache_invalidate_src(&artwork_image); dirty=true;
+}
+static void sync_artwork(void) {
+    const char *wanted=wanted_artwork();
+    if(strcmp(artwork_target,wanted)||(artwork_until&&io->now_ms()>=artwork_until)) {
+        clear_artwork(); snprintf(artwork_target,sizeof(artwork_target),"%s",wanted);
+    }
+}
 static void render(void);
 static uint32_t background(void) { return state.palette==1?0x292620:state.palette==2?0x22282e:0x202521; }
 static uint32_t accent(void) { return state.palette==1?0xddc8a6:state.palette==2?0xb9cddd:0xc2d1b5; }
@@ -50,7 +73,7 @@ static bool send_request(bridge_action_t action,const char *text) {
     if(!io->submit(&request)) {
         /* A cancelled generation may still occupy the transport worker. Retain
          * only the new read, never a mutation, until that worker is drained. */
-        if(!bridge_mutation(action)&&action!=BR_SNAPSHOT) {
+        if(!bridge_mutation(action)&&action!=BR_SNAPSHOT&&action!=BR_ARTWORK) {
             deferred_read=true; deferred_action=action;
             snprintf(deferred_text,sizeof(deferred_text),"%s",request.text);
         }
@@ -74,7 +97,7 @@ static void membership(const char *reference,bool track) {
 }
 bool controller_ui_touch(bool pressed) { contact_active=pressed; return controller_touch(&state,pressed); }
 void controller_ui_disconnect(void) {
-    deferred_read=false; cancel_capture(); controller_disconnect(&state);
+    deferred_read=false; clear_artwork(); cancel_capture(); controller_disconnect(&state);
     state.track_saved=state.context.saved=SAVED_UNKNOWN;
     if(io->invalidate) io->invalidate(state.generation);
     network_pending=false; refresh_needed=true; next_read=io->now_ms(); dirty=true;
@@ -121,7 +144,7 @@ static void click(lv_event_t *e) {
     } else if((a==14||a==15)&&controller_ui_ready()) {
         if(io->submit) send_request(a==15?BR_AMP_UP:BR_AMP_DOWN,NULL);
         else io->amplifier_once(a==15);
-    } else if(a==17) start_capture();
+    } else if(a==17) { abandon_read(); start_capture(); }
     else if(a==18&&(state.voice==VOICE_RECORDING||state.voice==VOICE_STOPPED)) {
         io->microphone_cancel(); state.voice=VOICE_STOPPED;
         if(io->submit) send_request(BR_VOICE,NULL);
@@ -215,6 +238,12 @@ static void mic_draw(lv_event_t *e) {
     lv_point_t p={a.x1+32,a.y1+43},q={a.x1+32,a.y1+51}; lv_draw_line(ctx,&l,&p,&q);
 }
 static void art(int size) {
+    if(artwork_loaded&&!strcmp(artwork_target,wanted_artwork())&&io->now_ms()<artwork_until) {
+        artwork_widget=lv_img_create(content);
+        lv_img_set_src(artwork_widget,&artwork_image); lv_img_set_pivot(artwork_widget,0,0);
+        lv_img_set_zoom(artwork_widget,(uint16_t)(size*256/BRIDGE_ART_SIDE));
+        lv_obj_set_pos(artwork_widget,0,0); return;
+    }
     lv_obj_t *o=lv_obj_create(content); lv_obj_set_pos(o,0,0); lv_obj_set_size(o,size,size);
     lv_obj_set_style_bg_color(o,lv_color_hex(0x2b322b),0); lv_obj_set_style_border_color(o,lv_color_hex(0x58634e),0);
     lv_obj_clear_flag(o,LV_OBJ_FLAG_SCROLLABLE);
@@ -248,7 +277,7 @@ static void display_setting(lv_event_t *e) {
 }
 static void render(void) {
     if(keyboard) { lv_obj_del(keyboard); keyboard=NULL; }
-    lv_obj_clean(root); rows=query=NULL; dirty=false;
+    lv_obj_clean(root); artwork_widget=NULL; rows=query=NULL; dirty=false;
     bool ready=controller_ui_ready(); last_ready=ready;
     bool library_ready=ready&&strcmp(state.account,"disconnected");
     lv_obj_set_style_bg_color(root,lv_color_hex(background()),0);
@@ -334,7 +363,7 @@ static void render(void) {
         snprintf(text,sizeof(text),"%u / 30 seconds",state.voice==VOICE_IDLE?0:(unsigned)(30-(state.recording_until>io->now_ms()?(state.recording_until-io->now_ms()+999)/1000:0)));
         label(content,text,24,130,700,36,&lv_font_montserrat_24);
         button(content,"Stop & search",24,184,264,64,18,!network_pending&&state.voice!=VOICE_IDLE,false);
-        button(content,"Restart",300,184,188,64,17,ready&&state.fixture,false); button(content,"Cancel",500,184,196,64,19,true,true);
+        button(content,"Restart",300,184,188,64,17,controller_available(&state,io->now_ms())&&state.fixture,false); button(content,"Cancel",500,184,196,64,19,true,true);
         label(content,"Microphone fixture: no audio captured. Search only.",24,270,704,40,&lv_font_montserrat_16); break;
     case SETTINGS:
         button(content,"Display   /   Brightness, appearance and timeout",0,0,752,94,41,true,true);
@@ -374,6 +403,27 @@ static void render(void) {
 }
 static void apply_reply(void) {
     network_pending=false;
+    if(reply.action==BR_ARTWORK) {
+        sync_artwork();
+        if(!strcmp(request.text,artwork_target)&&artwork_target[0]) {
+            artwork_attempted=true; artwork_until=io->now_ms()+5000;
+            if(reply.valid&&reply.outcome==BR_OBSERVED&&reply.artwork_available&&
+               !strcmp(reply.artwork,artwork_target)&&reply.started_ms+reply.valid_for_ms>io->now_ms()) {
+                lv_img_cache_invalidate_src(&artwork_image);
+                for(unsigned i=0;i<BRIDGE_ART_PIXELS;i++) {
+                    uint16_t c=reply.pixels[i];
+                    artwork_pixels[i]=lv_color_make((uint8_t)(((c>>11)*255)/31),
+                        (uint8_t)((((c>>5)&63)*255)/63),(uint8_t)(((c&31)*255)/31));
+                }
+                memset(&artwork_image,0,sizeof(artwork_image));
+                artwork_image.header.cf=LV_IMG_CF_TRUE_COLOR;
+                artwork_image.header.w=artwork_image.header.h=BRIDGE_ART_SIDE;
+                artwork_image.data=(const uint8_t *)artwork_pixels; artwork_image.data_size=sizeof(artwork_pixels);
+                artwork_loaded=true; artwork_until=reply.started_ms+reply.valid_for_ms;
+            }
+        }
+        dirty=true; return; /* Optional artwork failure never disconnects playback. */
+    }
     snprintf(state.error_code,sizeof(state.error_code),"%s",reply.valid?reply.error_code:"BRIDGE_UNAVAILABLE");
     if(bridge_mutation(reply.action)) {
         remember_scroll();
@@ -395,7 +445,7 @@ static void apply_reply(void) {
             state.online=true; state.fresh_until=reply.started_ms+reply.valid_for_ms;
             strcpy(state.title,reply.title); strcpy(state.artist,reply.artist); strcpy(state.album,reply.album);
             strcpy(state.source,reply.source); strcpy(state.transport,reply.transport); strcpy(state.account,reply.account);
-            state.current=reply.item; state.position_ms=reply.position_ms; state.duration_ms=reply.duration_ms; state.bitrate=reply.bitrate;
+            state.current=reply.item; strcpy(state.current.artwork,reply.artwork); state.position_ms=reply.position_ms; state.duration_ms=reply.duration_ms; state.bitrate=reply.bitrate;
             if(state.context.screen==QUEUE&&state.context.offset==0) {
                 state.context.count=reply.count; memcpy(state.context.items,reply.items,sizeof(state.context.items));
             }
@@ -437,8 +487,12 @@ static void tick(lv_timer_t *timer) {
     if(controller_voice_tick(&state,io->now_ms())) { io->microphone_cancel(); dirty=true; }
     if(io->submit) {
         if(io->poll(&reply)&&reply.generation==state.generation) apply_reply();
+        sync_artwork();
         if(!network_pending&&!contact_active&&deferred_read) send_request(deferred_action,deferred_text);
         if(!network_pending&&!deferred_read&&!contact_active&&io->now_ms()>=next_read&&state.voice!=VOICE_RECORDING) send_request(BR_SNAPSHOT,NULL);
+        if(!network_pending&&!deferred_read&&!contact_active&&artwork_target[0]&&!artwork_attempted&&state.voice!=VOICE_RECORDING) {
+            if(send_request(BR_ARTWORK,artwork_target)) artwork_attempted=true;
+        }
     } else io->snapshot(&state);
     if(last_ready!=controller_ui_ready()) dirty=true;
     if(dirty&&!keyboard&&!contact_active) { render(); }

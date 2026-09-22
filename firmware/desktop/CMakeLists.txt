@@ -27,3 +27,7 @@ add_test(NAME controller_state COMMAND controller_test)
 add_executable(bridge_protocol_test ../../tests/bridge_protocol_test.c)
 target_link_libraries(bridge_protocol_test PRIVATE bridge_protocol)
 add_test(NAME bridge_protocol COMMAND bridge_protocol_test)
+
+add_executable(ui_recovery_test ../../tests/ui_recovery_test.c ../shared/controller.c)
+target_link_libraries(ui_recovery_test PRIVATE lvgl bridge_protocol)
+add_test(NAME ui_recovery COMMAND ui_recovery_test)

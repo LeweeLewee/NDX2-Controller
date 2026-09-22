@@ -5,11 +5,13 @@
 #define BRIDGE_REQUEST_MAX 8192
 #define BRIDGE_RESPONSE_MAX 32768
 #define BRIDGE_PAGE_MAX 12
+#define BRIDGE_ART_SIDE 80
+#define BRIDGE_ART_PIXELS (BRIDGE_ART_SIDE * BRIDGE_ART_SIDE)
 typedef enum { BR_SNAPSHOT, BR_SEARCH, BR_BROWSE, BR_PLAY, BR_AMP_UP, BR_AMP_DOWN,
-               BR_QUEUE, BR_SAVED, BR_SAVE, BR_REMOVE, BR_TRANSPORT, BR_LIBRARY, BR_VOICE } bridge_action_t;
+               BR_QUEUE, BR_SAVED, BR_SAVE, BR_REMOVE, BR_TRANSPORT, BR_LIBRARY, BR_VOICE, BR_ARTWORK } bridge_action_t;
 typedef struct {
     char reference[257], title[257], artist[257], album[257], kind[16];
-    char artist_reference[257], album_reference[257];
+    char artist_reference[257], album_reference[257], artwork[81];
     int saved; /* -1 unknown, 0 unsaved, 1 saved */
 } bridge_item_t;
 typedef struct {
@@ -24,7 +26,9 @@ typedef struct {
     bridge_action_t action;
     uint32_t generation;
     uint64_t started_ms;
-    bool valid, fixture, playable;
+    bool valid, fixture, playable, artwork_available;
+    uint16_t pixels[BRIDGE_ART_PIXELS];
+    char artwork[81];
     enum { BR_OBSERVED, BR_SUBMITTED, BR_REJECTED, BR_UNKNOWN } outcome;
     unsigned valid_for_ms, count;
     int next_offset, saved;

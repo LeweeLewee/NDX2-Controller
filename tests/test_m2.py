@@ -270,6 +270,9 @@ class TLSTests(unittest.TestCase):
                 client=Client(url,root/'tls/trust.pem')
                 with self.assertRaises(urllib.error.HTTPError) as unauth: client.request('snapshot')
                 self.assertEqual(unauth.exception.code,401)
+                with self.assertRaises(urllib.error.HTTPError) as art_auth:
+                    client.request('artwork', {'reference': '/artwork/' + '0'*64 + '.jpg'})
+                self.assertEqual(art_auth.exception.code,401)
                 wrong=Client(url,root/'wrong/trust.pem')
                 with self.assertRaises(urllib.error.URLError) as wrong_trust: wrong.pair(pairing.issue())
                 self.assertIsInstance(wrong_trust.exception.reason,ssl.SSLCertVerificationError)
@@ -282,7 +285,12 @@ class TLSTests(unittest.TestCase):
                 model.search('quiet','albums'); model.details(model.context['items'][0])
                 self.assertEqual(model.mutate('play',{'reference':model.selected['item']['reference']}),'submitted')
                 self.assertEqual(model.snapshot['player']['title'],'Silent track')
+                reference=model.snapshot['player']['artwork']
+                self.assertTrue(client.request('artwork',{'reference':reference})['data']['available'])
                 pairing.revoke(auth['device']); self.assertFalse(model.reconnect())
+                with self.assertRaises(urllib.error.HTTPError) as revoked:
+                    client.request('artwork',{'reference':reference})
+                self.assertEqual(revoked.exception.code,401)
             finally:
                 httpd.shutdown(); httpd.server_close(); thread.join(); vault.close()
 

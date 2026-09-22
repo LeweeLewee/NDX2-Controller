@@ -1,6 +1,10 @@
 # M2 software and UI review closeout — 22 September 2026
 
-## Current published closeout — 22 September 2026
+## Current artwork checkpoint - 22 September 2026
+
+Continuation from `5bf0c8a` implements authenticated bounded artwork and shared LVGL rendering using silent local fixtures, plus the voice Restart cancellation fix. See [current evidence and limits](m2-artwork.md). Fresh results: 77 Python tests, five JavaScript tests, three CTests, both TLS demos and both builds passed. ESP32 image `0x92c00`, 43% partition free. Live artwork/quality and all physical gates remain open. Earlier next-slice statements below are historical.
+
+## Prior published closeout — 22 September 2026
 
 The approved core UI port and M2 foundation are committed and pushed: `04fcf17` (implementation) and `a87286a` (merge with concurrent hardware research through `4749541`). The working tree was clean at handover preparation. This closeout update is documentation-only; inspect Git status/history at the next start rather than assuming a fixed HEAD.
 

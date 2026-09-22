@@ -91,3 +91,7 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 ## D020 — Approved desktop UI baseline
 
 **Accepted by user, 22 September 2026.** The user approved the iterated design after icon-only Search. [Approval](ui-review/approval.md) identifies the source hash and final interactions; it supersedes conflicting earlier rough UI proposals, including artwork-side volume and the separate voice review step. Implement the design in shared native C/LVGL; the browser board remains a design reference. D011 command semantics and D017/D018 architecture remain unchanged. Approval is not firmware parity, production provisioning or HP-01/physical P3/P4/P5 acceptance. See [closeout](m2-closeout.md).
+
+## D021 - Bounded authenticated artwork preview
+
+**Implementation choice within the authorized M2 slice, 22 September 2026.** Keep artwork processing on the D018 bridge and send fixed 80 x 80 RGB565 previews through the authenticated v1 read envelope. Native code validates fixed bounds and renders with LVGL; provider URLs and JPEG decoding stay off the controller. Preserve approved artwork-space dimensions, clear stale/obsolete covers and leave optional failures unavailable. This fits the current 32-KiB response bound without a new image route. Resolution is provisional; live visual quality, deployment-host resource profiling and physical memory remain validation work. See [contract](controller-contract-v1.md) and [evidence](m2-artwork.md).

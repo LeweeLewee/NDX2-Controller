@@ -37,6 +37,17 @@ def main():
                 print(result.stderr); raise RuntimeError('Compiled native UI smoke failed')
             assert len(service.naim.calls)==1 and service.naim.calls[0][0]=='play',service.naim.calls
             assert all((captures/name).is_file() for name in ('01-now.bmp','02-find.bmp','03-details.bmp','04-playing.bmp','05-recording.bmp','06-voice-search.bmp','07-settings.bmp','08-display.bmp','09-artist.bmp','10-following.bmp','11-track.bmp','12-voice-limit.bmp','13-wake-restored.bmp'))
+            from PIL import Image
+            before=Image.open(captures/'01-now.bmp').convert('RGB')
+            after=Image.open(captures/'04-playing.bmp').convert('RGB')
+            detail=Image.open(captures/'03-details.bmp').convert('RGB')
+            assert before.size==after.size==detail.size==(800,480)
+            # Stable interior samples identify the synthetic artwork, not labels.
+            assert before.getpixel((40,90))[1] > before.getpixel((40,90))[2]
+            assert after.getpixel((40,90))[2] > after.getpixel((40,90))[1]
+            assert detail.getpixel((40,90))==before.getpixel((40,90))
+            assert before.getpixel((144,120))!=before.getpixel((40,90))
+            print('PASS authenticated artwork pixels, detail rendering and changed-track replacement')
             print('PASS actual LVGL pixels, paired TLS, native resolution simulation, one silent command and refreshed state')
             print('Captures:',captures)
         finally:

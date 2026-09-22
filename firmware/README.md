@@ -61,3 +61,9 @@ ESP32 emits `HP01` timestamped fixture event names plus free/minimum heap. Hooks
 ## Approved native UI port — 22 September 2026
 
 The shared renderer now implements the D020 core layout and interaction slices; see [parity/evidence](../docs/m2-ui-parity.md). Native smoke includes immediate-record voice entry, restart, explicit search, cancel, an accelerated 30-second stop without submission, independent artist-follow/track-save and consumed wake contact. `06-voice-search.bmp` supersedes the historical review-step capture; thirteen captures now document the flow. Font sizes 16/20/24/32 are explicitly enabled by the owned build overlay, retaining LVGL 8.4.0 and ESP-IDF v5.2. No new SDK/dependency download or board operation is needed.
+
+## Authenticated artwork preview - 22 September 2026
+
+Shared LVGL/codec accept fixed 80 x 80 RGB565 artwork previews over the authenticated bridge. No firmware image-decoder dependency or SDK pin changed. Three CTests cover controller state, strict protocol bounds and native UI cancellation/artwork failures. Desktop TLS smoke checks artwork pixels before/after a silent track change. Latest ESP32 build: `0x92c00`, 43% free; compiler evidence only. Standalone firmware fixtures have no artwork pixels yet.
+
+The host bridge uses already-installed Pillow 12.2.0 for bounded JPEG normalization and local fixtures. Host dependencies are pinned in `tools/requirements-m2.txt` (also cryptography 46.0.7 for certificates). On a fresh host install that file with the chosen Python environment; no download was needed for this checkpoint. See [bounds and evidence](../docs/m2-artwork.md).

@@ -182,3 +182,7 @@ Normal automatic-support baseline estimates: underside-down 7h43m59s / 289.08 g;
 ## 22 September 2026 — Larger battery source review
 
 Reference evidence only, no physical test: [larger battery review](hardware/larger-battery-review.md) records visually inspected PKCELL drawings. BAT0014 maximum 69.5 x 57 x 20.5 mm body is dimensionally contained by the current 80 x 64 x 26 mm reserved battery box; cradle/cable fit remains unverified. BAT0015 maximum 75 x 69.5 x 20.5 mm body exceeds its short dimension. Live Pimoroni variant data reports BAT0014 £25 and available. Adafruit BQ24074 published Eagle schematic blob a97e12c1628a74e95eb0af333206ff6f3706126c connects TMR to GND; TI states this disables safety timers. This resolves the source timer question, not actual delivered board revision or charging behaviour.
+
+## M2 authenticated artwork checkpoint - 22 September 2026
+
+Authenticated bounded artwork renders in shared LVGL Playing/detail screens using silent local JPEG fixtures. Voice Restart now cancels pending transcripts. Fresh validation: 77 Python tests, five JavaScript tests, three CTests, both TLS demos, desktop and ESP32 builds passed (`0x92c00`, 43% free). Native artwork/changed-cover pixels were inspected and asserted. See [limits and detailed evidence](m2-artwork.md). Live artwork/quality, deployment-host resource profiling, provisioning/preferences and physical HP-01/P3/P4/P5 remain open. No audio or hardware operation occurred.

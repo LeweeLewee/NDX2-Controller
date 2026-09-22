@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-static const char *actions[]={"snapshot","search","browse","play","amplifier","amplifier","queue","library_state","library_save","library_save","transport","library_page","voice_review"};
+static const char *actions[]={"snapshot","search","browse","play","amplifier","amplifier","queue","library_state","library_save","library_save","transport","library_page","voice_review","artwork"};
 bool bridge_mutation(bridge_action_t a) { return a==BR_PLAY||a==BR_AMP_UP||a==BR_AMP_DOWN||a==BR_SAVE||a==BR_REMOVE||a==BR_TRANSPORT; }
 static bool text(const cJSON *object,const char *key,char *out,size_t cap,bool required) {
     const cJSON *value=cJSON_GetObjectItemCaseSensitive(object,key);
@@ -31,10 +31,11 @@ static bool item(const cJSON *value,bridge_item_t *out) {
            text(value,"album",out->album,sizeof(out->album),false)&&
            text(value,"kind",out->kind,sizeof(out->kind),false)&&
            text(value,"artist_reference",out->artist_reference,sizeof(out->artist_reference),false)&&
-           text(value,"album_reference",out->album_reference,sizeof(out->album_reference),false);
+           text(value,"album_reference",out->album_reference,sizeof(out->album_reference),false)&&
+           text(value,"artwork",out->artwork,sizeof(out->artwork),false);
 }
 bool bridge_encode(const bridge_request_t *r,char *json,size_t capacity) {
-    if(r->action<BR_SNAPSHOT||r->action>BR_VOICE||!memchr(r->id,0,sizeof(r->id))||
+    if(r->action<BR_SNAPSHOT||r->action>BR_ARTWORK||!memchr(r->id,0,sizeof(r->id))||
        !memchr(r->kind,0,sizeof(r->kind))||!memchr(r->text,0,sizeof(r->text))||!memchr(r->cursor,0,sizeof(r->cursor))||!memchr(r->result_id,0,sizeof(r->result_id))||
        strlen(r->id)<16||strlen(r->id)>48||r->offset>10000||capacity>BRIDGE_REQUEST_MAX+1) return false;
     cJSON *root=cJSON_CreateObject(); if(!root) return false;
@@ -102,7 +103,8 @@ bool bridge_decode(const bridge_request_t *request,const char *json,size_t size,
             text(player,"album",r->album,sizeof(r->album),false)&&
             text(player,"sourceDetail",r->source,sizeof(r->source),false)&&
             text(player,"state",r->transport,sizeof(r->transport),false)&&
-            text(data,"account",r->account,sizeof(r->account),false);
+            text(data,"account",r->account,sizeof(r->account),false)&&
+            text(player,"artwork",r->artwork,sizeof(r->artwork),false);
         const cJSON *current=cJSON_GetObjectItemCaseSensitive(data,"current_item");
         if(current&&!cJSON_IsNull(current)) ok=ok&&item(current,&r->item);
         number(player,"transportPosition",&r->position_ms,0,2147483647);
@@ -118,6 +120,29 @@ bool bridge_decode(const bridge_request_t *request,const char *json,size_t size,
         const cJSON *next=cJSON_GetObjectItemCaseSensitive(data,"next_offset");
         if(next&&!cJSON_IsNull(next)) ok=ok&&number(data,"next_offset",&r->next_offset,0,10000);
     } else if(request->action==BR_VOICE) ok=text(data,"transcript",r->transcript,sizeof(r->transcript),true);
+    else if(request->action==BR_ARTWORK) {
+        const cJSON *available=cJSON_GetObjectItemCaseSensitive(data,"available");
+        ok=cJSON_IsBool(available);
+        r->artwork_available=cJSON_IsTrue(available);
+        if(ok&&r->artwork_available) {
+            int width,height,ttl; char format[24];
+            const cJSON *pixels=cJSON_GetObjectItemCaseSensitive(data,"pixels");
+            ok=number(data,"width",&width,BRIDGE_ART_SIDE,BRIDGE_ART_SIDE)&&
+                number(data,"height",&height,BRIDGE_ART_SIDE,BRIDGE_ART_SIDE)&&
+                number(data,"valid_for_ms",&ttl,1,60000)&&
+                text(data,"format",format,sizeof(format),true)&&!strcmp(format,"rgb565be-hex")&&
+                text(data,"reference",r->artwork,sizeof(r->artwork),true)&&!strcmp(r->artwork,request->text)&&
+                cJSON_IsString(pixels)&&strlen(pixels->valuestring)==BRIDGE_ART_PIXELS*4;
+            if(ok) {
+                r->valid_for_ms=(unsigned)ttl;
+                for(unsigned i=0;i<BRIDGE_ART_PIXELS*4;i++) {
+                    char c=pixels->valuestring[i]; int nibble=c>='0'&&c<='9'?c-'0':c>='a'&&c<='f'?c-'a'+10:-1;
+                    if(nibble<0) { ok=false; break; }
+                    r->pixels[i/4]=(uint16_t)((r->pixels[i/4]<<4)|nibble);
+                }
+            }
+        }
+    }
     else if(request->action==BR_SAVED) r->saved=saved(data,"saved_state");
 done:
     cJSON_Delete(root); r->valid=ok;

@@ -48,7 +48,8 @@ Automatic track advancement and a new controller connection during playback pass
 - [ ] Define interaction flows and touch targets on the actual 4.3-inch display.
 - [x] Complete desktop visual design review: user approved the [UI baseline](ui-review/approval.md) on 22 September 2026.
 - [x] Implement the approved core layouts/interactions in shared LVGL and exercise silent end-to-end slices; see [parity and remaining integration](m2-ui-parity.md).
-- [ ] Complete real artwork, production device preferences/provisioning and physical touch acceptance.
+- [x] Implement authenticated bounded artwork previews in shared LVGL with silent fixtures.
+- [ ] Validate live artwork/quality, production preferences/provisioning and physical touch acceptance.
 - [ ] Carry forward queue-edit controls and playlist creation/editing, shuffle/repeat/seek UI; prioritize only when required by the detailed design.
 
 - [x] Record hardware baseline and BOM ([hardware](hardware/README.md)); Waveshare selected (D017), hardware proof pending.
@@ -92,3 +93,7 @@ Desktop UI design is approved (D020). [M2 closeout](m2-closeout.md) records deli
 ## Shared approved UI implementation — 22 September 2026
 
 The approved direction is now implemented as native C/LVGL slices: Playing layout and controls, filtered search, nested details and membership, collection/queue reads, immediate-record voice search and Settings. See the [parity inventory and actual evidence](m2-ui-parity.md) for implemented behavior and remaining integration gaps. Desktop evidence: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo and expanded native LVGL/TLS smoke passed. HP-01 and physical P3/P4/P5 remain open; the hardware-arrival checklist is unchanged.
+
+## M2 authenticated artwork checkpoint - 22 September 2026
+
+Authenticated bounded artwork renders in shared LVGL Playing/detail screens using silent local JPEG fixtures. Voice Restart now cancels pending transcripts. Fresh validation: 77 Python tests, five JavaScript tests, three CTests, both TLS demos, desktop and ESP32 builds passed (`0x92c00`, 43% free). Native artwork/changed-cover pixels were inspected and asserted. See [limits and detailed evidence](m2-artwork.md). Live artwork/quality, deployment-host resource profiling, provisioning/preferences and physical HP-01/P3/P4/P5 remain open. No audio or hardware operation occurred.

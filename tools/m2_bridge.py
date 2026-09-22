@@ -10,6 +10,7 @@ import time
 import uuid
 
 from controller_service import Bridge
+from m2_artwork import ArtworkDelivery, fixture_jpeg
 from m2_security import Pairing, Vault
 
 MAX_REQUEST = 8192
@@ -21,7 +22,7 @@ FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 
           'library_state': {'reference'}, 'library_save': {'reference', 'saved'},
           'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command'},
           'voice_review': {'fixture'}, 'suggest': {'prompt'},
-          'library_page': {'kind', 'cursor', 'offset'}}
+          'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference'}}
 
 
 def configured_service(vault):
@@ -68,8 +69,20 @@ class FixtureService(Bridge):
     fixture = True
     def __init__(self):
         super().__init__(FixtureNaim())
+        self.fixture_images = {self.cover('https://resources.tidal.com/images/fixture/a.jpg'): fixture_jpeg(),
+                               self.cover('https://resources.tidal.com/images/fixture/b.jpg'): fixture_jpeg(True)}
         self.saved = {'inputs/tidal/artists/1': False, 'inputs/tidal/tracks/101': False}
+    def image(self, path):
+        return self.fixture_images[path]
     def request(self, action, args):
+        if action == 'status':
+            data = super().request(action, args)
+            data['artwork'] = list(self.fixture_images)[self.naim.title == 'Silent track']
+            return data
+        if action == 'browse':
+            data = super().request(action, args)
+            data['item']['artwork'] = list(self.fixture_images)[0]
+            return data
         if action in ('search', 'library_page'):
             kind = args.get('kind', 'albums')
             items = [{'reference': 'inputs/tidal/' + kind + '/' + str(i), 'title':
@@ -102,6 +115,7 @@ class Contract:
         self.lock = threading.Lock()
         self.fresh = {}
         self.revision = 0
+        self.artwork = ArtworkDelivery(service, clock)
 
     def detail_links(self, item):
         # Only exact provider relationships; absence never becomes a search guess.
@@ -137,7 +151,7 @@ class Contract:
                 if type(value) is not int or not 0 <= value <= 10000: raise ContractError('INVALID_ARGUMENT')
             elif not isinstance(value, str) or len(value.encode()) > (4096 if key == 'cursor' else 256):
                 raise ContractError('INVALID_ARGUMENT')
-        required = {'play': {'reference'}, 'browse': {'reference'}, 'library_state': {'reference'},
+        required = {'play': {'reference'}, 'browse': {'reference'}, 'artwork': {'reference'}, 'library_state': {'reference'},
                     'library_save': {'reference', 'saved'}, 'amplifier': {'direction'}, 'transport': {'command'}}
         if not required.get(action, set()).issubset(args): raise ContractError('INVALID_ARGUMENT')
         if action == 'amplifier' and args['direction'] not in ('up', 'down'): raise ContractError('INVALID_ARGUMENT')
@@ -171,9 +185,12 @@ class Contract:
             if len(self.vault.data['commands']) >= 10000: raise ContractError('JOURNAL_FULL')
             self.vault.update(lambda d: d['commands'].update({key: {'fingerprint': fingerprint, 'outcome': 'unknown'}}))
         try:
-            if action == 'snapshot':
+            if action == 'artwork':
+                data = self.artwork.get(args['reference'])
+            elif action == 'snapshot':
                 sampled_at = self.clock()
                 player = self.service.request('status', {})
+                self.artwork.register(player.get('artwork'))
                 queue = self.service.request('queue', {})
                 try: current = self.detail_links(self.service.request('current_item', {}))
                 except Exception: current = None
@@ -200,6 +217,7 @@ class Contract:
                 data = self.service.request(action, passed)
                 if action == 'browse':
                     data = {**data, 'item': self.detail_links(data['item'])}
+                    self.artwork.register(data['item'].get('artwork'))
                 if 'items' in data:
                     items = data['items']
                     start = 0 if action == 'browse' else offset

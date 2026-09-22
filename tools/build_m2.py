@@ -25,7 +25,7 @@ def run(args):
             '-DCJSON_SOURCE_DIR='+(sdk/'components/json/cJSON').as_posix(),
             '-DSDL2_DIR='+(ROOT/'local/m2/SDL2-2.30.12/x86_64-w64-mingw32/lib/cmake/SDL2').as_posix()]
         subprocess.run(command,check=True)
-        subprocess.run([str(cmake),'--build',str(output),'--target','ndx_fixture','controller_test','bridge_protocol_test','-j','4'],check=True)
+        subprocess.run([str(cmake),'--build',str(output),'--target','ndx_fixture','controller_test','bridge_protocol_test','ui_recovery_test','-j','4'],check=True)
         import shutil
         shutil.copyfile(ROOT/'local/m2/SDL2-2.30.12/x86_64-w64-mingw32/bin/SDL2.dll',output/'SDL2.dll')
         subprocess.run([str(tools/'cmake/data/bin/ctest.exe'),'--test-dir',str(output),'--output-on-failure'],check=True)
