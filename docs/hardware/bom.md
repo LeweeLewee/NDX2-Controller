@@ -1,6 +1,6 @@
 # Parts BOM
 
-Revision 0.3 — 21 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
+Revision 0.4 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
 All new items are **not ordered**. User confirms tools and wires already owned, except the regulated PSU. Screen is not ordered, awaiting stock; intention is to order together.
 
 D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
@@ -14,7 +14,7 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 | HW-020 | Adafruit 3421 SPH0645LM4H I2S microphone | 1 | evaluation candidate | not ordered | Pi Hut £6.70 incl VAT, 2026-09-21 | [Microphone review](microphone-review.md); proposed microSD pin reuse requires validation |
 | HW-021 | SparkFun microSD Sniffer TOL-09419 / SK Pang USD-SNIFFER | 1 conditional | evaluation candidate | not ordered | £8.52 incl VAT, 2026-09-21 | Experimental mic pin access; confirm fit, continuity and stock |
 | HW-022 | External battery-temperature NTC probe compatible with charger | 1 conditional | research | not ordered | Unquoted | Specify sensor curve and mounting; separate from bench thermometer |
-| HW-002 | Protected rechargeable battery pack, base mounted; 5,000–10,000 mAh at nominal 3.7 V is an initial range only | 1 pack | research | not ordered | TBD | Select chemistry, topology, Wh, dimensions, protection and connector after load/charge assessment |
+| HW-002 | Pimoroni BAT0014 protected 10,050 mAh / 3.7 V pack | 1 pack | leading prototype candidate | not ordered | £25, available in supplier data 2026-09-22; delivery excluded | [Larger battery review](larger-battery-review.md): body fits reserved envelope; polarity, restraint and power tests pending |
 | HW-003 | Charger and power path: external route leads; Adafruit BQ24074 4755 candidate | 1 function; 0 or 1 extra board | research | not ordered | Candidate USD 14.95; 2026-09-20; shipping/tax excluded | Verify schematic, charge rate, simultaneous use/charge and termination |
 | HW-004 | Regulated 5 V supply / load switching: external converter candidate; Pololu U3V70F5 reference | 1 function; 0 or 1 extra board | research | not ordered | TBD for external converter | Measure idle losses and startup peaks; avoid duplicate power hardware |
 | HW-005 | Battery state monitoring: onboard capability to investigate; external fuel gauge conditional | 0 or 1 extra board | research | not ordered | TBD if needed | Confirm voltage/status access and low-battery behaviour |
@@ -69,3 +69,7 @@ Do not sum alternative power routes or count included functions twice.
 [Consolidated UK shopping list](prototype-shopping-list.md) covers all functional rows and assembly consumables. BAT0008 6600 mAh (£15 listed) is a UK battery candidate; confirm variant availability, polarity and fit. BQ24074 (£14.40) remains an external charger candidate. Smaller U3V16F5 (£6.70, sold out) is an alternative converter for load testing, not a selected replacement for U3V70F5. Do not sum alternative converters. Combined BQ25185/boost board rejected for this basket because fixed six-hour charging timeout is a poor match for the large pack. No power route is released or runtime validated.
 
 Known microphone + sniffer + display PSU subtotal is £22.92 before delivery and screen. Historic USD figures above remain historical; no complete build price is claimed.
+
+## Larger battery follow-up — 22 September
+
+[Review](larger-battery-review.md) promotes BAT0014 10,050 mAh as the leading candidate: 69.5 x 57 x 20.5 mm maximum body within the 80 x 64 x 26 mm reservation, 37.185 Wh nominal. BAT0015 13,400 mAh requires layout revision. Published Adafruit BQ24074 schematic grounds TMR (safety timers disabled), resolving the earlier timer-configuration research item for that source revision. Delivered hardware, charging and runtime remain untested.

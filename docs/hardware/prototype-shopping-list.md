@@ -1,11 +1,11 @@
 # Prototype procurement BOM — UK
-21 September 2026. Covers one controller and bench bring-up. Nothing ordered by this task.
+Updated 22 September 2026. Covers one controller and bench bring-up. Nothing ordered by this task.
 
 User inventory: tools and wires already owned, including the supplies/meters asked about; regulated USB PSU missing. Screen not ordered, awaiting stock. Consolidate purchases when the screen is available. Exact meter capability should still be recorded with measurements.
 
 ## Proposed supplier baskets
 
-Prices are listed GBP item prices checked 21 September, excluding delivery. Pi Hut prices include VAT. Pimoroni BAT0008 shows £15; confirm UK VAT and variant at checkout. Stock can change. A listing with an Add to cart button alone is not proof of stock.
+Prices are listed GBP item prices checked 21 September, excluding delivery. Pi Hut prices include VAT. Pimoroni BAT0014 live quote is £25 as of 22 September; confirm UK VAT and variant at checkout. Stock can change. A listing with an Add to cart button alone is not proof of stock.
 
 | BOM | Part / supplier link | Qty | Unit price | Stock / purchasing status |
 | --- | --- | --- | --- | --- |
@@ -13,13 +13,13 @@ Prices are listed GBP item prices checked 21 September, excluding delivery. Pi H
 | HW-020 | [Adafruit 3421 SPH0645LM4H I2S microphone — Pi Hut](https://thepihut.com/collections/audio/products/adafruit-i2s-mems-microphone-breakout-sph0645lm4h) | 1 | £6.70 | Listed in stock; evaluation candidate, integration untested |
 | HW-021 | [SparkFun microSD Sniffer — SK Pang](https://www.skpang.co.uk/products/microsd-sniffer), USD-SNIFFER / SparkFun TOL-09419 | 1 | £8.52 incl VAT | Orderable listing; availability not explicitly confirmed. Experimental pin access, not a microphone interface |
 | HW-017 | [Official Raspberry Pi 15 W USB-C PSU, UK plug — Pi Hut](https://thepihut.com/products/raspberry-pi-psu-uk), white SC0443 | 1 | £7.70 | Listed in stock; 5.1 V / 3 A, captive USB-C cable. For display bench power |
-| HW-002 | [Pimoroni protected lithium-ion pack](https://shop.pimoroni.com/products/lithium-ion-battery-pack), **6600 mAh BAT0008** | 1 | £15.00 listed | Candidate; variant stock unresolved. Road shipping. Confirm connector polarity and mechanical envelope before ordering |
+| HW-002 | [Pimoroni BAT0014 10,050 mAh](https://shop.pimoroni.com/products/high-capacity-lithium-ion-battery-pack?variant=32012684623955), protected 3.7 V pack | 1 | £25.00 | Available in live supplier data 22 September; leading candidate. Body fits reserved envelope; confirm polarity and cradle/lead routing |
 | HW-003 | [Adafruit BQ24074 4755 charger — Pi Hut](https://thepihut.com/products/adafruit-universal-usb-dc-solar-lithium-ion-polymer-charger-bq24074) | 1 | £14.40 | 11 listed available at research time; external-power evaluation candidate |
 | HW-004 | [Pololu U3V16F5 4941 converter — Pi Hut](https://thepihut.com/products/pololu-5v-step-up-voltage-regulator-u3v16f5) | 1 alternative | £6.70 | Sold out; candidate only, load capacity must be measured. Existing U3V70F5 remains another candidate; do not buy both |
 | HW-022 | 10 kΩ NTC battery-temperature probe suitable for BQ24074 | 1 conditional | Unquoted | Part curve and attachment to pack still to specify; not a generic interchangeable thermistor purchase |
 
 **Subtotal for microphone + sniffer + PSU: £22.92**, excluding screen and delivery. Pi Hut portion £14.40; SK Pang portion £8.52.
-Battery + charger + U3V16F5 add £36.10 at listed prices: **£59.02 partial electronics scenario**, excluding screen, shipping, any VAT adjustment on the battery, NTC and remaining assembly items. This is not a complete build total or a released battery-powered design.
+BAT0014 battery + charger + U3V16F5 add £46.10 at listed prices: **£69.02 partial electronics scenario**, excluding screen, shipping, any VAT adjustment on the battery, NTC and remaining assembly items. This is not a complete build total or a released battery-powered design.
 
 Target primary basket: Pi Hut screen, microphone, PSU and whichever power parts pass selection. Use SK Pang for the sniffer only if that access route is retained. Pimoroni battery creates a third delivery unless a suitable pack becomes available from the primary supplier. This is a consolidation proposal, not a proven cheapest landed basket: delivery depends on destination and battery carriage. Do not place separate small orders while screen stock remains the gating item.
 
@@ -62,3 +62,7 @@ The [Pimoroni-linked BAT0008 datasheet](https://cdn.shopify.com/s/files/1/0174/1
 The [Adafruit 6106 BQ25185 combined 5 V board](https://learn.adafruit.com/adafruit-bq25185-usb-dc-solar-charger-with-5v-boost-board/overview) was examined but is not recommended for this basket. Its fixed six-hour charge timeout can interrupt a depleted 6600 mAh pack's charge; the guide also flags startup difficulty with immediate loads above 200 mA. Its £8.60 price and reduced board count do not resolve these requirements.
 
 Before releasing the whole order: confirm bare 4.3B stock/price, sniffer fit/net continuity from the board revision, battery dimensions/polarity, final charger/converter choice, and exact mechanical consumables. Recheck stock and supplier delivery totals together. No runtime or weeks-standby claim has been validated.
+
+## Larger pack update — 22 September
+
+See [larger battery review](larger-battery-review.md). BAT0014 replaces BAT0008 in the proposed basket; no purchase or final selection is recorded. BAT0008 discussion above is historical comparison. BAT0014 body is 69.5 x 57 x 20.5 mm maximum, nominal energy +52.3%. The published Adafruit BQ24074 netlist grounds TMR, so its charge safety timers are disabled; check the delivered revision, thermal behaviour and charge termination. The earlier request to establish source timer configuration is now answered, not a claim of a tested charging system.
