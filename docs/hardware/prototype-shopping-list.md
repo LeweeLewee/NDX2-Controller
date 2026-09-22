@@ -5,7 +5,7 @@ User inventory: tools and wires already owned, including the supplies/meters ask
 
 ## Supplier orders and outstanding purchases
 
-Prices are listed GBP item prices checked 21 September, excluding delivery. Pi Hut prices include VAT. Pimoroni BAT0014 live quote is £25 as of 22 September; confirm UK VAT and variant at checkout. Stock can change. A listing with an Add to cart button alone is not proof of stock.
+Prices are listed GBP item prices checked 21 September, excluding delivery. Pi Hut prices include VAT. Pimoroni BAT0014 checkout screenshot showed £25 subtotal, £10.74 shipping and £7.15 estimated tax (£42.89 total); final paid amount and discount acceptance are unconfirmed. Stock can change. A listing with an Add to cart button alone is not proof of stock.
 
 | BOM | Part / supplier link | Qty | Unit price | Stock / purchasing status |
 | --- | --- | --- | --- | --- |
@@ -13,14 +13,14 @@ Prices are listed GBP item prices checked 21 September, excluding delivery. Pi H
 | HW-020 | [Adafruit 3421 SPH0645LM4H I2S microphone — Pi Hut](https://thepihut.com/collections/audio/products/adafruit-i2s-mems-microphone-breakout-sph0645lm4h) | 1 | £6.70 | ordered from Pi Hut, user confirmed 2026-09-22; integration untested |
 | HW-021 | [SparkFun microSD Sniffer — SK Pang](https://www.skpang.co.uk/products/microsd-sniffer), USD-SNIFFER / SparkFun TOL-09419 | 1 | £8.52 incl VAT | Ordered from SK Pang, user confirmed 2026-09-22; delivery not confirmed. Experimental microphone pin access, integration untested |
 | HW-017 | Existing user-owned USB-C power supply | 1 owned; 0 to buy | £0 incremental | Fulfilled from existing stock, user confirmed 22 September. Use normal 5 V USB output with a suitable cable for the BQ24074 USB-C input |
-| HW-002 | [Pimoroni BAT0014 10,050 mAh](https://shop.pimoroni.com/products/high-capacity-lithium-ion-battery-pack?variant=32012684623955), protected 3.7 V pack | 1 | £25.00 | Available in live supplier data 22 September; leading candidate. Body fits reserved envelope; confirm polarity and cradle/lead routing |
+| HW-002 | [Pimoroni BAT0014 10,050 mAh](https://shop.pimoroni.com/products/high-capacity-lithium-ion-battery-pack?variant=32012684623955), protected 3.7 V pack | 1 | £25.00 | Ordered from Pimoroni, user confirmed 2026-09-22. Body fits reserved envelope; confirm delivered pack polarity and cradle/lead routing |
 | HW-003 | [Adafruit BQ24074 4755 charger — Pi Hut](https://thepihut.com/products/adafruit-universal-usb-dc-solar-lithium-ion-polymer-charger-bq24074) | 1 | £14.40 | ordered from Pi Hut, user confirmed 2026-09-22; external-power integration untested |
 | HW-004 | [Pololu U3V40F5 — Pi Hut](https://thepihut.com/products/5v-step-up-voltage-regulator-u3v40f5), POL4012 | 1 | £9.60 | ordered from Pi Hut, user confirmed 2026-09-22; load and standby testing pending |
 | HW-006a | [JST-PH 2-pin female connector lead — Pi Hut](https://thepihut.com/products/jst-ph-2-pin-cable-female-connector-150mm), 102818 | 1 | £0.80 | ordered from Pi Hut, user confirmed 2026-09-22; charger LOAD-to-converter lead |
 | HW-006b | [USB-A female breakout — horizontal — Pi Hut](https://thepihut.com/products/usb-a-breakout-horizontal), 106576 | 1 | £2.60 | ordered from Pi Hut, user confirmed 2026-09-22; converter-to-display USB connection |
 | HW-022 | 10 kΩ NTC battery-temperature probe suitable for BQ24074 | 1 conditional | Unquoted | Part curve and attachment to pack still to specify; not a generic interchangeable thermistor purchase |
 
-**Pi Hut order: six items, £34.10 plus screen price and delivery**, using recorded basket prices including VAT. Screen paid price and final invoice total are not supplied. PSU already owned (£0 new spend). MicroSD sniffer is ordered from SK Pang (user confirmed 22 September; £8.52 reference price, final invoice/delivery not supplied). Battery (£25 reference, Pimoroni) remains not ordered. No delivery or integration test is recorded.
+**Pi Hut order: six items, £34.10 plus screen price and delivery**, using recorded basket prices including VAT. Screen paid price and final invoice total are not supplied. PSU already owned (£0 new spend). MicroSD sniffer is ordered from SK Pang (user confirmed 22 September; £8.52 reference price, final invoice/delivery not supplied). Pimoroni BAT0014 battery is also ordered, user confirmed 22 September; checkout total £42.89, final paid amount unconfirmed. No delivery or integration test is recorded.
 
 ## Full remaining assembly coverage
 
@@ -60,8 +60,8 @@ Historical comparison (superseded for procurement by ordered U3V40F5): [Pololu U
 
 The [Adafruit 6106 BQ25185 combined 5 V board](https://learn.adafruit.com/adafruit-bq25185-usb-dc-solar-charger-with-5v-boost-board/overview) was examined but is not recommended for this basket. Its fixed six-hour charge timeout can interrupt a depleted 6600 mAh pack's charge; the guide also flags startup difficulty with immediate loads above 200 mA. Its £8.60 price and reduced board count do not resolve these requirements.
 
-After the Pi Hut order: record display paid price and final invoice, check delivered board revisions, sniffer fit/net continuity, battery dimensions/polarity and exact mechanical consumables. Battery procurement remains outstanding; sniffer delivery and integration checks are pending. No runtime or weeks-standby claim has been validated.
+After the Pi Hut order: record display paid price and final invoice, check delivered board revisions, sniffer fit/net continuity, battery dimensions/polarity and exact mechanical consumables. Battery and sniffer are ordered; delivery and integration checks are pending. No runtime or weeks-standby claim has been validated.
 
 ## Larger pack update — 22 September
 
-See [larger battery review](larger-battery-review.md). BAT0014 replaces BAT0008 in the proposed basket; no purchase or final selection is recorded. BAT0008 discussion above is historical comparison. BAT0014 body is 69.5 x 57 x 20.5 mm maximum, nominal energy +52.3%. The published Adafruit BQ24074 netlist grounds TMR, so its charge safety timers are disabled; check the delivered revision, thermal behaviour and charge termination. The earlier request to establish source timer configuration is now answered, not a claim of a tested charging system.
+See [larger battery review](larger-battery-review.md). BAT0014 replaces BAT0008 and is ordered as the prototype battery, user confirmed 22 September. BAT0008 discussion above is historical comparison. BAT0014 body is 69.5 x 57 x 20.5 mm maximum, nominal energy +52.3%. The published Adafruit BQ24074 netlist grounds TMR, so its charge safety timers are disabled; check the delivered revision, thermal behaviour and charge termination. The earlier request to establish source timer configuration is now answered, not a claim of a tested charging system.

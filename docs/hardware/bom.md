@@ -1,7 +1,7 @@
 # Parts BOM
 
-Revision 0.7 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
-Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. MicroSD sniffer is ordered from SK Pang, user confirmed 22 September; battery remains not ordered.
+Revision 0.8 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
+Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. MicroSD sniffer is ordered from SK Pang, user confirmed 22 September; Pimoroni BAT0014 10,050 mAh battery is also ordered, user confirmed 22 September.
 
 D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
 
@@ -14,7 +14,7 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 | HW-020 | Adafruit 3421 SPH0645LM4H I2S microphone | 1 | evaluation candidate | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut £6.70 incl VAT, 2026-09-21 | [Microphone review](microphone-review.md); proposed microSD pin reuse requires validation |
 | HW-021 | SparkFun microSD Sniffer TOL-09419 / SK Pang USD-SNIFFER | 1 | evaluation candidate | ordered from SK Pang, user confirmed 2026-09-22 | £8.52 incl VAT, 2026-09-21 | Experimental mic pin access; confirm delivery, fit and continuity |
 | HW-022 | External battery-temperature NTC probe compatible with charger | 1 conditional | research | not ordered | Unquoted | Specify sensor curve and mounting; separate from bench thermometer |
-| HW-002 | Pimoroni BAT0014 protected 10,050 mAh / 3.7 V pack | 1 pack | leading prototype candidate | not ordered | £25, available in supplier data 2026-09-22; delivery excluded | [Larger battery review](larger-battery-review.md): body fits reserved envelope; polarity, restraint and power tests pending |
+| HW-002 | Pimoroni BAT0014 protected 10,050 mAh / 3.7 V pack | 1 pack | prototype selection | ordered from Pimoroni, user confirmed 2026-09-22 | Checkout showed £25 subtotal + £10.74 shipping + £7.15 estimated tax = £42.89; final paid amount unconfirmed | [Larger battery review](larger-battery-review.md): body fits reserved envelope; polarity, restraint and power tests pending |
 | HW-003 | Adafruit BQ24074 4755 charger and power path | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut basket £14.40 incl VAT | Validate delivered revision, charge rate, simultaneous use/charge and termination |
 | HW-004 | Pololu U3V40F5 5 V step-up regulator, POL4012 | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut basket £9.60 incl VAT | Measure idle losses and startup peaks; system low-voltage control remains unresolved |
 | HW-005 | Battery state monitoring: onboard capability to investigate; external fuel gauge conditional | 0 or 1 extra board | research | not ordered | TBD if needed | Confirm voltage/status access and low-battery behaviour |
@@ -79,3 +79,7 @@ Microphone + sniffer new-purchase subtotal is £15.22 before delivery and screen
 ## Pi Hut order — 22 September
 
 User confirmed all six items above ordered. Recorded basket subtotal is £34.10 plus the display and delivery; display paid price, final invoice total and arrival date are not supplied. Prices remain basket references, not invoice verification. Earlier converter comparisons and cost scenarios are historical; U3V40F5 is the ordered prototype converter. Procurement does not establish validated integration or battery life.
+
+## Battery order — 22 September
+
+User confirmed Pimoroni BAT0014 10,050 mAh ordered. Checkout screenshot showed £42.89 including shipping and estimated tax; no discount acceptance or final invoice supplied. Delivery not yet confirmed. All eight named prototype electronics/connector items across Pi Hut, SK Pang and Pimoroni are now ordered; PSU, tools and wires are owned. Remaining monitoring, temperature sensing and enclosure assembly details are still open.
