@@ -1,5 +1,18 @@
 # M2 software and UI review closeout — 22 September 2026
 
+## Current published closeout — 22 September 2026
+
+The approved core UI port and M2 foundation are committed and pushed: `04fcf17` (implementation) and `a87286a` (merge with concurrent hardware research through `4749541`). The working tree was clean at handover preparation. This closeout update is documentation-only; inspect Git status/history at the next start rather than assuming a fixed HEAD.
+
+Use the rewritten [continuation prompt](continuation-prompt.md) and [native parity/evidence](m2-ui-parity.md). The previous prompt is retained as [history](m2-ui-port-prompt-history.md). Core UI implementation is complete to the bounded fixture scope; the recommended next slice is authenticated, bounded artwork delivery and native rendering, with any blocking recovery defects fixed first. Do not repeat the approved UI port.
+
+Prior validation: 72 Python tests, five JavaScript tests, two CTests, five-stage TLS demo, expanded native LVGL/TLS smoke, desktop build and ESP32 build passed. Thirteen real LVGL captures were recorded and key screens inspected. The ESP32 image is `0x925b0` bytes with 43% application partition free. The 30-second voice smoke uses accelerated time. No tests/builds were rerun for this documentation-only closeout.
+
+Remaining: native artwork, persistent device preferences, production protected provisioning/admin, live metadata/membership integration validation, and physical screen/touch/wake/backlight/sleep/microphone/power evidence. Pi suitability remains conditional. HP-01 and physical P3/P4/P5 remain open; merged enclosure and battery research does not pass those gates. No audio test, flashing, efuse, Pi installation or real credential provisioning was performed.
+
+The approved HTML hash and frozen feasibility tag are unchanged. Private configuration, generated dependencies/builds and captures remain ignored. The user authorized repository updates when appropriate; preserve concurrent work and publish coherent validated checkpoints without force pushes. The older sections below describe the pre-port checkpoint and are retained as history.
+
+
 This checkpoint closes the chat, not M2 or its physical acceptance gates. The repository is the durable source of truth. The next implementation is **approved UI parity in shared C/LVGL**, desktop first. Use the [continuation prompt](continuation-prompt.md).
 
 ## Source precedence and repository state

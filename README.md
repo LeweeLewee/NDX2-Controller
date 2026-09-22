@@ -10,7 +10,7 @@ The project's TIDAL developer app is created. Its metadata-only adapter retrieve
 
 The frozen reference is tagged `software-feasibility-v1`. Start the next phase from the [milestone closeout and detailed-design handover](docs/milestone-handover.md).
 
-**Current checkpoint, 22 September 2026:** [M2 closeout](docs/m2-closeout.md) and [continuation prompt](docs/continuation-prompt.md). The [desktop UI is approved](docs/ui-review/approval.md); the [shared LVGL port and fixture evidence](docs/m2-ui-parity.md) now cover the approved core screens and interactions. Approval does not imply native UI parity or physical acceptance.
+**Published checkpoint and continuation, 22 September 2026:** [M2 closeout](docs/m2-closeout.md) and [continuation prompt](docs/continuation-prompt.md). The [desktop UI is approved](docs/ui-review/approval.md); the [shared LVGL port and fixture evidence](docs/m2-ui-parity.md) now cover the approved core screens and interactions. Approval does not imply native UI parity or physical acceptance.
 
 ## The product
 
