@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "fixture.h"
 #include "transport.h"
+#include "preferences_store.h"
 #include <stdio.h>
 #include <string.h>
 static SDL_Renderer *renderer;
@@ -35,10 +36,12 @@ static void read_pointer(lv_indev_drv_t *drv,lv_indev_data_t *data) {
     if(!controller_ui_touch(down)) data->state=LV_INDEV_STATE_RELEASED;
 }
 int main(int argc,char **argv) {
-    const char *smoke=NULL,*python=NULL,*config=NULL;
+    const char *smoke=NULL,*python=NULL,*config=NULL,*preferences_path=NULL,*preferences_smoke=NULL;
     for(int i=1;i<argc;i++) {
         if(!strcmp(argv[i],"--smoke")&&i+1<argc) smoke=argv[++i];
         else if(!strcmp(argv[i],"--bridge")&&i+2<argc) { python=argv[++i]; config=argv[++i]; }
+        else if(!strcmp(argv[i],"--preferences")&&i+1<argc) preferences_path=argv[++i];
+        else if(!strcmp(argv[i],"--preferences-smoke")&&i+1<argc) preferences_smoke=argv[++i];
         else return 2;
     }
     SDL_SetMainReady();
@@ -52,6 +55,12 @@ int main(int argc,char **argv) {
     static lv_indev_drv_t input; lv_indev_drv_init(&input); input.type=LV_INDEV_TYPE_POINTER; input.read_cb=read_pointer; lv_indev_drv_register(&input);
     platform_t platform=fixture_platform(now_ms,log_event);
     if(python&&!desktop_transport_init(&platform,python,config)) return 2;
+    char default_preferences[1024];
+    if(!preferences_path) {
+        char *directory=SDL_GetPrefPath("NDX2","Controller");
+        if(directory) { snprintf(default_preferences,sizeof(default_preferences),"%spreferences.bin",directory); SDL_free(directory); preferences_path=default_preferences; }
+    }
+    if(preferences_path) desktop_preferences_init(&platform,preferences_path);
     controller_ui_init(&platform);
     bool running=true; uint64_t last=now_ms(),started=last,next=last+2500; unsigned stage=0; int exit_code=0;
     while(running) {
@@ -65,6 +74,31 @@ int main(int argc,char **argv) {
         if(smoke&&now>=next) {
             const controller_t *s=controller_ui_state();
             next=now+500;
+            if(preferences_smoke) {
+                switch(stage) {
+                case 0:
+                    if(!strcmp(preferences_smoke,"check")&&(s->palette!=1||s->brightness!=65||s->timeout!=5)) { exit_code=7; running=false; break; }
+                    tap(756,30); stage++; break;
+                case 1: if(s->context.screen==SETTINGS) { tap(330,120); stage++; } break;
+                case 2: if(s->context.screen==DISPLAY) {
+                    if(!strcmp(preferences_smoke,"save")) { tap(400,210); stage++; }
+                    else { capture(smoke,"15-preferences-restored"); puts("PASS preferences restored in fresh native process"); running=false; }
+                } break;
+                case 3: if(s->palette==1) {
+                    /* Native value-change events from the actual Display widgets. */
+                    lv_obj_t *body=lv_obj_get_child(lv_scr_act(),3);
+                    lv_obj_t *slider=lv_obj_get_child(body,1), *dropdown=lv_obj_get_child(body,6);
+                    lv_slider_set_value(slider,65,LV_ANIM_OFF); lv_event_send(slider,LV_EVENT_VALUE_CHANGED,NULL);
+                    lv_dropdown_set_selected(dropdown,2); lv_event_send(dropdown,LV_EVENT_VALUE_CHANGED,NULL);
+                    next=now+1200; stage++;
+                } break;
+                case 4:
+                    if(s->brightness!=65||s->timeout!=5||!controller_ui_save_preferences()) { exit_code=8; running=false; break; }
+                    capture(smoke,"14-preferences-saved"); puts("PASS preferences edited and saved through native UI"); running=false; break;
+                }
+                if(SDL_GetTicks64()-started>15000) { exit_code=9; running=false; }
+                continue;
+            }
             switch(stage) {
             case 0: if(controller_ui_ready()) { capture(smoke,"01-now"); tap(290,440); stage++; } break;
             case 1: if(s->context.screen==FIND) { tap(664,108); stage++; } break;
@@ -107,5 +141,6 @@ int main(int argc,char **argv) {
             if(SDL_GetTicks64()-started>30000) { fprintf(stderr,"Native UI smoke timed out at stage %u\n",stage); exit_code=4; running=false; }
         }
     }
+    controller_ui_save_preferences(); desktop_preferences_close();
     desktop_transport_close(); SDL_DestroyTexture(texture); SDL_DestroyRenderer(renderer); SDL_DestroyWindow(window); SDL_Quit(); return exit_code;
 }

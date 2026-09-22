@@ -4,6 +4,7 @@
 #include "esp_system.h"
 #include "ui.h"
 #include "fixture.h"
+#include "preferences_nvs.h"
 #include "bridge_transport.h"
 static uint64_t now_ms(void) { return esp_timer_get_time()/1000; }
 static void diagnostic(const char *event) {
@@ -17,6 +18,7 @@ void app_main(void) {
     static platform_t platform;
     platform=fixture_platform(now_ms,diagnostic);
     diagnostic(esp_bridge_start(&platform)?"protected_bridge_client":"silent_fixture_no_provisioning");
+    esp_preferences_init(&platform);
     if (lvgl_port_lock(-1)) {
         controller_ui_init(&platform);
         lvgl_port_unlock();

@@ -186,3 +186,7 @@ Reference evidence only, no physical test: [larger battery review](hardware/larg
 ## M2 authenticated artwork checkpoint - 22 September 2026
 
 Authenticated bounded artwork renders in shared LVGL Playing/detail screens using silent local JPEG fixtures. Voice Restart now cancels pending transcripts. Fresh validation: 77 Python tests, five JavaScript tests, three CTests, both TLS demos, desktop and ESP32 builds passed (`0x92c00`, 43% free). Native artwork/changed-cover pixels were inspected and asserted. See [limits and detailed evidence](m2-artwork.md). Live artwork/quality, deployment-host resource profiling, provisioning/preferences and physical HP-01/P3/P4/P5 remain open. No audio or hardware operation occurred.
+
+## M2 local preferences - 22 September 2026
+
+Local palette, brightness intent and timeout persist across separate native desktop launches. Bounds/checksum, atomic replacement, writer locking, corrupted storage, coalescing and save failures have native tests. Restored Settings pixels were inspected. Fresh evidence: 77 Python tests, five JavaScript tests, four CTests, both TLS demos, preference restart smoke and both builds passed. The ESP32 NVS adapter is compiled only; hardware brightness/sleep and physical durability remain open. See [details and limitations](m2-preferences.md). No live Naim or hardware operation occurred.

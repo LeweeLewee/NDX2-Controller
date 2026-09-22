@@ -95,3 +95,7 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 ## D021 - Bounded authenticated artwork preview
 
 **Implementation choice within the authorized M2 slice, 22 September 2026.** Keep artwork processing on the D018 bridge and send fixed 80 x 80 RGB565 previews through the authenticated v1 read envelope. Native code validates fixed bounds and renders with LVGL; provider URLs and JPEG decoding stay off the controller. Preserve approved artwork-space dimensions, clear stale/obsolete covers and leave optional failures unavailable. This fits the current 32-KiB response bound without a new image route. Resolution is provisional; live visual quality, deployment-host resource profiling and physical memory remain validation work. See [contract](controller-contract-v1.md) and [evidence](m2-artwork.md).
+
+## D022 - Controller-local display preferences
+
+**Authorized offline M2 slice, 22 September 2026.** Save palette, brightness intent and timeout on the controller, separately from bridge/account credentials and commands. Use a versioned, strictly bounded record, coalesced saves and visible failure states. Windows writes use atomic replacement and a writer lock; ESP32 uses one separate NVS blob without erase-on-error recovery. Missing records use defaults; corrupt/future records remain untouched and session-only. Brightness/sleep remain hardware-unbound until physical validation. See [implementation and evidence limits](m2-preferences.md).

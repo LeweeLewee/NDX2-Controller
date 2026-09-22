@@ -65,5 +65,5 @@ platform_t fixture_platform(uint64_t (*now)(void),void (*log)(const char *)) {
     clock_ms=now; diagnostic=log; pending=playing=false;
     for(unsigned k=0;k<4;k++) for(unsigned i=0;i<32;i++) membership[k][i]=i==1?0:-1;
     membership[1][101%32]=0;
-    platform_t p={now,log,snapshot,play,amp,light,sleep_mode,battery,mic,cancel,submit,poll_reply,invalidate,request_id}; return p;
+    platform_t p={now,log,snapshot,play,amp,light,sleep_mode,battery,mic,cancel,submit,poll_reply,invalidate,request_id,NULL,NULL}; return p;
 }

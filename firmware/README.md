@@ -67,3 +67,9 @@ The shared renderer now implements the D020 core layout and interaction slices; 
 Shared LVGL/codec accept fixed 80 x 80 RGB565 artwork previews over the authenticated bridge. No firmware image-decoder dependency or SDK pin changed. Three CTests cover controller state, strict protocol bounds and native UI cancellation/artwork failures. Desktop TLS smoke checks artwork pixels before/after a silent track change. Latest ESP32 build: `0x92c00`, 43% free; compiler evidence only. Standalone firmware fixtures have no artwork pixels yet.
 
 The host bridge uses already-installed Pillow 12.2.0 for bounded JPEG normalization and local fixtures. Host dependencies are pinned in `tools/requirements-m2.txt` (also cryptography 46.0.7 for certificates). On a fresh host install that file with the chosen Python environment; no download was needed for this checkpoint. See [bounds and evidence](../docs/m2-artwork.md).
+
+## Persistent local preferences - 22 September 2026
+
+Palette/brightness intent/timeout use the shared bounded preference record and local platform storage callbacks. Windows uses SDL's per-user `NDX2/Controller` directory, or `--preferences PATH` with an existing parent. The ESP32 NVS adapter uses `display_prefs/record`, never erases on storage error and does not change credential protection gates. No hardware brightness/sleep effect is implemented.
+
+Run `python tools/m2_preferences_demo.py` after the desktop build for isolated two-process restart evidence and native captures. All smoke tools supply temporary preference paths, preserving normal user preferences. Four CTests now include atomic storage/recovery and native save behavior. ESP32 storage remains compiled-only; physical latency/power-loss/endurance are open. See [preferences runbook](../docs/m2-preferences.md).

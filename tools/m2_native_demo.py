@@ -30,7 +30,7 @@ def main():
         env=os.environ.copy(); env['SDL_VIDEODRIVER']='dummy'
         try:
             result=subprocess.run([str(ROOT/'local/m2/desktop-verified/ndx_fixture.exe'),'--bridge',sys.executable,
-                str(config),'--smoke',str(captures)],cwd=ROOT,env=env,timeout=45,capture_output=True,text=True,
+                str(config),'--preferences',str(root/'preferences.bin'),'--smoke',str(captures)],cwd=ROOT,env=env,timeout=45,capture_output=True,text=True,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
             print(result.stdout)
             if result.returncode:

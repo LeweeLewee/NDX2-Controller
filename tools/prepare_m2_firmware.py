@@ -21,7 +21,7 @@ def sync_sources(output):
             target=output/'main'/path.name
             if not target.exists() or target.read_bytes()!=path.read_bytes(): shutil.copyfile(path,target)
     (output/'main/CMakeLists.txt').write_text(
-        'idf_component_register(SRCS "waveshare_rgb_lcd_port.c" "main.c" "lvgl_port.c" "controller.c" "ui.c" "fixture.c" "bridge_protocol.c" "bridge_transport.c" INCLUDE_DIRS ".")\n'
+        'idf_component_register(SRCS "waveshare_rgb_lcd_port.c" "main.c" "lvgl_port.c" "controller.c" "ui.c" "fixture.c" "bridge_protocol.c" "bridge_transport.c" "preferences.c" "preferences_nvs.c" INCLUDE_DIRS ".")\n'
         'idf_component_get_property(json_lib json COMPONENT_LIB)\n'
         'target_compile_definitions(${json_lib} PRIVATE CJSON_NESTING_LIMIT=16)\n')
     for name in ('sdkconfig.defaults','sdkconfig'):
@@ -58,7 +58,7 @@ def prepare(archive, output, touch_reviewed=False):
     for path in (ROOT/'firmware/esp32').glob('*.[ch]'):
         shutil.copyfile(path, output/'main'/path.name)
     cmake = output/'main/CMakeLists.txt'
-    cmake.write_text('idf_component_register(SRCS "waveshare_rgb_lcd_port.c" "main.c" "lvgl_port.c" "controller.c" "ui.c" "fixture.c" "bridge_protocol.c" "bridge_transport.c" INCLUDE_DIRS ".")\n')
+    cmake.write_text('idf_component_register(SRCS "waveshare_rgb_lcd_port.c" "main.c" "lvgl_port.c" "controller.c" "ui.c" "fixture.c" "bridge_protocol.c" "bridge_transport.c" "preferences.c" "preferences_nvs.c" INCLUDE_DIRS ".")\n')
     # Components are vendored inside the checksum-pinned archive. Disable floating registry resolution.
     (output/'main/idf_component.yml').write_text('dependencies:\n  idf: "==5.2.0"\n')
     config = output/'sdkconfig.defaults'

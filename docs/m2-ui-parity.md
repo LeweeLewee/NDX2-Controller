@@ -11,7 +11,7 @@ Implements D020 in shared C/LVGL, using the approved browser source unchanged. I
 | Details | Album title, separate Save/Remove | Native album/track/artist/playlist browse, exact related links, children, bounded paging, artist Follow/Unfollow/status, compact Library actions and distinct saved/unsaved/unknown |
 | Browsing | Albums only, basic Back | Four search filters, collection pages, read-only queue, independent row membership actions. Back retains query/filter/cursor/page/items/scroll and selected detail/membership. History remains bounded to four entries |
 | Voice | Record → review → search | Microphone entry records immediately; Stop & search explicitly requests fixture transcription and searches; Restart discards; Cancel/Back/section exit/disconnect discard; 30 s stops without submission. No physical microphone or live AI integration |
-| Settings | Absent | Gear → Display/Connection/Device; native brightness slider, palette options, timeout dropdown, Wi-Fi/pairing setup guidance and labelled simulations. Preferences are session-only; no hardware brightness, sleep, network reconfiguration or provisioning is claimed |
+| Settings | Absent | Gear → Display/Connection/Device; native brightness slider, palette options, timeout dropdown, Wi-Fi/pairing setup guidance and labelled simulations. Display preferences now persist locally (see follow-up); hardware brightness/sleep and network provisioning remain unavailable |
 | Recovery and commands | Protected TLS and state foundation | Retained authentication/trust, no mutation replay, generation rejection, freshness gates and wake-release suppression. Both amplifier controls use the same in-flight gate. D011 adapter unchanged |
 | Standalone firmware fixture | Static scaffolding | In-memory bounded request/reply fixture serves the same screens before hardware/provisioning; all operations are silent simulations |
 
@@ -39,8 +39,12 @@ Initial development runs caught and fixed Python edit syntax, unavailable LVGL g
 
 HP-01 and physical P3/P4/P5 remain open. Follow the unchanged ten-step [hardware-arrival checklist](m2-software.md#hardware-arrival-checklist). Development-host bridge operation remains supported; Pi placement depends on private inventory. B01 remains deferred; queue/playlist editing and general feature parity remain outside scope.
 
-Remaining integration: live artwork validation and final preview quality; live validation of exact metadata and membership; production provisioning/admin UI; persistent device preferences; physical screen/backlight/sleep/microphone behavior and error usability trials. Source selection and multiple-artist presentation need later review if real metadata exposes those cases. Desktop fixture success is not physical acceptance.
+Remaining integration: live artwork validation and final preview quality; live validation of exact metadata and membership; production provisioning/admin UI; physical preference effects and durability; physical screen/backlight/sleep/microphone behavior and error usability trials. Source selection and multiple-artist presentation need later review if real metadata exposes those cases. Desktop fixture success is not physical acceptance.
 
 ## Authenticated artwork follow-up - 22 September 2026
 
 The next bounded integration is implemented. See [artwork bounds, recovery fix and fresh evidence](m2-artwork.md): 77 Python tests, five JavaScript tests, three CTests, both TLS demos and both builds passed. Actual Playing/detail/changed-cover pixels were inspected. Older artwork-unavailable statements describe the earlier checkpoint; live image quality and physical gates remain open.
+
+## Local preferences follow-up - 22 September 2026
+
+Palette, brightness intent and timeout persist across native desktop launches. Versioned validation, atomic replacement, save feedback, coalescing and storage-failure behavior are tested. The ESP32 NVS adapter compiles; physical durability and brightness/sleep behavior remain open. See [preferences evidence](m2-preferences.md). Four CTests and the separate-process LVGL restart smoke pass alongside the existing 77 Python/five JavaScript tests and TLS demos. The approved layout/source remain unchanged.

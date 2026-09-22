@@ -8,7 +8,11 @@ static uint64_t clock_ms=100;
 static bridge_request_t sent;
 static bool occupied, deliver;
 static bridge_reply_t incoming;
-static unsigned submissions;
+static unsigned submissions, preference_writes;
+static bool preference_success=true;
+static preferences_t stored;
+static preferences_result_t load_test(preferences_t *p) { *p=(preferences_t){1,65,5}; return PREF_LOADED; }
+static bool save_test(const preferences_t *p) { preference_writes++; if(preference_success) stored=*p; return preference_success; }
 static uint64_t clock_now(void) { return clock_ms; }
 static void diagnostic(const char *s) { (void)s; }
 static void cancel(void) {}
@@ -40,8 +44,9 @@ int main(void) {
     static lv_disp_drv_t display; lv_disp_drv_init(&display); display.hor_res=800; display.ver_res=480;
     display.draw_buf=&draw; display.flush_cb=flush_test; lv_disp_drv_register(&display);
     platform_t platform={.now_ms=clock_now,.diagnostic=diagnostic,.microphone_cancel=cancel,.microphone_start=start,
-        .submit=submit_test,.poll=poll_test,.invalidate=invalidated,.request_id=identity};
+        .submit=submit_test,.poll=poll_test,.invalidate=invalidated,.request_id=identity,.load_preferences=load_test,.save_preferences=save_test};
     controller_ui_init(&platform);
+    assert(state.palette==1&&state.brightness==65&&state.timeout==5&&!preference_writes);
     controller_snapshot(&state,clock_ms); controller_ui_touch(false); next_read=2000;
     controller_push(&state,VOICE); start_capture(); render();
     tap_action(18); assert(sent.action==BR_VOICE&&network_pending);
@@ -76,5 +81,22 @@ int main(void) {
     controller_ui_disconnect(); incoming.generation=image_generation; deliver=true; tick(NULL);
     assert(!artwork_loaded&&!state.online); /* obsolete image cannot revive a disconnect */
     puts("PASS native artwork identity/missing/corrupt/stale/disconnect and bounded retry");
+    occupied=deliver=network_pending=false; next_read=clock_ms+100000;
+    state.current.artwork[0]=0; controller_ui_touch(false);
+    unsigned before_preferences=submissions;
+    controller_push(&state,DISPLAY); render();
+    tap_action(60); clock_ms+=300; tap_action(62);
+    clock_ms+=749; tick(NULL); assert(preference_writes==0);
+    controller_ui_touch(true); clock_ms+=10; tick(NULL); assert(preference_writes==0);
+    controller_ui_touch(false); tick(NULL); assert(preference_writes==1&&stored.palette==2&&preferences_status==SETTINGS_SAVED);
+    preference_success=false; tap_action(61); clock_ms+=800; tick(NULL);
+    assert(preference_writes==2&&preferences_status==SETTINGS_FAILED&&state.palette==1&&stored.palette==2);
+    clock_ms+=5000; tick(NULL); assert(preference_writes==2); /* no storage retry storm */
+    preference_success=true; tap_action(61); assert(controller_ui_save_preferences());
+    assert(preference_writes==3&&stored.palette==1); /* orderly close flush */
+    assert(submissions==before_preferences); /* local settings needed no bridge request */
+    preferences_storage_available=false; tap_action(60);
+    assert(!preferences_pending&&preferences_status==SETTINGS_UNAVAILABLE&&state.palette==0&&preference_writes==3);
+    puts("PASS loaded preferences, coalesced edits, held contact, save failure and explicit retry");
     return 0;
 }

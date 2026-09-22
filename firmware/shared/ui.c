@@ -18,6 +18,29 @@ static bool last_ready, deferred_read;
 static bridge_action_t deferred_action;
 static char deferred_text[257];
 static unsigned voice_second;
+static lv_obj_t *preferences_label;
+static bool preferences_pending, preferences_storage_available;
+static uint64_t preferences_due;
+static enum { SETTINGS_DEFAULTS, SETTINGS_SAVED, SETTINGS_PENDING, SETTINGS_FAILED, SETTINGS_UNAVAILABLE } preferences_status;
+static void preferences_feedback(void) {
+    if(!preferences_label) return;
+    const char *messages[]={"Defaults; changes save locally.","Saved on this controller.","Saving preferences...",
+        "Could not save; change a setting to retry.","Storage unavailable; session preferences only."};
+    char text[160]; snprintf(text,sizeof(text),"%s\nBrightness / sleep hardware unavailable.",messages[preferences_status]);
+    lv_label_set_text(preferences_label,text);
+}
+static void preferences_changed(void) {
+    if(!preferences_storage_available) { preferences_status=SETTINGS_UNAVAILABLE; preferences_feedback(); return; }
+    preferences_pending=true; preferences_due=io->now_ms()+750;
+    preferences_status=SETTINGS_PENDING; preferences_feedback();
+}
+bool controller_ui_save_preferences(void) {
+    if(!preferences_pending) return preferences_status!=SETTINGS_FAILED&&preferences_status!=SETTINGS_UNAVAILABLE;
+    preferences_t p={state.palette,state.brightness,state.timeout};
+    bool ok=io->save_preferences&&io->save_preferences(&p);
+    preferences_pending=false; preferences_status=ok?SETTINGS_SAVED:SETTINGS_FAILED;
+    preferences_feedback(); return ok;
+}
 static char artwork_target[81];
 static uint64_t artwork_until;
 static bool artwork_loaded, artwork_attempted;
@@ -172,9 +195,9 @@ static void click(lv_event_t *e) {
     } else if(a>=50&&a<=53&&!network_pending) {
         const char *filters[]={"albums","tracks","artists","playlists"};
         strcpy(state.context.filter,filters[a-50]); reset_page(); search_page();
-    } else if(a>=60&&a<=62) state.palette=a-60;
-    else if(a==63) state.brightness=state.brightness>=100?30:state.brightness+10;
-    else if(a==64) state.timeout=state.timeout==1?2:state.timeout==2?5:state.timeout==5?0:1;
+    } else if(a>=60&&a<=62) { state.palette=a-60; preferences_changed(); }
+    else if(a==63) { state.brightness=state.brightness>=100?30:state.brightness+10; preferences_changed(); }
+    else if(a==64) { state.timeout=state.timeout==1?2:state.timeout==2?5:state.timeout==5?0:1; preferences_changed(); }
     else if(a==65) { /* explicit simulated setup, never touches network credentials */
         io->diagnostic("fixture_wifi_setup_only"); controller_back(&state);
     } else if(a==66) { io->diagnostic("fixture_pairing_setup_only"); controller_back(&state); }
@@ -274,10 +297,11 @@ static void display_setting(lv_event_t *e) {
     } else {
         const unsigned minutes[]={1,2,5,0}; state.timeout=minutes[lv_dropdown_get_selected(lv_event_get_target(e))];
     }
+    preferences_changed();
 }
 static void render(void) {
     if(keyboard) { lv_obj_del(keyboard); keyboard=NULL; }
-    lv_obj_clean(root); artwork_widget=NULL; rows=query=NULL; dirty=false;
+    lv_obj_clean(root); preferences_label=NULL; artwork_widget=NULL; rows=query=NULL; dirty=false;
     bool ready=controller_ui_ready(); last_ready=ready;
     bool library_ready=ready&&strcmp(state.account,"disconnected");
     lv_obj_set_style_bg_color(root,lv_color_hex(background()),0);
@@ -383,7 +407,7 @@ static void render(void) {
         lv_dropdown_set_options(timeout,"1 minute\n2 minutes\n5 minutes\nNever");
         lv_dropdown_set_selected(timeout,state.timeout==1?0:state.timeout==2?1:state.timeout==5?2:3);
         lv_obj_add_event_cb(timeout,display_setting,LV_EVENT_VALUE_CHANGED,(void *)2);
-        label(content,"Session fixtures only. Hardware brightness / sleep unavailable.",0,278,752,34,&lv_font_montserrat_16); break; }
+        preferences_label=label(content,"",0,268,752,44,&lv_font_montserrat_16); preferences_feedback(); break; }
     case CONNECTION:
         button(content,"Wi-Fi   /   Setup fixture",0,0,752,78,44,state.fixture,true);
         button(content,"Bridge   /   Pairing setup",0,88,752,78,45,true,true);
@@ -483,6 +507,7 @@ static void apply_reply(void) {
 static void tick(lv_timer_t *timer) {
     (void)timer;
     remember_scroll();
+    if(preferences_pending&&!contact_active&&io->now_ms()>=preferences_due) controller_ui_save_preferences();
     if(state.voice==VOICE_RECORDING&&voice_second!=io->now_ms()/1000) { voice_second=(unsigned)(io->now_ms()/1000); dirty=true; }
     if(controller_voice_tick(&state,io->now_ms())) { io->microphone_cancel(); dirty=true; }
     if(io->submit) {
@@ -499,6 +524,13 @@ static void tick(lv_timer_t *timer) {
 }
 void controller_ui_init(platform_t *platform) {
     io=platform; controller_init(&state); io->diagnostic("boot_controller");
+    preferences_t preferences; preferences_defaults(&preferences);
+    preferences_result_t loaded=io->load_preferences?io->load_preferences(&preferences):PREF_UNAVAILABLE;
+    preferences_status=loaded==PREF_LOADED?SETTINGS_SAVED:loaded==PREF_DEFAULTS?SETTINGS_DEFAULTS:SETTINGS_UNAVAILABLE;
+    if(loaded!=PREF_UNAVAILABLE&&preferences_valid(&preferences)) {
+        state.palette=preferences.palette; state.brightness=preferences.brightness; state.timeout=preferences.timeout;
+    } else preferences_status=SETTINGS_UNAVAILABLE;
+    preferences_pending=false; preferences_storage_available=preferences_status!=SETTINGS_UNAVAILABLE&&io->save_preferences;
     if(!io->submit) io->snapshot(&state); else { refresh_needed=true; next_read=0; }
     root=lv_scr_act(); lv_obj_set_style_text_font(root,&lv_font_montserrat_20,0);
     render(); lv_timer_create(tick,50,NULL);

@@ -49,7 +49,8 @@ Automatic track advancement and a new controller connection during playback pass
 - [x] Complete desktop visual design review: user approved the [UI baseline](ui-review/approval.md) on 22 September 2026.
 - [x] Implement the approved core layouts/interactions in shared LVGL and exercise silent end-to-end slices; see [parity and remaining integration](m2-ui-parity.md).
 - [x] Implement authenticated bounded artwork previews in shared LVGL with silent fixtures.
-- [ ] Validate live artwork/quality, production preferences/provisioning and physical touch acceptance.
+- [x] Persist local display preferences with native restart and storage-failure tests.
+- [ ] Validate live artwork/quality, production provisioning and physical preference/touch behavior.
 - [ ] Carry forward queue-edit controls and playlist creation/editing, shuffle/repeat/seek UI; prioritize only when required by the detailed design.
 
 - [x] Record hardware baseline and BOM ([hardware](hardware/README.md)); Waveshare selected (D017), hardware proof pending.
@@ -97,3 +98,7 @@ The approved direction is now implemented as native C/LVGL slices: Playing layou
 ## M2 authenticated artwork checkpoint - 22 September 2026
 
 Authenticated bounded artwork renders in shared LVGL Playing/detail screens using silent local JPEG fixtures. Voice Restart now cancels pending transcripts. Fresh validation: 77 Python tests, five JavaScript tests, three CTests, both TLS demos, desktop and ESP32 builds passed (`0x92c00`, 43% free). Native artwork/changed-cover pixels were inspected and asserted. See [limits and detailed evidence](m2-artwork.md). Live artwork/quality, deployment-host resource profiling, provisioning/preferences and physical HP-01/P3/P4/P5 remain open. No audio or hardware operation occurred.
+
+## M2 local preferences - 22 September 2026
+
+Local palette, brightness intent and timeout persist across separate native desktop launches. Bounds/checksum, atomic replacement, writer locking, corrupted storage, coalescing and save failures have native tests. Restored Settings pixels were inspected. Fresh evidence: 77 Python tests, five JavaScript tests, four CTests, both TLS demos, preference restart smoke and both builds passed. The ESP32 NVS adapter is compiled only; hardware brightness/sleep and physical durability remain open. See [details and limitations](m2-preferences.md). No live Naim or hardware operation occurred.

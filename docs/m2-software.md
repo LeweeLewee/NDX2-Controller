@@ -86,3 +86,7 @@ The approved direction is now implemented as useful native C/LVGL slices: Playin
 
 
 Final firmware validation, 22 September 2026: `python tools/build_m2.py esp32` **passed** with the final shared sources, pinned ESP-IDF v5.2 and LVGL 8.4.0. Application image `0x925b0` bytes fits the `0x100000` partition with 43% free. No flashing or efuse operation was run. This is compiler/linker evidence only; the default-disabled protected network path and physical behavior remain unvalidated.
+
+## Local preference persistence - 22 September 2026
+
+The offline continuation now saves palette, brightness intent and timeout locally. [Preference behavior and evidence](m2-preferences.md) records atomic desktop replacement, native save/error states, separate-process restart tests and the compiled ESP32 NVS backend. Hardware brightness/sleep and physical storage durability remain unvalidated. Existing playback, authentication and the ten-step hardware-arrival checklist above are unchanged.

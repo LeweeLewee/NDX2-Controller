@@ -7,3 +7,6 @@ void controller_ui_disconnect(void);
 /* Read-only diagnostics for native smoke tests and HP-01 tooling. */
 const controller_t *controller_ui_state(void);
 bool controller_ui_ready(void);
+
+/* Flush only locally edited display intent on orderly shutdown; no network action. */
+bool controller_ui_save_preferences(void);

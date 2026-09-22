@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "bridge_protocol.h"
+#include "preferences.h"
 
 typedef enum { NOW, FIND, DETAILS, COLLECTION, QUEUE, VOICE, SETTINGS, DISPLAY, CONNECTION, DEVICE, WIFI, PAIRING } screen_t;
 typedef enum { SAVED_UNKNOWN, SAVED_NO, SAVED_YES } saved_t;
@@ -57,6 +58,8 @@ typedef struct {
     bool (*poll)(bridge_reply_t *reply);
     void (*invalidate)(uint32_t generation);
     void (*request_id)(char out[49]);
+    preferences_result_t (*load_preferences)(preferences_t *preferences);
+    bool (*save_preferences)(const preferences_t *preferences);
 } platform_t;
 
 void controller_init(controller_t *s);
