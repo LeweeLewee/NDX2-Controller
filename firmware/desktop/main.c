@@ -82,9 +82,13 @@ int main(int argc,char **argv) {
                 if(controller_ui_ready()) {
                     if(stage==0&&!strcmp(s->transport,"playing")) { capture(smoke,"playing"); tap(433,350); stage++; }
                     else if(stage==1&&!strcmp(s->transport,"paused")) { capture(smoke,"paused"); tap(433,350); stage++; }
-                    else if(stage==2&&!strcmp(s->transport,"playing")) { capture(smoke,"resumed"); puts("PASS native Play/Pause state and icon cycle"); running=false; }
+                    else if(stage==2&&!strcmp(s->transport,"playing")) { capture(smoke,"resumed"); tap(534,350); stage++; }
+                    else if(stage==3&&!strcmp(s->current.reference,"inputs/tidal/tracks/102")&&s->position_ms==0) { capture(smoke,"next"); tap(332,350); stage++; }
+                    else if(stage==4&&!strcmp(s->current.reference,"inputs/tidal/tracks/101")) { capture(smoke,"previous"); tap(332,350); stage++; }
+                    else if(stage==5&&!strcmp(s->current.reference,"inputs/tidal/tracks/103")) { capture(smoke,"previous-wrap"); tap(534,350); stage++; }
+                    else if(stage==6&&!strcmp(s->current.reference,"inputs/tidal/tracks/101")) { capture(smoke,"next-wrap"); puts("PASS native Play/Pause icons and Next/Previous track sequence"); running=false; }
                 }
-                if(SDL_GetTicks64()-started>15000) { fprintf(stderr,"Transport smoke timed out at stage %u\n",stage); exit_code=10; running=false; }
+                if(SDL_GetTicks64()-started>20000) { fprintf(stderr,"Transport smoke timed out at stage %u\n",stage); exit_code=10; running=false; }
                 continue;
             }
             if(preferences_smoke) {

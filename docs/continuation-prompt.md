@@ -61,3 +61,7 @@ Latest trust checkpoint: 118 Python tests, trust-renewal/rotation TLS demo and e
 Latest packaging checkpoint: 126 Python tests and extracted native/TLS package acceptance passed. Two clean installation directories retained external pairing/preferences byte-for-byte. The same archive was used for upgrade-layout rehearsal; native compilation, cross-machine portability and physical behavior were not newly validated. Build with `python tools/package_m2.py --out NEW-DIRECTORY`, then run `python tools/m2_package_demo.py PATH-TO-ZIP`.
 
 Play/Pause correction build evidence: desktop and five CTests passed; ESP32 compiled at `0x97260` bytes, 41% free. Standalone and TLS native pointer/pixel regressions passed. No flashing or live transport command occurred. Newer hardware-order records were preserved.
+
+Next/Previous fixture follow-up: both silent fixtures now display a three-track sequence with correct current/queue references, position reset and preserved paused state. The native transport smoke tests pointer taps through pause/resume and next/previous/wrap. Keep visual polish against the approved baseline as the next task; do not redesign it or return to infrastructure work.
+
+Fresh transport follow-up validation: 128 Python tests, five desktop CTests, standalone/TLS native pointer and pixel checks, and the native artwork smoke passed. Both builds passed; ESP32 image is `0x97420` bytes with 41% application partition free. The Next capture visibly shows Silent track 2 at 0:00. No real audio, live device command or flashing occurred.

@@ -43,29 +43,42 @@ class FixtureNaim:
     def __init__(self):
         self.title = 'Silent fixture - ready'
         self.transport_state = '2'
+        self.track_index = 0
+        self.position_ms = 76000
         self.calls = []
     def status(self):
         return {'title': self.title, 'artist': 'Fixture Ensemble', 'album': 'Silent album',
-                'transportState': self.transport_state, 'sourceDetail': 'tidal', 'duration': 330000, 'transportPosition': 76000}
+                'transportState': self.transport_state, 'sourceDetail': 'tidal', 'duration': 330000, 'transportPosition': self.position_ms}
+    @property
+    def reference(self): return f'inputs/tidal/tracks/{101+self.track_index}'
     def queue(self):
-        return {'children': [{'ussi': 'inputs/tidal/tracks/101', 'title': self.title}]}
+        return {'children': [{'ussi': self.reference, 'title': self.title}]}
     def browse(self, reference, offset=0):
         kind = reference.split('/')[2]
         title = ('Fixture Ensemble' if kind == 'artists' else 'Silent track' if kind == 'tracks' else
                  'An exceptionally long album title for seated reading and layout trials')
+        for i,track_title in enumerate(('Silent track','Silent track 2','Silent track 3')):
+            if reference==f'inputs/tidal/tracks/{101+i}': title=track_title
         child = 'inputs/tidal/albums/1' if kind == 'artists' else 'inputs/tidal/tracks/101'
         return {'ussi': reference, 'class': {'albums':'object.tidalAlbum', 'tracks':'object.tidalTrack',
                 'artists':'object.tidalArtist', 'playlists':'object.tidalPlaylist'}.get(kind),
                 'artist': 'Fixture Ensemble', 'title': title,
                 'children': [{'ussi': child, 'title': 'Silent album' if kind == 'artists' else 'Silent track'}], 'totalCount': 1}
     def play(self, reference, placement):
-        self.calls.append(('play', reference, placement)); self.title = 'Silent track'; self.transport_state = '2'
+        self.calls.append(('play', reference, placement)); self.transport_state = '2'; self.track_index = 0; self.position_ms = 0
+        for i in range(3):
+            if reference==f'inputs/tidal/tracks/{101+i}': self.track_index=i
+        self.title=('Silent track','Silent track 2','Silent track 3')[self.track_index]
     def amplifier_nudge(self, direction):
         self.calls.append(('amplifier', direction))
     def transport(self, command):
         self.calls.append(('transport', command))
         if command == 'pause': self.transport_state = '3'
         elif command == 'resume': self.transport_state = '2'
+        elif command in ('next','prev'):
+            self.track_index=(self.track_index+(1 if command=='next' else -1))%3
+            self.title=('Silent track','Silent track 2','Silent track 3')[self.track_index]
+            self.position_ms=0
 
 
 class FixtureService(Bridge):
@@ -96,7 +109,7 @@ class FixtureService(Bridge):
                 items = [i for i in items if self.saved.get(i['reference'], i['saved'] == 'saved')]
             return {'items': items, 'cursor': None, 'result_id': 'fixture'}
         if action == 'current_item':
-            return {'reference':'inputs/tidal/tracks/101', 'title':self.naim.title, 'kind':'tracks'}
+            return {'reference':self.naim.reference, 'title':self.naim.title, 'kind':'tracks'}
         if action == 'related':
             return {'items':[{'reference':'inputs/tidal/albums/1','title':'Silent album','kind':'albums'},
                              {'reference':'inputs/tidal/artists/1','title':'Fixture Ensemble','kind':'artists'}]}

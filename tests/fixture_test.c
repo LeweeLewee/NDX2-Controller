@@ -16,5 +16,11 @@ int main(void) {
     exchange(&p,BR_TRANSPORT,"resume"); r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.transport,"playing")&&commands==2);
     exchange(&p,BR_TRANSPORT,"pause"); exchange(&p,BR_PLAY,"inputs/tidal/tracks/101");
     r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.transport,"playing"));
+    exchange(&p,BR_TRANSPORT,"pause"); exchange(&p,BR_TRANSPORT,"next");
+    r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.title,"Silent track 2")&&!strcmp(r.item.reference,"inputs/tidal/tracks/102")&&r.position_ms==0&&!strcmp(r.transport,"paused"));
+    exchange(&p,BR_TRANSPORT,"prev"); r=exchange(&p,BR_QUEUE,NULL); assert(!strcmp(r.items[0].reference,"inputs/tidal/tracks/101"));
+    exchange(&p,BR_TRANSPORT,"prev"); r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.title,"Silent track 3"));
+    exchange(&p,BR_TRANSPORT,"next"); r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.title,"Silent track"));
+    exchange(&p,BR_PLAY,"inputs/tidal/tracks/103"); r=exchange(&p,BR_SNAPSHOT,NULL); assert(!strcmp(r.title,"Silent track 3")&&!strcmp(r.transport,"playing"));
     return 0;
 }

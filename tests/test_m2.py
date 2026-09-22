@@ -41,6 +41,19 @@ class M2Tests(unittest.TestCase):
         self.vault.close(); self.temp.cleanup()
     def req(self, action, args=None, rid='a'*32):
         return self.contract.handle('device', {'version':1,'request_id':rid,'action':action,'args':args or {}})
+    def test_fixture_next_previous_changes_current_identity_and_position(self):
+        naim=self.service.naim; naim.transport('pause')
+        for command,index,title in [('next',102,'Silent track 2'),('prev',101,'Silent track'),('prev',103,'Silent track 3'),('next',101,'Silent track')]:
+            naim.transport(command)
+            self.assertEqual(naim.status()['title'],title)
+            self.assertEqual(naim.status()['transportPosition'],0)
+            self.assertEqual(naim.status()['transportState'],'3')
+            self.assertEqual(self.service.request('current_item',{})['reference'],f'inputs/tidal/tracks/{index}')
+            self.assertEqual(naim.queue()['children'][0]['ussi'],f'inputs/tidal/tracks/{index}')
+        self.assertEqual(naim.calls,[('transport',c) for c in ('pause','next','prev','prev','next')])
+        naim.play('inputs/tidal/tracks/103','replace')
+        self.assertEqual(naim.reference,'inputs/tidal/tracks/103')
+        self.assertEqual(naim.status()['title'],'Silent track 3')
     def test_fixture_pause_resume_and_new_play_update_observed_state(self):
         self.service.naim.transport('pause')
         self.assertEqual(self.service.naim.status()['transportState'],'3')

@@ -26,7 +26,7 @@ def main(package=None):
                 captures=ROOT/'local/m2/transport-captures'/mode; captures.mkdir(parents=True,exist_ok=True)
                 command=[str((package or ROOT/'local/m2/desktop-verified')/'ndx_fixture.exe'),'--preferences',str(root/(mode+'-preferences.bin')),'--smoke',str(captures),'--transport-smoke']
                 if mode=='tls': command+=['--bridge',str(package/'runtime/python.exe') if package else sys.executable,str(config)]
-                result=subprocess.run(command,cwd=package or ROOT,env=env,capture_output=True,text=True,timeout=25,
+                result=subprocess.run(command,cwd=package or ROOT,env=env,capture_output=True,text=True,timeout=30,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
                 if result.returncode: raise RuntimeError(result.stdout+result.stderr)
                 pictures=[]
@@ -35,9 +35,11 @@ def main(package=None):
                     pictures.append(picture.crop((405,332,460,373)))
                 assert ImageChops.difference(pictures[0],pictures[1]).getbbox()
                 assert ImageChops.difference(pictures[0],pictures[2]).getbbox() is None
-                print('PASS',mode,'native pointer taps: Pause -> Play -> Pause pixels')
-            assert service.naim.calls==[('transport','pause'),('transport','resume')]
-            print('PASS exactly one pause and one resume; no real audio or amplifier command')
+                for name in ('next','previous','previous-wrap','next-wrap'):
+                    Image.open(captures/(name+'.bmp')).save(captures/(name+'.png'))
+                print('PASS',mode,'native pointer taps: icon cycle and next/previous track identity')
+            assert service.naim.calls==[('transport',c) for c in ('pause','resume','next','prev','prev','next')]
+            print('PASS one command per tap: pause/resume, next/previous and wrap; no real audio or amplifier command')
         finally:
             bridge.shutdown(); bridge.server_close(); worker.join(); vault.close()
 

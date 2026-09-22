@@ -35,3 +35,7 @@ This is Windows x64 development-host evidence on the current machine, not a clea
 ## Play/Pause correction
 
 The first user trial found a silent-fixture state bug: Pause commands did not change the reported playing state. The corrected package includes a fixture fix, verified with actual native Pause -> Play -> Pause icon captures in standalone and TLS modes. The UI still follows observed state. This package remains a functional development build; a focused finish against the approved design is pending. Run `python tools/m2_transport_demo.py --package EXTRACTED-DIRECTORY` from the development repository for the silent regression.
+
+## User trial: visible Next/Previous feedback
+
+Next/Previous had the same silent-fixture gap: commands were logged without changing track data. Both fixtures now use a three-track sequence with distinct titles/references, wrapping in either direction and resetting position to zero. Queue/current-item/detail identity stays consistent. Skipping preserves paused state; explicit Play starts the selected fixture playback state. The icons for Next/Previous intentionally stay fixed; changed metadata is their feedback. Native pointer smoke now covers pause/resume, next, previous and wrapping with one request per tap. Live Naim adapters and D011 are unchanged; this is silent simulation, not live transport validation.
