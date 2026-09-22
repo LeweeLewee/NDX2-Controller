@@ -7,15 +7,15 @@ unless a trusted local operator explicitly configures allow_live=true.
 import json
 from pathlib import Path
 import sys
-from m2_client import Client
+from m2_provisioning import controller_client
 from m2_security import Vault
 
 
 def main():
     config=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
     vault=Vault(config['state'])
-    client=Client(config['url'],config['trust'],vault.data['controller']['credential'])
     try:
+        client=controller_client(vault,config['url'],config['trust'])
         for line in iter(lambda:sys.stdin.buffer.readline(8194),b''):
             try:
                 if len(line)>8193 or not line.endswith(b'\n'): break
@@ -32,4 +32,7 @@ def main():
     finally: vault.close()
 
 
-if __name__=='__main__': main()
+if __name__=='__main__':
+    try: main()
+    except Exception:
+        sys.stderr.write('Bridge configuration unavailable.\n'); sys.exit(1)

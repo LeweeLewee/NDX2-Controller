@@ -19,7 +19,7 @@ class PipeRecoveryTests(unittest.TestCase):
             config.write_text(json.dumps({'state':'unused','url':'https://127.0.0.1','trust':'unused'}))
             with patch.object(m2_pipe.sys,'argv',['m2_pipe',str(config)]), patch.object(m2_pipe.sys,'stdin',stdin), \
                  patch.object(m2_pipe.sys,'stdout',stdout), patch.object(m2_pipe,'Vault',return_value=vault), \
-                 patch.object(m2_pipe,'Client',return_value=client):
+                 patch.object(m2_pipe,'controller_client',return_value=client):
                 m2_pipe.main()
         vault.close.assert_called_once()
         return [json.loads(line) for line in stdout.getvalue().splitlines()]

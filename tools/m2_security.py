@@ -97,6 +97,15 @@ class Pairing:
             self.pending = (code, self.clock() + 120, 0)
             return code
 
+    def devices(self):
+        """Local admin inventory: public IDs only, never credential hashes."""
+        with self.vault.lock:
+            return sorted(self.vault.data['devices'])
+
+    def cancel(self):
+        with self.lock:
+            self.pending = None
+
     def pair(self, code):
         with self.lock:
             pending = self.pending

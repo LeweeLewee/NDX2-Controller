@@ -103,3 +103,7 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 ## D023 - Bounded offline recovery without command replay
 
 **Authorized M2 continuation, 22 September 2026.** Recreate a failed desktop pipe/helper only for a subsequent request, never to retry a mutation. Shared LVGL treats a bridge boot change as lost interaction context, requires fresh authoritative state and contact release, and invalidates requests pending eight seconds. Preserve browsing and local preferences; clear remote artwork/membership claims. Unknown mutation outcomes remain unknown where snapshots cannot prove completion, particularly amplifier commands. This implements D019 recovery rather than changing native playback or D011. See [fixture evidence and physical limits](m2-recovery.md).
+
+## D024 - Durable host enrollment and explicit device recovery
+
+**Authorized offline design/fixture slice, 22 September 2026.** Persist setup intent before a single pairing request; lost replies remain uncertain and require local inventory/revocation decisions, never automatic re-pairing. Bind newly persisted controller authorization to independently supplied origin/trust, keep status redacted, and distinguish local forgetting from bridge revocation. No new HTTP admin endpoint or physical secret installer. Preserve legacy fixture compatibility without claiming retroactive binding. [Provisioning design and evidence](m2-provisioning.md) records recovery and production gates.

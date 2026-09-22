@@ -306,11 +306,17 @@ def main():
     httpd = server(Contract(service, vault), pairing, args.cert, args.key, args.host, args.port)
     def console():
         while True:
-            try: command = input('Local admin: pair | revoke DEVICE | quit\n').split()
+            try: command = input('Local admin: pair | cancel | devices | revoke DEVICE | quit\n').split()
             except EOFError: return
-            if command == ['pair']: print('Single-use setup code (120 s):', pairing.issue())
-            elif len(command) == 2 and command[0] == 'revoke': pairing.revoke(command[1])
-            elif command == ['quit']: httpd.shutdown(); return
+            try:
+                if command == ['pair']: print('Single-use setup code (120 s):', pairing.issue())
+                elif command == ['cancel']: pairing.cancel(); print('Setup code cancelled.')
+                elif command == ['devices']: print('Controller IDs:', ', '.join(pairing.devices()) or 'none')
+                elif len(command) == 2 and command[0] == 'revoke':
+                    pairing.revoke(command[1]); print('Controller authorization removed.')
+                elif command == ['quit']: httpd.shutdown(); return
+            except Exception:
+                print('Administration failed; inspect protected storage before retrying.')
     threading.Thread(target=console, daemon=True).start()
     print('LIVE native bridge ready.' if args.live else 'SILENT FIXTURE HTTPS bridge ready; provider credentials are not needed.')
     try: httpd.serve_forever()

@@ -77,3 +77,7 @@ Run `python tools/m2_preferences_demo.py` after the desktop build for isolated t
 ## Offline recovery checkpoint
 
 After the desktop build, run `python tools/m2_recovery_demo.py` to exercise the real worker/helper over paired TLS with startup outage, delayed replies and a new bridge boot ID. All commands target silent fixtures. Four CTests include expanded LVGL recovery assertions; the separate transport executable is driven by this Python fixture rather than standalone CTest. Shared UI uses an eight-second pending deadline, generation invalidation and conservative unknown outcomes. ESP32 compiles (`0x971f0`, 41% free); no physical networking or recovery is claimed. See [recovery evidence](../docs/m2-recovery.md).
+
+## Host enrollment foundation
+
+New desktop controller records can be created with the tested host enrollment library and are bound to their supplied HTTPS origin/trust file. The helper validates these bindings; legacy fixture records remain compatible. `python tools/m2_provisioning_demo.py` exercises enrollment/revocation/replacement using temporary synthetic state and verified loopback TLS. This does not create ESP32 NVS images, expose secrets or enable the gated hardware transport. See [design, recovery and evidence](../docs/m2-provisioning.md).

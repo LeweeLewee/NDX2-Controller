@@ -51,3 +51,7 @@ Run a proposed 24-hour host coexistence trial including voice/search bursts; rec
 ## Settings design boundary — 22 September 2026
 
 Approved Settings screens illustrate display preferences, Wi-Fi, pairing/revocation and device diagnostics. The browser review implements local fixture behavior only; it provisions no real network or credential. Native UI integration must use the protected provisioning/trust interfaces above and clearly report unavailable hardware capabilities. Approval does not close host selection or on-device deployment gates. See [continuation](continuation-prompt.md).
+
+## M2 enrollment and revocation foundation - 22 September 2026
+
+The [offline provisioning slice](m2-provisioning.md) adds protected enrollment intent, origin/trust-bound controller records, durable uncertain/revoked states, local ID inventory and setup-code cancellation. The desktop helper enforces new record bindings while preserving legacy fixtures. Fresh evidence: 93 Python tests, read-only TLS enrollment/revocation/re-pairing demo, native UI/artwork smoke and outage-recovery demo passed. No C/ESP32 or UI changes; prior build evidence was not rerun. Production setup UI, physical installation and HP-01/P3/P4/P5 remain open.
