@@ -1,7 +1,7 @@
 # Parts BOM
 
-Revision 0.5 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
-All new items are **not ordered**. User confirms tools and wires already owned, and confirms USB-C power supplies already owned on 22 September; HW-017 is fulfilled with no purchase needed. Screen is not ordered, awaiting stock; intention is to order together.
+Revision 0.6 — 22 September 2026. Planning BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
+Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. Battery and microSD sniffer remain not ordered.
 
 D017 selects HW-001 and excludes HW-019. Existing prices are historical references, not refreshed quotes or purchasing approval. Selection and procurement are separate.
 
@@ -9,16 +9,18 @@ D017 selects HW-001 and excludes HW-019. Existing prices are historical referenc
 
 | ID | Item / exact candidate | Qty per unit | Selection | Procurement | Price reference | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | selected | not ordered | USD 36.99; 2026-09-20; shipping/tax excluded | HP-01 after procurement; validate revision, touch wake and power |
+| HW-001 | [Waveshare ESP32-S3-Touch-LCD-4.3B](https://www.waveshare.com/product/arduino/boards-kits/esp32-s3/esp32-s3-touch-lcd-4.3b.htm), standard without case, SKU 27848 | 1 | selected | ordered from Pi Hut, user confirmed 2026-09-22 | USD 36.99; 2026-09-20; shipping/tax excluded | HP-01 after procurement; validate revision, touch wake and power |
 | HW-019 | Old Android phone | 0 | excluded | not ordered | Not included | Ruled out by user, D017; no further phone trial |
-| HW-020 | Adafruit 3421 SPH0645LM4H I2S microphone | 1 | evaluation candidate | not ordered | Pi Hut £6.70 incl VAT, 2026-09-21 | [Microphone review](microphone-review.md); proposed microSD pin reuse requires validation |
+| HW-020 | Adafruit 3421 SPH0645LM4H I2S microphone | 1 | evaluation candidate | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut £6.70 incl VAT, 2026-09-21 | [Microphone review](microphone-review.md); proposed microSD pin reuse requires validation |
 | HW-021 | SparkFun microSD Sniffer TOL-09419 / SK Pang USD-SNIFFER | 1 conditional | evaluation candidate | not ordered | £8.52 incl VAT, 2026-09-21 | Experimental mic pin access; confirm fit, continuity and stock |
 | HW-022 | External battery-temperature NTC probe compatible with charger | 1 conditional | research | not ordered | Unquoted | Specify sensor curve and mounting; separate from bench thermometer |
 | HW-002 | Pimoroni BAT0014 protected 10,050 mAh / 3.7 V pack | 1 pack | leading prototype candidate | not ordered | £25, available in supplier data 2026-09-22; delivery excluded | [Larger battery review](larger-battery-review.md): body fits reserved envelope; polarity, restraint and power tests pending |
-| HW-003 | Charger and power path: external route leads; Adafruit BQ24074 4755 candidate | 1 function; 0 or 1 extra board | research | not ordered | Candidate USD 14.95; 2026-09-20; shipping/tax excluded | Verify schematic, charge rate, simultaneous use/charge and termination |
-| HW-004 | Regulated 5 V supply / load switching: external converter candidate; Pololu U3V70F5 reference | 1 function; 0 or 1 extra board | research | not ordered | TBD for external converter | Measure idle losses and startup peaks; avoid duplicate power hardware |
+| HW-003 | Adafruit BQ24074 4755 charger and power path | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut basket £14.40 incl VAT | Validate delivered revision, charge rate, simultaneous use/charge and termination |
+| HW-004 | Pololu U3V40F5 5 V step-up regulator, POL4012 | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | Pi Hut basket £9.60 incl VAT | Measure idle losses and startup peaks; system low-voltage control remains unresolved |
 | HW-005 | Battery state monitoring: onboard capability to investigate; external fuel gauge conditional | 0 or 1 extra board | research | not ordered | TBD if needed | Confirm voltage/status access and low-battery behaviour |
-| HW-006 | Internal battery/power harness with correctly keyed mating connectors and strain relief | 1 assembly | design | not ordered | TBD | Specify external charger/pack/5 V connections; leave HW-001 battery socket empty for route B; verify polarity and measured peaks |
+| HW-006 | Internal battery/power harness with keyed connectors and strain relief | 1 assembly | design | partially ordered; two parts below | £3.40 listed parts; remaining TBD | Assemble and verify polarity; use existing USB-A to USB-C cable to avoid soldering the display |
+| HW-006a | JST-PH 2-pin female connector lead, Pi Hut 102818 | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | £0.80 incl VAT | Charger LOAD output to converter input; verify polarity |
+| HW-006b | USB-A female breakout — horizontal, Pi Hut 106576 | 1 | prototype selection | ordered from Pi Hut, user confirmed 2026-09-22 | £2.60 incl VAT | Converter output to existing display USB cable |
 | HW-007 | Accessible charging inlet: existing USB-C port initially; extension or dock conditional | 0 or 1 extra inlet | design | not ordered | TBD if needed | Resolve port access without compromising enclosure or serviceability |
 | HW-008 | Service power isolation for external base pack; exact switch TBD | 0 or 1 | research | not ordered | TBD if needed | Do not assume Waveshare battery switch isolates external 5 V; verify coverage and accessibility |
 | HW-009 | External wake device or low-power latch, only if touch wake cannot meet energy target | 0 or 1 | optional | not ordered | TBD if needed | Validate native touch wake before adding hardware; preserve touch-wake requirement |
@@ -73,3 +75,7 @@ Microphone + sniffer new-purchase subtotal is £15.22 before delivery and screen
 ## Larger battery follow-up — 22 September
 
 [Review](larger-battery-review.md) promotes BAT0014 10,050 mAh as the leading candidate: 69.5 x 57 x 20.5 mm maximum body within the 80 x 64 x 26 mm reservation, 37.185 Wh nominal. BAT0015 13,400 mAh requires layout revision. Published Adafruit BQ24074 schematic grounds TMR (safety timers disabled), resolving the earlier timer-configuration research item for that source revision. Delivered hardware, charging and runtime remain untested.
+
+## Pi Hut order — 22 September
+
+User confirmed all six items above ordered. Recorded basket subtotal is £34.10 plus the display and delivery; display paid price, final invoice total and arrival date are not supplied. Prices remain basket references, not invoice verification. Earlier converter comparisons and cost scenarios are historical; U3V40F5 is the ordered prototype converter. Procurement does not establish validated integration or battery life.
