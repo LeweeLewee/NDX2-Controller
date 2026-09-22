@@ -40,3 +40,8 @@ add_test(NAME preferences_store COMMAND preferences_test)
 add_executable(desktop_transport_test ../../tests/desktop_transport_test.c transport.c)
 target_include_directories(desktop_transport_test PRIVATE ../shared . ${SDL2_INCLUDE_DIRS})
 target_link_libraries(desktop_transport_test PRIVATE bridge_protocol SDL2::SDL2 bcrypt)
+
+add_executable(fixture_test ../../tests/fixture_test.c ../shared/fixture.c ../shared/controller.c)
+target_include_directories(fixture_test PRIVATE ../shared)
+target_link_libraries(fixture_test PRIVATE bridge_protocol)
+add_test(NAME fixture_transport COMMAND fixture_test)

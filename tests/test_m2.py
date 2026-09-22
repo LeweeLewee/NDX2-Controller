@@ -41,6 +41,14 @@ class M2Tests(unittest.TestCase):
         self.vault.close(); self.temp.cleanup()
     def req(self, action, args=None, rid='a'*32):
         return self.contract.handle('device', {'version':1,'request_id':rid,'action':action,'args':args or {}})
+    def test_fixture_pause_resume_and_new_play_update_observed_state(self):
+        self.service.naim.transport('pause')
+        self.assertEqual(self.service.naim.status()['transportState'],'3')
+        self.service.naim.transport('resume')
+        self.assertEqual(self.service.naim.status()['transportState'],'2')
+        self.assertEqual(self.service.naim.calls,[('transport','pause'),('transport','resume')])
+        self.service.naim.transport('pause'); self.service.naim.play('inputs/tidal/tracks/101','replace')
+        self.assertEqual(self.service.naim.status()['transportState'],'2')
     def test_pair_expiry_single_use_revocation_restart(self):
         pairing = Pairing(self.vault, lambda:self.time[0])
         code=pairing.issue(); self.time[0]+=121

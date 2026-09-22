@@ -39,11 +39,13 @@ static void read_pointer(lv_indev_drv_t *drv,lv_indev_data_t *data) {
 }
 int main(int argc,char **argv) {
     const char *smoke=NULL,*python=NULL,*config=NULL,*preferences_path=NULL,*preferences_smoke=NULL;
+    bool transport_smoke=false;
     for(int i=1;i<argc;i++) {
         if(!strcmp(argv[i],"--smoke")&&i+1<argc) smoke=argv[++i];
         else if(!strcmp(argv[i],"--bridge")&&i+2<argc) { python=argv[++i]; config=argv[++i]; }
         else if(!strcmp(argv[i],"--preferences")&&i+1<argc) preferences_path=argv[++i];
         else if(!strcmp(argv[i],"--preferences-smoke")&&i+1<argc) preferences_smoke=argv[++i];
+        else if(!strcmp(argv[i],"--transport-smoke")) transport_smoke=true;
         else return 2;
     }
     SDL_SetMainReady();
@@ -76,6 +78,15 @@ int main(int argc,char **argv) {
         if(smoke&&now>=next) {
             const controller_t *s=controller_ui_state();
             next=now+500;
+            if(transport_smoke) {
+                if(controller_ui_ready()) {
+                    if(stage==0&&!strcmp(s->transport,"playing")) { capture(smoke,"playing"); tap(433,350); stage++; }
+                    else if(stage==1&&!strcmp(s->transport,"paused")) { capture(smoke,"paused"); tap(433,350); stage++; }
+                    else if(stage==2&&!strcmp(s->transport,"playing")) { capture(smoke,"resumed"); puts("PASS native Play/Pause state and icon cycle"); running=false; }
+                }
+                if(SDL_GetTicks64()-started>15000) { fprintf(stderr,"Transport smoke timed out at stage %u\n",stage); exit_code=10; running=false; }
+                continue;
+            }
             if(preferences_smoke) {
                 switch(stage) {
                 case 0:

@@ -42,10 +42,11 @@ class FixtureNaim:
     """No sockets, audio, physical microphone or inferred amplifier level."""
     def __init__(self):
         self.title = 'Silent fixture - ready'
+        self.transport_state = '2'
         self.calls = []
     def status(self):
         return {'title': self.title, 'artist': 'Fixture Ensemble', 'album': 'Silent album',
-                'transportState': '2', 'sourceDetail': 'tidal', 'duration': 330000, 'transportPosition': 76000}
+                'transportState': self.transport_state, 'sourceDetail': 'tidal', 'duration': 330000, 'transportPosition': 76000}
     def queue(self):
         return {'children': [{'ussi': 'inputs/tidal/tracks/101', 'title': self.title}]}
     def browse(self, reference, offset=0):
@@ -58,11 +59,13 @@ class FixtureNaim:
                 'artist': 'Fixture Ensemble', 'title': title,
                 'children': [{'ussi': child, 'title': 'Silent album' if kind == 'artists' else 'Silent track'}], 'totalCount': 1}
     def play(self, reference, placement):
-        self.calls.append(('play', reference, placement)); self.title = 'Silent track'
+        self.calls.append(('play', reference, placement)); self.title = 'Silent track'; self.transport_state = '2'
     def amplifier_nudge(self, direction):
         self.calls.append(('amplifier', direction))
     def transport(self, command):
         self.calls.append(('transport', command))
+        if command == 'pause': self.transport_state = '3'
+        elif command == 'resume': self.transport_state = '2'
 
 
 class FixtureService(Bridge):
