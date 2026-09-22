@@ -54,3 +54,7 @@ Next offline slice: an operator-facing host enrollment flow using this library, 
 ## Operator flow follow-up
 
 The subsequent [host setup console](m2-setup.md) now wraps this library with private input and explicit recovery. Earlier next-work statements above describe the foundation checkpoint. No physical installer or native UI provisioning is implied.
+
+## Explicit trust migration follow-up
+
+[Same-origin trust updates](m2-trust.md) now preserve the existing credential after operator approval and verified read-only probing, with one atomic local binding replacement. This supersedes the earlier unimplemented-migration boundary for the host library only; production certificate installation and physical ESP32 migration are still open.

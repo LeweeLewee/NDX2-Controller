@@ -25,6 +25,7 @@ ERRORS={
     'ENROLLMENT_REQUIRED':'Enrollment or bridge binding needs recovery. Use status and inspect the intended bridge trust.',
     'AUTHORIZATION_REQUIRED':STATES['authorization_required'],
     'BRIDGE_UNAVAILABLE':'Bridge unavailable. Saved pairing is retained; try verify later.',
+    'TRUST_VERIFICATION_FAILED':'New trust could not verify the bridge. The saved binding was not changed.',
     'INVALID_ORIGIN':'A verified HTTPS bridge origin is required.'}
 
 class Parser(argparse.ArgumentParser):
@@ -58,12 +59,13 @@ def show_status(flow):
     result=flow.status()
     print(STATES.get(result['state'],STATES['recovery_required']))
     if result.get('device'): print('Controller ID:',result['device'])
+    if result.get('trust_sha256'): print('Saved trust SHA-256:',result['trust_sha256'])
 
 
 def main(argv=None):
-    parser=Parser(description='Host setup: local status, private pairing, read-only verification and explicit local forgetting.')
+    parser=Parser(description='Host setup: local status, private pairing, read-only verification, explicit trust update and local forgetting.')
     parser.add_argument('--config',required=True,help='Public desktop JSON with url and absolute trust/state paths')
-    parser.add_argument('action',choices=('status','pair','verify','forget'))
+    parser.add_argument('action',choices=('status','pair','verify','forget','trust-update'))
     args=parser.parse_args(argv)
     vault=None
     try:
@@ -88,6 +90,22 @@ def main(argv=None):
             finally: code=None
             show_status(flow)
             print('Next: run verify. No verification or playback command was sent automatically.')
+        elif args.action=='trust-update':
+            if flow.status()['state']!='paired':
+                show_status(flow); return 1
+            record=vault.data.get('controller',{})
+            if record.get('origin')!=flow.target['origin']:
+                raise EnrollmentError('ENROLLMENT_REQUIRED')
+            if not sys.stdin.isatty(): raise EnrollmentError('INTERACTIVE_TERMINAL_REQUIRED')
+            print('Bridge:',flow.target['origin'])
+            print('Saved trust SHA-256:',record.get('trust_sha256','unavailable'))
+            print('Proposed trust SHA-256:',flow.target['trust_sha256'])
+            print('Verify the new trust with the bridge administrator through an independent trusted channel.')
+            print('This permits the existing credential to authenticate with the approved new trust.')
+            if input('Type UPDATE TRUST to verify and save this trust change: ')!='UPDATE TRUST':
+                print('Cancelled. Saved trust retained.'); return 1
+            flow.update_trust()
+            print('Trust binding saved after a read-only snapshot. Pairing retained; use this configuration with the controller.')
         elif args.action=='verify':
             result=flow.verify()
             print('Connected to the silent fixture.' if result['fixture'] else 'Connected to the bridge.')
@@ -105,7 +123,7 @@ def main(argv=None):
         print('Interrupted. Run status before retrying; an in-flight pairing may have an unknown outcome.'); return 1
     except EnrollmentError as exc:
         messages={**ERRORS,'PRIVATE_TERMINAL_REQUIRED':'Pairing requires a private interactive terminal with hidden input.',
-            'INTERACTIVE_TERMINAL_REQUIRED':'Local forgetting requires interactive confirmation.'}
+            'INTERACTIVE_TERMINAL_REQUIRED':'This recovery action requires interactive confirmation.'}
         print(messages.get(str(exc),'Setup unavailable. Inspect local configuration and protected storage.')); return 1
     except Exception:
         print('Setup unavailable. Check the public configuration, verified trust and protected storage; close other clients first.'); return 1

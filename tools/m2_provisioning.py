@@ -62,6 +62,8 @@ class Enrollment:
             result={'state':state}
             device=self.vault.data.get('controller',{}).get('device')
             if isinstance(device,str) and re.fullmatch('[0-9a-f]{24}',device): result['device']=device
+            digest=self.vault.data.get('controller',{}).get('trust_sha256')
+            if isinstance(digest,str) and re.fullmatch('[0-9a-f]{64}',digest): result['trust_sha256']=digest
             return result
 
     def _save(self, change):
@@ -106,6 +108,31 @@ class Enrollment:
             except EnrollmentError: raise
             except Exception: raise EnrollmentError('BRIDGE_UNAVAILABLE') from None
             return {'state':'connected','device':self.status().get('device'),'fixture':response.get('fixture') is True}
+
+    def update_trust(self):
+        """Explicit operator-approved same-origin trust change; snapshot only.
+
+        There is no remote mutation or retry. Atomic local replacement happens
+        after verification, so interrupted recovery retains either old or new trust.
+        """
+        with self.vault.lock:
+            if self.status()['state']!='paired': raise EnrollmentError('LOCAL_RECOVERY_REQUIRED')
+            record=self.vault.data.get('controller',{})
+            if (self.target is None or record.get('origin')!=self.target['origin'] or
+                not isinstance(record.get('trust_sha256'),str) or not re.fullmatch('[0-9a-f]{64}',record['trust_sha256']) or
+                not isinstance(record.get('device'),str) or not re.fullmatch('[0-9a-f]{24}',record['device']) or
+                not isinstance(record.get('credential'),str) or not re.fullmatch('[A-Za-z0-9_-]{43}',record['credential'])):
+                raise EnrollmentError('ENROLLMENT_REQUIRED')
+            client,target=binding(self.url,self.trust)
+            if target!=self.target: raise EnrollmentError('TRUST_CHANGED')
+            client.credential=record['credential']
+            try:
+                response=client.request('snapshot')
+                if response.get('outcome')!='observed': raise ValueError()
+            except Exception:
+                raise EnrollmentError('TRUST_VERIFICATION_FAILED') from None
+            self._save(lambda d:d['controller'].update(trust_sha256=target['trust_sha256']))
+            return self.status()
 
     def forget(self):
         # Explicit local action only. It cannot revoke an issued bridge credential.

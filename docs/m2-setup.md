@@ -43,3 +43,7 @@ If interrupted, run status before retrying. An interrupted remote pairing may al
 The hidden-entry test uses injected input; physical terminal echo suppression remains a manual host check. No actual user credentials or private configuration were accessed. No C/LVGL/ESP32 source or approved UI change occurred; native builds, screenshots and previous broader native smoke results remain prior evidence and were not rerun for this console-only slice. No hardware installation, flashing, efuse, Pi deployment or live Naim/provider operation occurred. HP-01 and physical P3/P4/P5 remain open.
 
 Next: validate private prompt behavior on the intended host terminal with synthetic setup first. When NDX network access returns, use separately scoped read-only metadata/artwork/reconnect validation. Production certificate renewal/rotation, installation packaging and physical ESP32 provisioning remain separate work.
+
+## Trust-update follow-up
+
+The console now also supports `trust-update` with the proposed public configuration. It requires interactive `UPDATE TRUST`, independent comparison of old/new fingerprints and a successful snapshot before committing the new same-origin binding. `status` now shows the saved fingerprint, including without a trust file. See [procedure and interruption evidence](m2-trust.md). Earlier command counts/next-work statements above describe the setup checkpoint.

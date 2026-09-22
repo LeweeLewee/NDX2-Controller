@@ -92,3 +92,23 @@ class SetupTests(unittest.TestCase):
              patch.object(m2_setup.sys.stderr,'isatty',return_value=True), \
              patch.object(m2_setup.getpass,'getpass',side_effect=lambda *_:warnings.warn('no echo control',m2_setup.getpass.GetPassWarning)):
             with self.assertRaises(m2_setup.getpass.GetPassWarning): m2_setup.private_code()
+
+    def trust_state(self):
+        self.flow.status.return_value={'state':'paired'}
+        self.vault.data={'controller':{'origin':self.flow.target['origin'],'trust_sha256':'b'*64}}
+    def test_trust_update_requires_explicit_confirmation(self):
+        self.trust_state()
+        result,output,_=self.run_action('trust-update','UPDATE TRUST')
+        self.assertEqual(result,0); self.flow.update_trust.assert_called_once()
+        self.assertIn('Saved trust SHA-256',output); self.assertIn('Proposed trust SHA-256',output)
+        self.flow.pair.assert_not_called()
+    def test_trust_update_cancel_sends_nothing(self):
+        self.trust_state(); result,_,_=self.run_action('trust-update','no')
+        self.assertEqual(result,1); self.flow.update_trust.assert_not_called()
+    def test_trust_update_noninteractive_refused(self):
+        self.trust_state(); result,_,_=self.run_action('trust-update','UPDATE TRUST',False)
+        self.assertEqual(result,1); self.flow.update_trust.assert_not_called()
+    def test_trust_update_origin_change_refused(self):
+        self.trust_state(); self.vault.data['controller']['origin']='https://different.invalid'
+        result,_,_=self.run_action('trust-update','UPDATE TRUST')
+        self.assertEqual(result,1); self.flow.update_trust.assert_not_called()

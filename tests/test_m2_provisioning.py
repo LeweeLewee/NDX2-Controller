@@ -116,3 +116,65 @@ class ProvisioningTests(unittest.TestCase):
         with self.assertRaises(EnrollmentError): self.flow.pair(self.code)
         with self.assertRaises(EnrollmentError): controller_client(self.vault,'unused','unused')
         self.client.request.assert_not_called()
+
+    def test_trust_update_verifies_once_preserves_identity_and_history(self):
+        self.flow.pair(self.code)
+        self.vault.update(lambda d:d['commands'].update(previous={'outcome':'unknown'}))
+        new={**self.target,'trust_sha256':'f'*64}
+        with patch('m2_provisioning.binding',return_value=(self.client,new)):
+            flow=Enrollment(self.vault,'unused','unused'); flow.update_trust()
+        self.assertEqual(self.vault.data['controller']['credential'],self.result['credential'])
+        self.assertEqual(self.vault.data['controller']['trust_sha256'],'f'*64)
+        self.assertIn('previous',self.vault.data['commands'])
+        self.client.post.assert_called_once(); self.client.request.assert_called_once_with('snapshot')
+        self.reopen(); self.assertEqual(self.vault.data['controller']['trust_sha256'],'f'*64)
+    def test_trust_update_failure_and_interruption_retain_old_binding(self):
+        self.flow.pair(self.code)
+        new={**self.target,'trust_sha256':'f'*64}
+        with patch('m2_provisioning.binding',return_value=(self.client,new)):
+            flow=Enrollment(self.vault,'unused','unused')
+            for error in (TimeoutError(),KeyboardInterrupt()):
+                self.client.request.side_effect=error
+                with self.assertRaises((EnrollmentError,KeyboardInterrupt)): flow.update_trust()
+                self.assertEqual(self.vault.data['controller']['trust_sha256'],self.target['trust_sha256'])
+        self.client.post.assert_called_once()
+    def test_trust_update_storage_failure_does_not_publish_success(self):
+        self.flow.pair(self.code)
+        new={**self.target,'trust_sha256':'f'*64}
+        with patch('m2_provisioning.binding',return_value=(self.client,new)):
+            flow=Enrollment(self.vault,'unused','unused')
+            with patch.object(self.vault,'update',side_effect=OSError()):
+                with self.assertRaisesRegex(EnrollmentError,'STORAGE_UNCERTAIN'): flow.update_trust()
+            self.assertEqual(flow.status()['state'],'storage_uncertain')
+        self.reopen(); self.assertEqual(self.vault.data['controller']['trust_sha256'],self.target['trust_sha256'])
+    def test_trust_commit_then_failure_requires_reopen_without_rollback(self):
+        self.flow.pair(self.code); update=self.vault.update
+        def committed(change):
+            update(change); raise OSError()
+        new={**self.target,'trust_sha256':'f'*64}
+        with patch('m2_provisioning.binding',return_value=(self.client,new)):
+            flow=Enrollment(self.vault,'unused','unused')
+            with patch.object(self.vault,'update',side_effect=committed):
+                with self.assertRaisesRegex(EnrollmentError,'STORAGE_UNCERTAIN'): flow.update_trust()
+            with self.assertRaises(EnrollmentError): flow.update_trust()
+        self.reopen(); self.assertEqual(self.flow.status()['trust_sha256'],'f'*64)
+        self.client.request.assert_called_once_with('snapshot')
+    def test_trust_update_rejects_origin_change_before_sending_credential(self):
+        self.flow.pair(self.code)
+        with patch('m2_provisioning.binding',return_value=(self.client,{**self.target,'origin':'https://other.invalid'})):
+            flow=Enrollment(self.vault,'unused','unused')
+            with self.assertRaises(EnrollmentError): flow.update_trust()
+        self.client.request.assert_not_called()
+    def test_trust_file_change_after_confirmation_is_rejected(self):
+        self.flow.pair(self.code)
+        with patch('m2_provisioning.binding',return_value=(self.client,{**self.target,'trust_sha256':'f'*64})):
+            with self.assertRaisesRegex(EnrollmentError,'TRUST_CHANGED'): self.flow.update_trust()
+        self.client.request.assert_not_called()
+
+    def test_revoked_or_legacy_enrollment_cannot_use_trust_update(self):
+        self.flow.pair(self.code)
+        self.vault.update(lambda d:d.update(enrollment={'version':1,'state':'authorization_required'}))
+        with self.assertRaises(EnrollmentError): self.flow.update_trust()
+        self.vault.update(lambda d:d.pop('enrollment'))
+        with self.assertRaises(EnrollmentError): self.flow.update_trust()
+        self.client.request.assert_not_called()
