@@ -98,5 +98,64 @@ int main(void) {
     preferences_storage_available=false; tap_action(60);
     assert(!preferences_pending&&preferences_status==SETTINGS_UNAVAILABLE&&state.palette==0&&preference_writes==3);
     puts("PASS loaded preferences, coalesced edits, held contact, save failure and explicit retry");
+    /* Preserve navigation, but discard remote claims and held interaction intent. */
+    occupied=deliver=network_pending=false; rows=NULL;
+    state.context.screen=FIND; strcpy(state.context.query,"retained search");
+    strcpy(state.context.cursor,"retained cursor"); state.context.offset=24; state.context.scroll=91;
+    state.context.count=1; state.context.items[0].saved=1; state.context.saved=SAVED_YES;
+    state.depth=1; state.history[0]=state.context;
+    strcpy(state.current.reference,"inputs/tidal/tracks/101");
+    state.track_saved=SAVED_YES; pressed_allowed=true; deferred_read=true;
+    controller_snapshot(&state,clock_ms); controller_ui_touch(false); start_capture();
+    controller_ui_disconnect();
+    assert(!pressed_allowed&&!deferred_read&&state.voice==VOICE_IDLE&&!artwork_loaded);
+    assert(state.track_saved==SAVED_UNKNOWN&&state.context.items[0].saved==-1&&state.history[0].saved==SAVED_UNKNOWN);
+    assert(state.context.offset==24&&state.context.scroll==91&&!strcmp(state.context.query,"retained search"));
+    assert(!strcmp(state.context.cursor,"retained cursor")&&!controller_ui_ready());
+    /* A new bridge snapshot restores availability only after contact release. */
+    strcpy(bridge_boot,"old-boot");
+    reply=(bridge_reply_t){.valid=true,.action=BR_SNAPSHOT,.outcome=BR_OBSERVED,
+        .started_ms=clock_ms,.valid_for_ms=5000};
+    strcpy(reply.boot_id,"new-boot"); reply.item=state.current;
+    uint32_t before_restart=state.generation; apply_reply();
+    assert(state.generation==before_restart+1&&state.online&&!controller_ui_ready());
+    assert(!controller_ui_touch(true)); controller_ui_touch(false); assert(controller_ui_ready());
+    assert(state.context.offset==24&&state.context.scroll==91&&state.depth==1);
+    /* An expired response cannot update even the displayed title. */
+    strcpy(state.title,"authoritative title"); strcpy(reply.title,"expired title");
+    reply.started_ms=clock_ms-1; reply.valid_for_ms=1; apply_reply();
+    assert(!state.online&&!strcmp(state.title,"authoritative title"));
+    puts("PASS restart/outage preserve browsing, discard held contact and reject expired snapshots");
+    /* Every mutation times out once; obsolete replies cannot change the outcome. */
+    const bridge_action_t actions[]={BR_PLAY,BR_AMP_UP,BR_AMP_DOWN,BR_SAVE,BR_REMOVE,BR_TRANSPORT};
+    for(unsigned i=0;i<sizeof(actions)/sizeof(actions[0]);i++) {
+        occupied=deliver=network_pending=false; rows=NULL; state.current.artwork[0]=0;
+        controller_snapshot(&state,clock_ms); controller_ui_touch(false);
+        unsigned before=submissions;
+        assert(send_request(actions[i],"inputs/tidal/tracks/101"));
+        uint32_t stale=sent.generation;
+        clock_ms+=8000; tick(NULL);
+        assert(!state.busy&&!state.online&&state.outcome==OUTCOME_UNKNOWN&&submissions==before+1);
+        incoming=(bridge_reply_t){.valid=true,.action=actions[i],.generation=stale,.outcome=BR_SUBMITTED};
+        deliver=true; tick(NULL);
+        assert(state.outcome==OUTCOME_UNKNOWN&&submissions==before+1);
+        clock_ms=next_read; controller_ui_touch(false); tick(NULL); assert(sent.action==BR_SNAPSHOT);
+        incoming=(bridge_reply_t){.valid=true,.action=BR_SNAPSHOT,.generation=sent.generation,
+            .started_ms=clock_ms,.valid_for_ms=5000,.outcome=BR_OBSERVED};
+        incoming.item=state.current; strcpy(incoming.boot_id,"new-boot"); deliver=true; tick(NULL);
+        assert(controller_ui_ready()&&state.outcome==OUTCOME_UNKNOWN&&submissions==before+2);
+    }
+    /* Restart discovered in a mutation reply also leaves the command uncertain. */
+    assert(send_request(BR_AMP_UP,NULL));
+    reply=(bridge_reply_t){.valid=true,.action=BR_AMP_UP,.outcome=BR_SUBMITTED};
+    strcpy(reply.boot_id,"third-boot"); apply_reply();
+    assert(!state.busy&&!state.online&&state.outcome==OUTCOME_UNKNOWN);
+    occupied=network_pending=false;
+    /* Poll while recording, so a disconnected microphone session is cancelled. */
+    controller_snapshot(&state,clock_ms); controller_ui_touch(false); state.fixture=true; start_capture();
+    next_read=clock_ms; tick(NULL); assert(sent.action==BR_SNAPSHOT);
+    incoming=(bridge_reply_t){.action=BR_SNAPSHOT,.generation=sent.generation}; deliver=true; tick(NULL);
+    assert(!state.online&&state.voice==VOICE_IDLE&&backoff<=30000);
+    puts("PASS stalled mutations never replay, late replies ignored, authoritative recovery and recording outage");
     return 0;
 }

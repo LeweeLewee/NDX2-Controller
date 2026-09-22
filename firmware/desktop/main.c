@@ -17,6 +17,8 @@ static int px,py;
 static uint64_t release_at, smoke_clock_offset;
 static void tap(int x,int y) { px=x; py=y; down=true; release_at=SDL_GetTicks64()+smoke_clock_offset+90; }
 static void capture(const char *directory,const char *name) {
+    /* UI timers can update widgets after the display timer in the same pass. */
+    lv_refr_now(NULL);
     char path[1024]; snprintf(path,sizeof(path),"%s/%s.bmp",directory,name);
     SDL_Surface *surface=SDL_CreateRGBSurfaceFrom(pixels,800,480,32,800*4,0x00ff0000,0x0000ff00,0x000000ff,0xff000000);
     if(surface) { SDL_SaveBMP(surface,path); SDL_FreeSurface(surface); }

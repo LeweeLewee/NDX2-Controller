@@ -99,3 +99,7 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 ## D022 - Controller-local display preferences
 
 **Authorized offline M2 slice, 22 September 2026.** Save palette, brightness intent and timeout on the controller, separately from bridge/account credentials and commands. Use a versioned, strictly bounded record, coalesced saves and visible failure states. Windows writes use atomic replacement and a writer lock; ESP32 uses one separate NVS blob without erase-on-error recovery. Missing records use defaults; corrupt/future records remain untouched and session-only. Brightness/sleep remain hardware-unbound until physical validation. See [implementation and evidence limits](m2-preferences.md).
+
+## D023 - Bounded offline recovery without command replay
+
+**Authorized M2 continuation, 22 September 2026.** Recreate a failed desktop pipe/helper only for a subsequent request, never to retry a mutation. Shared LVGL treats a bridge boot change as lost interaction context, requires fresh authoritative state and contact release, and invalidates requests pending eight seconds. Preserve browsing and local preferences; clear remote artwork/membership claims. Unknown mutation outcomes remain unknown where snapshots cannot prove completion, particularly amplifier commands. This implements D019 recovery rather than changing native playback or D011. See [fixture evidence and physical limits](m2-recovery.md).

@@ -82,3 +82,7 @@ Follow the precise [ten-step hardware-arrival checklist](m2-software.md#hardware
 ## Subsequent implementation checkpoint — 22 September 2026
 
 This closeout's next-work statements describe its earlier checkpoint. The [native UI parity record](m2-ui-parity.md) now records the implemented shared C/LVGL slices and fresh desktop validation. Outstanding real artwork, device/provisioning and hardware work remains explicit there; the approved browser source and historical decisions have not been changed.
+
+## M2 offline recovery - 22 September 2026
+
+Desktop startup outages, late pipe replies and helper recovery are fixed without retrying commands. Shared LVGL detects bridge restarts, rejects expired snapshots, bounds pending state, clears stale artwork/membership and preserves browsing while consuming old gestures. Silent fault injection proves one play and one volume request despite lost replies. Fresh evidence: 80 Python tests, five JavaScript tests, four CTests, TLS/native/preference/recovery demos and both builds passed (`0x971f0`, 41% free on ESP32). The screenshot harness now flushes current LVGL pixels before capture. See [recovery scope and evidence](m2-recovery.md). No live Naim or hardware operation occurred; physical gates remain open.

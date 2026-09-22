@@ -90,3 +90,7 @@ Final firmware validation, 22 September 2026: `python tools/build_m2.py esp32` *
 ## Local preference persistence - 22 September 2026
 
 The offline continuation now saves palette, brightness intent and timeout locally. [Preference behavior and evidence](m2-preferences.md) records atomic desktop replacement, native save/error states, separate-process restart tests and the compiled ESP32 NVS backend. Hardware brightness/sleep and physical storage durability remain unvalidated. Existing playback, authentication and the ten-step hardware-arrival checklist above are unchanged.
+
+## M2 offline recovery - 22 September 2026
+
+Desktop startup outages, late pipe replies and helper recovery are fixed without retrying commands. Shared LVGL detects bridge restarts, rejects expired snapshots, bounds pending state, clears stale artwork/membership and preserves browsing while consuming old gestures. Silent fault injection proves one play and one volume request despite lost replies. Fresh evidence: 80 Python tests, five JavaScript tests, four CTests, TLS/native/preference/recovery demos and both builds passed (`0x971f0`, 41% free on ESP32). The screenshot harness now flushes current LVGL pixels before capture. See [recovery scope and evidence](m2-recovery.md). No live Naim or hardware operation occurred; physical gates remain open.

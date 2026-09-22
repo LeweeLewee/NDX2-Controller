@@ -14,6 +14,7 @@ static unsigned backoff=1000;
 static bridge_request_t request;
 static bridge_reply_t reply;
 static char membership_ref[257];
+static char bridge_boot[81];
 static bool last_ready, deferred_read;
 static bridge_action_t deferred_action;
 static char deferred_text[257];
@@ -120,8 +121,14 @@ static void membership(const char *reference,bool track) {
 }
 bool controller_ui_touch(bool pressed) { contact_active=pressed; return controller_touch(&state,pressed); }
 void controller_ui_disconnect(void) {
-    deferred_read=false; clear_artwork(); cancel_capture(); controller_disconnect(&state);
-    state.track_saved=state.context.saved=SAVED_UNKNOWN;
+    deferred_read=pressed_allowed=check_saved_after=browse_more=false;
+    clear_artwork(); cancel_capture(); controller_disconnect(&state);
+    state.track_saved=SAVED_UNKNOWN;
+    for(unsigned h=0;h<=state.depth;h++) {
+        context_t *c=h==state.depth?&state.context:&state.history[h];
+        c->saved=SAVED_UNKNOWN; c->selected.saved=-1;
+        for(unsigned i=0;i<c->count;i++) c->items[i].saved=-1;
+    }
     if(io->invalidate) io->invalidate(state.generation);
     network_pending=false; refresh_needed=true; next_read=io->now_ms(); dirty=true;
 }
@@ -427,6 +434,19 @@ static void render(void) {
 }
 static void apply_reply(void) {
     network_pending=false;
+    if(reply.valid&&reply.boot_id[0]) {
+        bool restarted=bridge_boot[0]&&strcmp(bridge_boot,reply.boot_id);
+        snprintf(bridge_boot,sizeof(bridge_boot),"%s",reply.boot_id);
+        if(restarted) {
+            controller_ui_disconnect();
+            /* A reply from a new process cannot complete old interaction intent. */
+            if(reply.action!=BR_SNAPSHOT) { dirty=true; return; }
+        }
+    }
+    if(reply.valid&&reply.action==BR_SNAPSHOT&&reply.outcome==BR_OBSERVED&&
+       reply.started_ms+reply.valid_for_ms<=io->now_ms()) {
+        reply.valid=false;
+    }
     if(reply.action==BR_ARTWORK) {
         sync_artwork();
         if(!strcmp(request.text,artwork_target)&&artwork_target[0]) {
@@ -460,7 +480,7 @@ static void apply_reply(void) {
     }
     if(!reply.valid||reply.outcome==BR_REJECTED) {
         if(reply.action==BR_SAVED) { if(saved_is_track) state.track_saved=SAVED_UNKNOWN; else state.context.saved=SAVED_UNKNOWN; }
-        else if(!bridge_mutation(reply.action)) { cancel_capture(); controller_disconnect(&state); io->invalidate(state.generation); }
+        else if(!bridge_mutation(reply.action)) controller_ui_disconnect();
         next_read=io->now_ms()+backoff; backoff=backoff<15000?backoff*2:30000;
     } else if(reply.outcome==BR_OBSERVED) {
         state.fixture=reply.fixture; backoff=1000;
@@ -512,9 +532,14 @@ static void tick(lv_timer_t *timer) {
     if(controller_voice_tick(&state,io->now_ms())) { io->microphone_cancel(); dirty=true; }
     if(io->submit) {
         if(io->poll(&reply)&&reply.generation==state.generation) apply_reply();
+        if(network_pending&&io->now_ms()-request.started_ms>=8000) {
+            controller_ui_disconnect();
+            strcpy(state.error_code,"BRIDGE_UNAVAILABLE"); next_read=io->now_ms()+backoff;
+            backoff=backoff<15000?backoff*2:30000;
+        }
         sync_artwork();
         if(!network_pending&&!contact_active&&deferred_read) send_request(deferred_action,deferred_text);
-        if(!network_pending&&!deferred_read&&!contact_active&&io->now_ms()>=next_read&&state.voice!=VOICE_RECORDING) send_request(BR_SNAPSHOT,NULL);
+        if(!network_pending&&!deferred_read&&!contact_active&&io->now_ms()>=next_read) send_request(BR_SNAPSHOT,NULL);
         if(!network_pending&&!deferred_read&&!contact_active&&artwork_target[0]&&!artwork_attempted&&state.voice!=VOICE_RECORDING) {
             if(send_request(BR_ARTWORK,artwork_target)) artwork_attempted=true;
         }

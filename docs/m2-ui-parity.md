@@ -48,3 +48,7 @@ The next bounded integration is implemented. See [artwork bounds, recovery fix a
 ## Local preferences follow-up - 22 September 2026
 
 Palette, brightness intent and timeout persist across native desktop launches. Versioned validation, atomic replacement, save feedback, coalescing and storage-failure behavior are tested. The ESP32 NVS adapter compiles; physical durability and brightness/sleep behavior remain open. See [preferences evidence](m2-preferences.md). Four CTests and the separate-process LVGL restart smoke pass alongside the existing 77 Python/five JavaScript tests and TLS demos. The approved layout/source remain unchanged.
+
+## M2 offline recovery - 22 September 2026
+
+Desktop startup outages, late pipe replies and helper recovery are fixed without retrying commands. Shared LVGL detects bridge restarts, rejects expired snapshots, bounds pending state, clears stale artwork/membership and preserves browsing while consuming old gestures. Silent fault injection proves one play and one volume request despite lost replies. Fresh evidence: 80 Python tests, five JavaScript tests, four CTests, TLS/native/preference/recovery demos and both builds passed (`0x971f0`, 41% free on ESP32). The screenshot harness now flushes current LVGL pixels before capture. See [recovery scope and evidence](m2-recovery.md). No live Naim or hardware operation occurred; physical gates remain open.

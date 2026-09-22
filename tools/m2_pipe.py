@@ -16,9 +16,6 @@ def main():
     vault=Vault(config['state'])
     client=Client(config['url'],config['trust'],vault.data['controller']['credential'])
     try:
-        status=client.request('snapshot')
-        if not status.get('fixture') and not config.get('allow_live',False):
-            raise PermissionError('Live bridge not enabled')
         for line in iter(lambda:sys.stdin.buffer.readline(8194),b''):
             try:
                 if len(line)>8193 or not line.endswith(b'\n'): break

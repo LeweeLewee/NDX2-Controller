@@ -73,3 +73,7 @@ The host bridge uses already-installed Pillow 12.2.0 for bounded JPEG normalizat
 Palette/brightness intent/timeout use the shared bounded preference record and local platform storage callbacks. Windows uses SDL's per-user `NDX2/Controller` directory, or `--preferences PATH` with an existing parent. The ESP32 NVS adapter uses `display_prefs/record`, never erases on storage error and does not change credential protection gates. No hardware brightness/sleep effect is implemented.
 
 Run `python tools/m2_preferences_demo.py` after the desktop build for isolated two-process restart evidence and native captures. All smoke tools supply temporary preference paths, preserving normal user preferences. Four CTests now include atomic storage/recovery and native save behavior. ESP32 storage remains compiled-only; physical latency/power-loss/endurance are open. See [preferences runbook](../docs/m2-preferences.md).
+
+## Offline recovery checkpoint
+
+After the desktop build, run `python tools/m2_recovery_demo.py` to exercise the real worker/helper over paired TLS with startup outage, delayed replies and a new bridge boot ID. All commands target silent fixtures. Four CTests include expanded LVGL recovery assertions; the separate transport executable is driven by this Python fixture rather than standalone CTest. Shared UI uses an eight-second pending deadline, generation invalidation and conservative unknown outcomes. ESP32 compiles (`0x971f0`, 41% free); no physical networking or recovery is claimed. See [recovery evidence](../docs/m2-recovery.md).
