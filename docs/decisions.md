@@ -113,3 +113,7 @@ D024 implementation follow-up: the [host setup console](m2-setup.md) now require
 ## D025 - Explicit same-origin trust replacement
 
 **Authorized offline slice, 22 September 2026.** Retain controller pairing across leaf renewal under unchanged trust. Permit an independently verified, explicitly confirmed same-origin trust update to probe one authenticated snapshot and atomically replace the saved trust digest while preserving identity and command history. Fail closed on invalid TLS, origin changes, unsupported enrollment or storage uncertainty; no automatic rollback/re-pair/command replay. [Evidence and deployment limits](m2-trust.md) distinguish fixture renewal from production certificate installation.
+
+## D026 - Replaceable desktop package with external user state
+
+**Authorized offline slice, 22 September 2026.** Assemble a Windows x64 portable development package from the existing native build, SDL and installed Python 3.14.3 standard runtime. Include an explicit client file list, isolated imports, license notices and content hashes. Keep configuration, trust, pairing and preferences outside replaceable application files; launch checks setup and allows transient offline recovery without replay. No provider adapter/service, credential migration, installer privileges or automatic update is added. [Evidence and release limits](m2-package.md) distinguish a same-host upgrade rehearsal from production distribution.

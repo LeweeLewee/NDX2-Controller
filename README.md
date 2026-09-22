@@ -39,6 +39,7 @@ Start current work with the [detailed-design plan](docs/detailed-design-plan.md)
 | [Evidence](docs/evidence.md) | What the live tests actually established |
 | [Decisions](docs/decisions.md) | Agreed decisions and their rationale |
 | [Roadmap](docs/roadmap.md) | Work and acceptance criteria for the next prototype |
+| [Portable desktop package](docs/m2-package.md) | Bundled runtime, launcher and external-state upgrades |
 | [Host controller setup](docs/m2-setup.md) | Private pairing, status, read-only verification and local recovery |
 | [Development](docs/development.md) | Running diagnostics, tests and keeping records |
 | [Research record](docs/research/native-tidal-feasibility.md) | Detailed research and references |

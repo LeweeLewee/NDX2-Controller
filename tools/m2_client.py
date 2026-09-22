@@ -8,7 +8,7 @@ import urllib.request
 import urllib.error
 import uuid
 from naim_native_probe import NoRedirect
-from m2_bridge import MAX_RESPONSE
+from m2_limits import MAX_RESPONSE
 
 
 class Client:

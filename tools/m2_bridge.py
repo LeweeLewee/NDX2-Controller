@@ -14,7 +14,7 @@ from m2_artwork import ArtworkDelivery, fixture_jpeg
 from m2_security import Pairing, Vault
 
 MAX_REQUEST = 8192
-MAX_RESPONSE = 32768
+from m2_limits import MAX_RESPONSE
 PAGE_SIZE = 12
 MUTATIONS = {'play', 'amplifier', 'transport', 'library_save'}
 FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 'offset'},
