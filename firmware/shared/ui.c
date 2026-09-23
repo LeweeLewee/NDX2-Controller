@@ -63,12 +63,13 @@ static void sync_artwork(void) {
     const char *wanted=wanted_artwork();
     if(strcmp(artwork_target,wanted)||(artwork_until&&io->now_ms()>=artwork_until)) {
         clear_artwork(); snprintf(artwork_target,sizeof(artwork_target),"%s",wanted);
+        if(state.fixture&&!strncmp(wanted,"fixture:study",13)) artwork_attempted=true;
     }
 }
 static void render(void);
-static uint32_t background(void) { return state.palette==1?0x292620:state.palette==2?0x22282e:0x202521; }
-static uint32_t surface(void) { return state.palette==1?0x363026:state.palette==2?0x2c3741:0x2b342b; }
-static uint32_t divider(void) { return state.palette==1?0x51483a:state.palette==2?0x43515e:0x3b4537; }
+static uint32_t background(void) { return state.palette==1?0x24211d:state.palette==2?0x1e252b:0x1c211e; }
+static uint32_t surface(void) { return state.palette==1?0x302b24:state.palette==2?0x29343d:0x29312a; }
+static uint32_t divider(void) { return state.palette==1?0x494137:state.palette==2?0x3c4a55:0x354137; }
 static uint32_t muted(void) { return state.palette==1?0xb8aa93:state.palette==2?0xa3b5c4:0x9eae96; }
 static uint32_t paper(void) { return state.palette==1?0xeee2cf:state.palette==2?0xe0e7ed:0xe6eddd; }
 static uint32_t accent(void) { return state.palette==1?0xddc8a6:state.palette==2?0xb9cddd:0xc2d1b5; }
@@ -251,6 +252,7 @@ static lv_obj_t *button(lv_obj_t *parent,const char *text,int x,int y,int w,int 
 }
 static lv_obj_t *left_button(lv_obj_t *parent,const char *text,int x,int y,int w,int h,unsigned action,bool enabled) {
     lv_obj_t *o=button(parent,text,x,y,w,h,action,enabled,true);
+    lv_obj_set_style_opa(o,LV_OPA_COVER,LV_STATE_DISABLED);
     lv_obj_t *t=lv_obj_get_child(o,0); lv_obj_set_style_text_align(t,LV_TEXT_ALIGN_LEFT,0); lv_obj_align(t,LV_ALIGN_LEFT_MID,0,0); return o;
 }
 #include "ui_visual.h"
@@ -258,6 +260,9 @@ static void art(int size) {
     lv_obj_t *frame=lv_obj_create(content); lv_obj_remove_style_all(frame); lv_obj_clear_flag(frame,LV_OBJ_FLAG_CLICKABLE|LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_pos(frame,0,0); lv_obj_set_size(frame,size,size); lv_obj_set_style_radius(frame,6,0);
     lv_obj_set_style_clip_corner(frame,true,0);
+    if(state.fixture&&!strncmp(wanted_artwork(),"fixture:study",13)) {
+        artwork_widget=frame; study_cover(frame,(unsigned)(wanted_artwork()[13]-'0')%3); return;
+    }
     if(artwork_loaded&&!strcmp(artwork_target,wanted_artwork())&&io->now_ms()<artwork_until) {
         artwork_widget=lv_img_create(frame);
         lv_img_set_src(artwork_widget,&artwork_image); lv_img_set_pivot(artwork_widget,0,0);
@@ -286,7 +291,8 @@ static void list_rows(int y,int height,bool actionable) {
         lv_obj_t *row=left_button(rows,item->title,0,i*76,650,70,100+i,actionable&&!network_pending);
         /* Read-only queue rows remain fully legible, without becoming tappable. */
         if(!actionable) lv_obj_set_style_opa(row,LV_OPA_COVER,LV_STATE_DISABLED);
-        lv_obj_t *title_label=lv_obj_get_child(row,0); lv_obj_set_align(title_label,LV_ALIGN_TOP_LEFT); lv_obj_set_pos(title_label,12,6); lv_obj_set_size(title_label,622,26);
+        lv_obj_set_style_text_font(row,&lv_font_montserrat_24,0);
+        lv_obj_t *title_label=lv_obj_get_child(row,0); lv_obj_set_align(title_label,LV_ALIGN_TOP_LEFT); lv_obj_set_pos(title_label,12,6); lv_obj_set_size(title_label,622,30);
         char subtitle[384]; snprintf(subtitle,sizeof(subtitle),"%s%s%s",item->artist,item->artist[0]?"  /  ":"",item->kind);
         lv_obj_t *sub=label(row,subtitle,12,38,622,22,&lv_font_montserrat_16); lv_obj_set_style_text_color(sub,lv_color_hex(muted()),0);
         if(actionable) icon_button(rows,item->saved==1?ICON_CHECK:item->saved==0?ICON_PLUS:ICON_QUESTION,674,i*76,72,70,200+i,controller_ui_ready()&&strcmp(state.account,"disconnected"));
@@ -313,17 +319,19 @@ static void render(void) {
     bool library_ready=ready&&strcmp(state.account,"disconnected");
     lv_obj_set_style_bg_color(root,lv_color_hex(background()),0);
     if(state.context.screen==NOW) {
-        lv_obj_t *brand=label(root,"NDX 2",24,21,112,28,&lv_font_montserrat_20);
+        lv_obj_t *brand=label(root,"RIVER STONE",24,23,208,28,&lv_font_montserrat_16);
         lv_obj_set_style_text_letter_space(brand,2,0);
     } else left_button(root,LV_SYMBOL_LEFT "  Back",20,4,112,52,10,state.depth>0);
-    status=label(root,"",168,24,548,24,&lv_font_montserrat_16);
+    status=label(root,"",240,24,400,24,&lv_font_montserrat_16);
     lv_obj_set_style_text_align(status,LV_TEXT_ALIGN_RIGHT,0);
     lv_obj_set_style_text_color(status,lv_color_hex(muted()),0);
-    char text[768]; snprintf(text,sizeof(text),"%s%s",state.fixture?"Silent demo  /  ":"",
-        state.busy?"Pending":state.outcome==OUTCOME_UNKNOWN?"Outcome unknown":(state.online&&io->now_ms()<state.fresh_until)?"Connected":state.online?"Checking connection":"Offline");
+    const char *connection=!state.online?(state.outcome==OUTCOME_UNKNOWN?"Offline / outcome unknown":"Offline"):
+        state.outcome==OUTCOME_UNKNOWN?"Outcome unknown":state.busy?"Pending":io->now_ms()>=state.fresh_until?"Reconnecting":"";
+    char text[768]; snprintf(text,sizeof(text),"%s%s%s",state.fixture?"Silent demo":"",state.fixture&&connection[0]?" / ":"",connection);
     lv_label_set_text(status,text);
     icon_button(root,ICON_SETTINGS,728,4,56,52,40,true);
-    rule(root,24,63,752);
+    /* Music screen meets the enclosure without a dashboard divider. */
+    if(state.context.screen!=NOW) rule(root,24,63,752);
     content=lv_obj_create(root); lv_obj_set_pos(content,24,76); lv_obj_set_size(content,752,312);
     lv_obj_set_style_pad_all(content,0,0); lv_obj_set_style_border_width(content,0,0); lv_obj_set_style_bg_opa(content,LV_OPA_TRANSP,0);
     lv_obj_clear_flag(content,LV_OBJ_FLAG_SCROLLABLE);
@@ -335,46 +343,54 @@ static void render(void) {
     if(section==DETAILS&&state.depth) { section=state.history[state.depth-1].screen; if(section==DETAILS) section=FIND; }
     lv_obj_t *nav_bg=lv_obj_create(root); lv_obj_remove_style_all(nav_bg); lv_obj_set_pos(nav_bg,0,400); lv_obj_set_size(nav_bg,800,80);
     lv_obj_set_style_bg_color(nav_bg,lv_color_hex(state.palette==1?0x211f1a:state.palette==2?0x1b2128:0x1b211c),0);
-    lv_obj_set_style_bg_opa(nav_bg,LV_OPA_COVER,0); rule(root,0,400,800);
+    lv_obj_set_style_bg_opa(nav_bg,LV_OPA_TRANSP,0); rule(root,24,400,752);
     for(unsigned i=0;i<4;i++) {
-        lv_obj_t *b=button(root,nav[i],20+i*192,408,184,64,actions[i],true,section!=actions[i]);
+        lv_obj_t *b=button(root,nav[i],20+i*192,408,184,64,actions[i],true,true);
         lv_obj_set_style_border_width(b,0,0);
         lv_obj_t *t=lv_obj_get_child(b,0); lv_obj_set_width(t,132); lv_obj_align(t,LV_ALIGN_CENTER,15,0);
         lv_obj_set_style_text_color(b,lv_color_hex(section==actions[i]?paper():muted()),0);
         lv_obj_t *ic=lv_obj_create(b); lv_obj_remove_style_all(ic); lv_obj_clear_flag(ic,LV_OBJ_FLAG_CLICKABLE); lv_obj_set_size(ic,26,26); lv_obj_set_pos(ic,8,15);
         lv_obj_add_event_cb(ic,icon_draw,LV_EVENT_DRAW_MAIN_END,(void *)(uintptr_t)nav_icons[i]);
-        if(section==actions[i]) { lv_obj_t *line=rule(b,16,57,144); lv_obj_set_style_bg_color(line,lv_color_hex(accent()),0); }
+        if(section==actions[i]) { lv_obj_t *line=rule(b,68,57,40); lv_obj_set_style_bg_color(line,lv_color_hex(accent()),0); }
     }
     switch(state.context.screen) {
     case NOW: {
-        art(240);
-        snprintf(text,sizeof(text),"%s / %s",state.source[0]?state.source:"Source unavailable",!strcmp(state.transport,"playing")?"NOW PLAYING":!strcmp(state.transport,"paused")?"PAUSED":"UNKNOWN");
-        lv_obj_t *kicker=label(content,text,268,0,264,24,&lv_font_montserrat_16); lv_obj_set_style_text_color(kicker,lv_color_hex(muted()),0);
-        if(state.bitrate>0) snprintf(text,sizeof(text),"%d kbps",state.bitrate); else strcpy(text,"Bitrate unavailable");
-        lv_obj_t *quality=label(content,text,532,0,220,24,&lv_font_montserrat_16); lv_obj_set_style_text_align(quality,LV_TEXT_ALIGN_RIGHT,0); lv_obj_set_style_text_color(quality,lv_color_hex(muted()),0);
-        lv_obj_t *title=left_button(content,state.title,268,28,408,68,30,state.current.reference[0]&&!network_pending);
+        art(280);
+        const char *source=!strcmp(state.source,"tidal")?"TIDAL":state.source[0]?state.source:"Source unavailable";
+        snprintf(text,sizeof(text),"%s%s",source,!strcmp(state.transport,"paused")?"  /  PAUSED":"");
+        lv_obj_t *kicker=label(content,text,312,0,350,24,&lv_font_montserrat_16);
+        lv_obj_set_style_text_letter_space(kicker,1,0); lv_obj_set_style_text_color(kicker,lv_color_hex(muted()),0);
+        lv_obj_t *title=left_button(content,state.title,312,32,436,76,30,state.current.reference[0]&&!network_pending);
         lv_obj_set_style_text_font(title,&lv_font_montserrat_32,0); lv_obj_set_style_text_letter_space(title,-1,0);
-        lv_obj_t *heart=icon_button(content,state.track_saved==SAVED_YES?ICON_HEART_SAVED:ICON_HEART,684,28,64,64,25,library_ready&&state.current.reference[0]);
-        if(state.track_saved==SAVED_UNKNOWN) label(heart,"?",42,0,16,20,&lv_font_montserrat_16);
-        lv_obj_t *artist_link=left_button(content,state.artist[0]?state.artist:"Artist unavailable",268,102,484,42,31,state.current.artist_reference[0]&&!network_pending);
+        lv_obj_t *title_text=lv_obj_get_child(title,0); lv_obj_set_height(title_text,72); lv_obj_set_style_text_line_space(title_text,2,0);
+        lv_obj_t *artist_link=left_button(content,state.artist[0]?state.artist:"Artist unavailable",312,112,436,42,31,state.current.artist_reference[0]&&!network_pending);
         lv_obj_set_style_text_font(artist_link,&lv_font_montserrat_24,0);
-        lv_obj_t *album=left_button(content,state.album[0]?state.album:"Album unavailable",268,148,484,42,32,state.current.album_reference[0]&&!network_pending);
+        lv_obj_t *album=left_button(content,state.album[0]?state.album:"Album unavailable",312,154,436,42,32,state.current.album_reference[0]&&!network_pending);
         lv_obj_set_style_text_color(album,lv_color_hex(muted()),0);
-        lv_obj_t *bar=lv_bar_create(content); lv_obj_set_pos(bar,268,202); lv_obj_set_size(bar,484,3);
+        lv_obj_t *heart=icon_button(root,state.track_saved==SAVED_YES?ICON_HEART_SAVED:ICON_HEART,656,4,64,52,25,library_ready&&state.current.reference[0]);
+        if(state.track_saved==SAVED_UNKNOWN) label(heart,"?",45,0,16,20,&lv_font_montserrat_16);
+        lv_obj_t *bar=lv_bar_create(content); lv_obj_set_pos(bar,312,210); lv_obj_set_size(bar,436,2);
         lv_bar_set_value(bar,state.duration_ms>0&&state.position_ms>=0?(int)((int64_t)state.position_ms*100/state.duration_ms):0,LV_ANIM_OFF);
         lv_obj_set_style_bg_color(bar,lv_color_hex(accent()),LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(bar,lv_color_hex(divider()),0); lv_obj_set_style_bg_opa(bar,LV_OPA_COVER,0);
         if(state.position_ms>=0) snprintf(text,sizeof(text),"%d:%02d",state.position_ms/60000,state.position_ms/1000%60); else strcpy(text,"--:--");
-        label(content,text,268,214,100,24,&lv_font_montserrat_16);
+        lv_obj_t *elapsed=label(content,text,312,220,100,24,&lv_font_montserrat_16); lv_obj_set_style_text_color(elapsed,lv_color_hex(muted()),0);
         if(state.duration_ms>=0) snprintf(text,sizeof(text),"%d:%02d",state.duration_ms/60000,state.duration_ms/1000%60); else strcpy(text,"--:--");
-        label(content,text,690,214,62,24,&lv_font_montserrat_16);
+        lv_obj_t *duration=label(content,text,680,220,68,24,&lv_font_montserrat_16); lv_obj_set_style_text_align(duration,LV_TEXT_ALIGN_RIGHT,0); lv_obj_set_style_text_color(duration,lv_color_hex(muted()),0);
         const unsigned icons[]={ICON_PREVIOUS,!strcmp(state.transport,"playing")?ICON_PAUSE:ICON_PLAY,ICON_NEXT,ICON_VOLUME_DOWN,ICON_VOLUME_UP};
         const unsigned acts[]={26,27,28,14,15};
-        for(unsigned i=0;i<5;i++) icon_button(content,icons[i],268+i*101,242,80,64,acts[i],ready);
+        for(unsigned i=0;i<5;i++) icon_button(content,icons[i],312+i*88,242,80,64,acts[i],ready);
+        if(state.bitrate>0) {
+            snprintf(text,sizeof(text),"%d kbps",state.bitrate);
+            lv_obj_t *quality=label(content,text,0,292,280,24,&lv_font_montserrat_16);
+            lv_obj_set_style_text_align(quality,LV_TEXT_ALIGN_CENTER,0); lv_obj_set_style_text_color(quality,lv_color_hex(muted()),0);
+        }
         break; }
     case FIND:
         query=lv_textarea_create(content); lv_obj_set_pos(query,0,0); lv_obj_set_size(query,596,64);
-        lv_textarea_set_one_line(query,true); lv_textarea_set_max_length(query,256); lv_textarea_set_text(query,state.context.query);
+        lv_textarea_set_one_line(query,true); lv_obj_set_size(query,596,64); lv_obj_set_style_text_font(query,&lv_font_montserrat_24,0); lv_textarea_set_max_length(query,256); lv_textarea_set_text(query,state.context.query);
+        lv_obj_set_style_border_width(query,1,0); lv_obj_set_style_border_color(query,lv_color_hex(divider()),0);
+        lv_obj_set_style_border_color(query,lv_color_hex(accent()),LV_STATE_FOCUSED);
         lv_obj_set_style_bg_color(query,lv_color_hex(surface()),0); lv_obj_set_style_text_color(query,lv_color_hex(paper()),0);
         lv_obj_add_event_cb(query,keyboard_event,LV_EVENT_FOCUSED,NULL); lv_obj_add_event_cb(query,keyboard_event,LV_EVENT_VALUE_CHANGED,NULL);
         lv_obj_t *search=button(content,"",608,0,64,64,11,!network_pending,true);

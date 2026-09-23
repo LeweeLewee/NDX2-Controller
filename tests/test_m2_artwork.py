@@ -72,7 +72,7 @@ class ArtworkTests(unittest.TestCase):
         artwork = request('artwork', {'reference': first})
         self.assertLess(len(json.dumps(artwork).encode()), MAX_RESPONSE)
         self.assertTrue(artwork['data']['available'])
-        self.service.naim.title = 'Silent track'
+        self.service.naim.art_variant = 1
         second = request('snapshot')['data']['player']['artwork']
         self.assertNotEqual(first, second)
         self.assertNotEqual(artwork['data']['pixels'], request('artwork', {'reference': second})['data']['pixels'])

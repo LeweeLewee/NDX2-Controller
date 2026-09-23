@@ -43,7 +43,7 @@ class M2Tests(unittest.TestCase):
         return self.contract.handle('device', {'version':1,'request_id':rid,'action':action,'args':args or {}})
     def test_fixture_next_previous_changes_current_identity_and_position(self):
         naim=self.service.naim; naim.transport('pause')
-        for command,index,title in [('next',102,'Silent track 2'),('prev',101,'Silent track'),('prev',103,'Silent track 3'),('next',101,'Silent track')]:
+        for command,index,title in [('next',102,'Soft Light'),('prev',101,'A Still Morning'),('prev',103,'Quiet Hours'),('next',101,'A Still Morning')]:
             naim.transport(command)
             self.assertEqual(naim.status()['title'],title)
             self.assertEqual(naim.status()['transportPosition'],0)
@@ -53,7 +53,7 @@ class M2Tests(unittest.TestCase):
         self.assertEqual(naim.calls,[('transport',c) for c in ('pause','next','prev','prev','next')])
         naim.play('inputs/tidal/tracks/103','replace')
         self.assertEqual(naim.reference,'inputs/tidal/tracks/103')
-        self.assertEqual(naim.status()['title'],'Silent track 3')
+        self.assertEqual(naim.status()['title'],'Quiet Hours')
     def test_fixture_pause_resume_and_new_play_update_observed_state(self):
         self.service.naim.transport('pause')
         self.assertEqual(self.service.naim.status()['transportState'],'3')
@@ -216,8 +216,8 @@ class M2Tests(unittest.TestCase):
         model.details(model.context['items'][0])
         ref=model.selected['item']['reference']
         self.assertEqual(model.mutate('play',{'reference':ref}),'submitted')
-        self.assertEqual(model.snapshot['player']['title'],'Silent track')
-        self.assertEqual(model.snapshot['queue'][0]['title'],'Silent track')
+        self.assertEqual(model.snapshot['player']['title'],'A Still Morning')
+        self.assertEqual(model.snapshot['queue'][0]['title'],'A Still Morning')
         self.assertEqual(model.read('library_state',{'reference':ref})['saved_state'],'unknown')
         model.mutate('library_save',{'reference':ref,'saved':True})
         self.assertEqual(model.read('library_state',{'reference':ref})['saved_state'],'saved')
@@ -305,7 +305,7 @@ class TLSTests(unittest.TestCase):
                 model=Controller(client); self.assertTrue(model.reconnect()); model.touch(False)
                 model.search('quiet','albums'); model.details(model.context['items'][0])
                 self.assertEqual(model.mutate('play',{'reference':model.selected['item']['reference']}),'submitted')
-                self.assertEqual(model.snapshot['player']['title'],'Silent track')
+                self.assertEqual(model.snapshot['player']['title'],'A Still Morning')
                 reference=model.snapshot['player']['artwork']
                 self.assertTrue(client.request('artwork',{'reference':reference})['data']['available'])
                 pairing.revoke(auth['device']); self.assertFalse(model.reconnect())

@@ -41,13 +41,14 @@ def configured_service(vault):
 class FixtureNaim:
     """No sockets, audio, physical microphone or inferred amplifier level."""
     def __init__(self):
-        self.title = 'Silent fixture - ready'
+        self.title = 'A Still Morning'
         self.transport_state = '2'
+        self.art_variant = 0
         self.track_index = 0
         self.position_ms = 76000
         self.calls = []
     def status(self):
-        return {'title': self.title, 'artist': 'Fixture Ensemble', 'album': 'Silent album',
+        return {'title': self.title, 'artist': 'River Stone Ensemble', 'album': 'Listening Studies',
                 'transportState': self.transport_state, 'sourceDetail': 'tidal', 'duration': 330000, 'transportPosition': self.position_ms}
     @property
     def reference(self): return f'inputs/tidal/tracks/{101+self.track_index}'
@@ -55,20 +56,21 @@ class FixtureNaim:
         return {'children': [{'ussi': self.reference, 'title': self.title}]}
     def browse(self, reference, offset=0):
         kind = reference.split('/')[2]
-        title = ('Fixture Ensemble' if kind == 'artists' else 'Silent track' if kind == 'tracks' else
+        title = ('River Stone Ensemble' if kind == 'artists' else 'A Still Morning' if kind == 'tracks' else
                  'An exceptionally long album title for seated reading and layout trials')
-        for i,track_title in enumerate(('Silent track','Silent track 2','Silent track 3')):
+        for i,track_title in enumerate(('A Still Morning','Soft Light','Quiet Hours')):
             if reference==f'inputs/tidal/tracks/{101+i}': title=track_title
         child = 'inputs/tidal/albums/1' if kind == 'artists' else 'inputs/tidal/tracks/101'
         return {'ussi': reference, 'class': {'albums':'object.tidalAlbum', 'tracks':'object.tidalTrack',
                 'artists':'object.tidalArtist', 'playlists':'object.tidalPlaylist'}.get(kind),
-                'artist': 'Fixture Ensemble', 'title': title,
-                'children': [{'ussi': child, 'title': 'Silent album' if kind == 'artists' else 'Silent track'}], 'totalCount': 1}
+                'artist': 'River Stone Ensemble', 'title': title,
+                'children': [{'ussi': child, 'title': 'Listening Studies' if kind == 'artists' else 'A Still Morning'}], 'totalCount': 1}
     def play(self, reference, placement):
+        self.art_variant = 1
         self.calls.append(('play', reference, placement)); self.transport_state = '2'; self.track_index = 0; self.position_ms = 0
         for i in range(3):
             if reference==f'inputs/tidal/tracks/{101+i}': self.track_index=i
-        self.title=('Silent track','Silent track 2','Silent track 3')[self.track_index]
+        self.title=('A Still Morning','Soft Light','Quiet Hours')[self.track_index]
     def amplifier_nudge(self, direction):
         self.calls.append(('amplifier', direction))
     def transport(self, command):
@@ -77,7 +79,7 @@ class FixtureNaim:
         elif command == 'resume': self.transport_state = '2'
         elif command in ('next','prev'):
             self.track_index=(self.track_index+(1 if command=='next' else -1))%3
-            self.title=('Silent track','Silent track 2','Silent track 3')[self.track_index]
+            self.title=('A Still Morning','Soft Light','Quiet Hours')[self.track_index]
             self.position_ms=0
 
 
@@ -93,7 +95,7 @@ class FixtureService(Bridge):
     def request(self, action, args):
         if action == 'status':
             data = super().request(action, args)
-            data['artwork'] = list(self.fixture_images)[self.naim.title == 'Silent track']
+            data['artwork'] = list(self.fixture_images)[self.naim.art_variant]
             return data
         if action == 'browse':
             data = super().request(action, args)
@@ -103,7 +105,7 @@ class FixtureService(Bridge):
             kind = args.get('kind', 'albums')
             items = [{'reference': 'inputs/tidal/' + kind + '/' + str(i), 'title':
                       'An exceptionally long album title for seated reading' if i == 1 else 'Silent ' + kind[:-1] + ' ' + str(i),
-                      'artist': 'Fixture Ensemble', 'kind': kind, 'artwork': None,
+                      'artist': 'River Stone Ensemble', 'kind': kind, 'artwork': None,
                       'saved': {1: 'saved', 2: 'unsaved'}.get(i, 'unknown')} for i in range(1, 30)]
             if action == 'library_page':
                 items = [i for i in items if self.saved.get(i['reference'], i['saved'] == 'saved')]
@@ -111,8 +113,8 @@ class FixtureService(Bridge):
         if action == 'current_item':
             return {'reference':self.naim.reference, 'title':self.naim.title, 'kind':'tracks'}
         if action == 'related':
-            return {'items':[{'reference':'inputs/tidal/albums/1','title':'Silent album','kind':'albums'},
-                             {'reference':'inputs/tidal/artists/1','title':'Fixture Ensemble','kind':'artists'}]}
+            return {'items':[{'reference':'inputs/tidal/albums/1','title':'Listening Studies','kind':'albums'},
+                             {'reference':'inputs/tidal/artists/1','title':'River Stone Ensemble','kind':'artists'}]}
         if action == 'library_state': return {'saved': self.saved.get(args['reference'])}
         if action == 'library_save':
             self.saved[args['reference']] = args['saved']

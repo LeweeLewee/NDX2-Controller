@@ -26,3 +26,7 @@ Physical touch sizing, seated readability, keyboard, wake, microphone, battery, 
 Approved source: `docs/ui-review/index.html` after approval-label update.
 SHA-256: `1886dfe3f6bea33d8206bbe27b0c799a45964c995144131ef02a9619a3c68bbc`.
 Later edits should be recorded as revisions to this baseline. Browser-local notes and preferences are not a substitute for this approval record.
+
+## Later user direction - 23 September 2026
+
+The user clarified that these were rough prototypes and authorized expert visual/UI redesign for the high-end coffee-table ornament. D027 and [the native design gate](../m2-object-design.md) supersede treating this HTML as final visual geometry. Its hash remains a preserved historical reference; interaction and playback/security constraints remain in force.

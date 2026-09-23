@@ -32,7 +32,7 @@ def main(package=None):
                 pictures=[]
                 for name in ('playing','paused','resumed'):
                     picture=Image.open(captures/(name+'.bmp')).convert('RGB'); picture.save(captures/(name+'.png'))
-                    pictures.append(picture.crop((405,332,460,373)))
+                    pictures.append(picture.crop((440,330,488,375)))
                 assert ImageChops.difference(pictures[0],pictures[1]).getbbox()
                 assert ImageChops.difference(pictures[0],pictures[2]).getbbox() is None
                 for name in ('next','previous','previous-wrap','next-wrap'):

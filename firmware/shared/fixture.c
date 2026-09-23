@@ -9,9 +9,9 @@ static bool playing, pending, paused;
 static uint32_t sequence;
 static unsigned track_index;
 static int position_ms;
-static const char *track_titles[]={"Silent track","Silent track 2","Silent track 3"};
+static const char *track_titles[]={"A Still Morning","Soft Light","Quiet Hours"};
 static const char *track_title(void) {
-    return playing?track_titles[track_index]:"Silent fixture - ready";
+    return playing?track_titles[track_index]:"A Still Morning";
 }
 static void track_ref(char out[257]) { snprintf(out,257,"inputs/tidal/tracks/%u",101+track_index); }
 static bridge_reply_t result;
@@ -37,13 +37,14 @@ static void item(bridge_item_t *out,const char *ref) {
     memset(out,0,sizeof(*out)); snprintf(out->reference,sizeof(out->reference),"%s",ref);
     const char *kind=kind_index(ref)==2?"artists":kind_index(ref)==1?"tracks":kind_index(ref)==3?"playlists":"albums";
     strcpy(out->kind,kind); snprintf(out->title,sizeof(out->title),"Silent %s %u",kind,item_index(ref));
-    strcpy(out->artist,"Fixture Ensemble"); strcpy(out->album,"Silent album");
+    strcpy(out->artist,"River Stone Ensemble"); strcpy(out->album,"Listening Studies");
     if(strcmp(kind,"artists")) strcpy(out->artist_reference,"inputs/tidal/artists/1");
     if(!strcmp(kind,"tracks")) strcpy(out->album_reference,"inputs/tidal/albums/1");
     for(unsigned i=0;i<3;i++) {
         char known[64]; snprintf(known,sizeof(known),"inputs/tidal/tracks/%u",101+i);
         if(!strcmp(ref,known)) strcpy(out->title,track_titles[i]);
     }
+    snprintf(out->artwork,sizeof(out->artwork),"fixture:study%u",item_index(ref)%3);
     out->saved=membership[kind_index(ref)][item_index(ref)];
 }
 static bool submit(const bridge_request_t *r) {
@@ -53,7 +54,7 @@ static bool submit(const bridge_request_t *r) {
     result.position_ms=position_ms; result.duration_ms=330000; result.bitrate=-1;
     result.outcome=bridge_mutation(r->action)?BR_SUBMITTED:BR_OBSERVED; result.valid_for_ms=5000;
     if(r->action==BR_SNAPSHOT) {
-        strcpy(result.title,track_title()); strcpy(result.artist,"Fixture Ensemble"); strcpy(result.album,"Silent album");
+        strcpy(result.title,track_title()); strcpy(result.artist,"River Stone Ensemble"); strcpy(result.album,"Listening Studies");
         strcpy(result.source,"tidal"); strcpy(result.transport,paused?"paused":"playing"); strcpy(result.account,"fixture");
         char ref[257]; track_ref(ref);
         item(&result.item,ref); strcpy(result.item.title,track_title());

@@ -25,7 +25,7 @@ def main():
             print('PASS paginated search / album detail / Back restores query, filter, page and scroll')
             model.details(model.context['items'][0]); reference=model.selected['item']['reference']
             assert model.mutate('play',{'reference':reference})=='submitted'
-            assert model.snapshot['player']['title']=='Silent track'
+            assert model.snapshot['player']['title']=='A Still Morning'
             assert len(service.naim.calls)==1
             print('PASS native resolution / single play request / refreshed player and queue (SILENT FIXTURE)')
             assert model.read('library_state',{'reference':reference})['saved_state']=='unknown'

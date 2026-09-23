@@ -39,3 +39,7 @@ The first user trial found a silent-fixture state bug: Pause commands did not ch
 ## User trial: visible Next/Previous feedback
 
 Next/Previous had the same silent-fixture gap: commands were logged without changing track data. Both fixtures now use a three-track sequence with distinct titles/references, wrapping in either direction and resetting position to zero. Queue/current-item/detail identity stays consistent. Skipping preserves paused state; explicit Play starts the selected fixture playback state. The icons for Next/Previous intentionally stay fixed; changed metadata is their feedback. Native pointer smoke now covers pause/resume, next, previous and wrapping with one request per tap. Live Naim adapters and D011 are unchanged; this is silent simulation, not live transport validation.
+
+## Object-led design build - 23 September 2026
+
+The newer native design has larger cover presentation, quieter navigation and original geometric silent-demo sleeves. Demo tracks are A Still Morning, Soft Light and Quiet Hours; no audio is produced. Play/Pause changes icon and Next/Previous changes title/cover. Real missing artwork is never replaced by these sleeves. Extract new packages to a new folder and retain external configuration/preferences. Designer review is desktop-only; live artwork and physical acceptance remain open.

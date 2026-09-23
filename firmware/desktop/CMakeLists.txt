@@ -45,3 +45,7 @@ add_executable(fixture_test ../../tests/fixture_test.c ../shared/fixture.c ../sh
 target_include_directories(fixture_test PRIVATE ../shared)
 target_link_libraries(fixture_test PRIVATE bridge_protocol)
 add_test(NAME fixture_transport COMMAND fixture_test)
+
+add_executable(ui_visual_test ../../tests/ui_visual_test.c ../shared/controller.c ../shared/preferences.c)
+target_link_libraries(ui_visual_test PRIVATE lvgl bridge_protocol)
+add_test(NAME ui_visual COMMAND ui_visual_test)

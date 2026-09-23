@@ -25,7 +25,7 @@ def main():
         assert struct.unpack('<I',raw[8:])[0]==zlib.crc32(raw[:8])
         for name in ('14-preferences-saved','15-preferences-restored'):
             picture=Image.open(captures/(name+'.bmp')).convert('RGB')
-            assert picture.size==(800,480) and picture.getpixel((790,390))==(41,38,32)
+            assert picture.size==(800,480) and picture.getpixel((790,390))==(36,33,29)
             picture.save(captures/(name+'.png'))
         print('PASS separate-process persistence and actual restored palette pixels; no network or audio')
 

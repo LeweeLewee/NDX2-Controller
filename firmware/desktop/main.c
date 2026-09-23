@@ -88,12 +88,12 @@ int main(int argc,char **argv) {
             next=now+500;
             if(transport_smoke) {
                 if(controller_ui_ready()) {
-                    if(stage==0&&!strcmp(s->transport,"playing")) { capture(smoke,"playing"); tap(433,350); stage++; }
-                    else if(stage==1&&!strcmp(s->transport,"paused")) { capture(smoke,"paused"); tap(433,350); stage++; }
-                    else if(stage==2&&!strcmp(s->transport,"playing")) { capture(smoke,"resumed"); tap(534,350); stage++; }
-                    else if(stage==3&&!strcmp(s->current.reference,"inputs/tidal/tracks/102")&&s->position_ms==0) { capture(smoke,"next"); tap(332,350); stage++; }
-                    else if(stage==4&&!strcmp(s->current.reference,"inputs/tidal/tracks/101")) { capture(smoke,"previous"); tap(332,350); stage++; }
-                    else if(stage==5&&!strcmp(s->current.reference,"inputs/tidal/tracks/103")) { capture(smoke,"previous-wrap"); tap(534,350); stage++; }
+                    if(stage==0&&!strcmp(s->transport,"playing")) { capture(smoke,"playing"); tap(464,350); stage++; }
+                    else if(stage==1&&!strcmp(s->transport,"paused")) { capture(smoke,"paused"); tap(464,350); stage++; }
+                    else if(stage==2&&!strcmp(s->transport,"playing")) { capture(smoke,"resumed"); tap(552,350); stage++; }
+                    else if(stage==3&&!strcmp(s->current.reference,"inputs/tidal/tracks/102")&&s->position_ms==0) { capture(smoke,"next"); tap(376,350); stage++; }
+                    else if(stage==4&&!strcmp(s->current.reference,"inputs/tidal/tracks/101")) { capture(smoke,"previous"); tap(376,350); stage++; }
+                    else if(stage==5&&!strcmp(s->current.reference,"inputs/tidal/tracks/103")) { capture(smoke,"previous-wrap"); tap(552,350); stage++; }
                     else if(stage==6&&!strcmp(s->current.reference,"inputs/tidal/tracks/101")) { capture(smoke,"next-wrap"); puts("PASS native Play/Pause icons and Next/Previous track sequence"); running=false; }
                 }
                 if(SDL_GetTicks64()-started>20000) { fprintf(stderr,"Transport smoke timed out at stage %u\n",stage); exit_code=10; running=false; }
@@ -131,7 +131,7 @@ int main(int argc,char **argv) {
             case 3: if(s->context.screen==DETAILS&&controller_ui_ready()) { capture(smoke,"03-details"); tap(60,30); stage++; } break;
             case 4: if(s->context.screen==FIND) { if(s->context.count!=12) { exit_code=3; running=false; } tap(330,236); stage++; } break;
             case 5: if(s->context.screen==DETAILS&&controller_ui_ready()&&s->context.playable) { tap(310,356); stage++; } break;
-            case 6: if(s->context.screen==NOW&&strstr(s->title,"Silent track")&&controller_ui_ready()) { capture(smoke,"04-playing"); tap(290,440); stage++; } break;
+            case 6: if(s->context.screen==NOW&&strstr(s->title,"A Still Morning")&&controller_ui_ready()) { capture(smoke,"04-playing"); tap(290,440); stage++; } break;
             case 7: if(s->context.screen==FIND&&controller_ui_ready()) { tap(744,108); stage++; } break;
             case 8: if(s->context.screen==VOICE&&s->voice==VOICE_RECORDING) { capture(smoke,"05-recording"); tap(390,292); stage++; } break;
             case 9: if(s->voice==VOICE_RECORDING) { tap(160,292); stage++; } break;

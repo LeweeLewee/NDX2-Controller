@@ -15,6 +15,7 @@ static void icon_draw(lv_event_t *e) {
     unsigned icon=(unsigned)(uintptr_t)lv_event_get_user_data(e);
     int size=lv_obj_get_width(o)<40?24:30;
     if(icon==ICON_DISC) size=48;
+    if(icon==ICON_PAUSE||icon==ICON_PLAY) size=32;
     int x=a.x1+(lv_obj_get_width(o)-size)/2,y=a.y1+(lv_obj_get_height(o)-size)/2;
     lv_draw_ctx_t *ctx=lv_event_get_draw_ctx(e);
     lv_draw_line_dsc_t d; lv_draw_line_dsc_init(&d); d.color=lv_obj_get_style_text_color(o,0);
@@ -22,6 +23,11 @@ static void icon_draw(lv_event_t *e) {
     lv_draw_arc_dsc_t arc; lv_draw_arc_dsc_init(&arc); arc.color=d.color; arc.width=2; arc.opa=d.opa;
 #define PATH(...) do { const int8_t p[]={__VA_ARGS__}; icon_path(ctx,&d,x,y,size,p,sizeof(p)); } while(0)
 #define CIRCLE(cx,cy,r) do { lv_point_t c={x+(cx)*size/24,y+(cy)*size/24}; lv_draw_arc(ctx,&arc,&c,(r)*size/24,0,360); } while(0)
+    if(icon==ICON_PAUSE||icon==ICON_PLAY) {
+        lv_draw_rect_dsc_t halo; lv_draw_rect_dsc_init(&halo); halo.bg_color=d.color; halo.bg_opa=LV_OPA_10; halo.radius=LV_RADIUS_CIRCLE;
+        lv_area_t circle={a.x1+(lv_obj_get_width(o)-56)/2,a.y1+(lv_obj_get_height(o)-56)/2,a.x1+(lv_obj_get_width(o)+56)/2-1,a.y1+(lv_obj_get_height(o)+56)/2-1};
+        lv_draw_rect(ctx,&halo,&circle); d.width=3;
+    }
     switch(icon) {
     case ICON_PREVIOUS: PATH(5,5,5,19); PATH(19,5,9,12,19,19,19,5); break;
     case ICON_NEXT: PATH(19,5,19,19); PATH(5,5,15,12,5,19,5,5); break;
@@ -68,4 +74,40 @@ static void setting_row(const char *title,const char *subtitle,int y,unsigned ac
     lv_obj_t *sub=label(o,subtitle,12,48,664,28,&lv_font_montserrat_16);
     lv_obj_set_style_text_color(sub,lv_color_hex(muted()),0);
     label(o,LV_SYMBOL_RIGHT,710,28,26,30,&lv_font_montserrat_20); rule(content,0,y+93,752);
+}
+
+/* Original geometric sleeve studies for the explicitly marked silent fixture.
+ * Drawn at display resolution; not substituted for missing real artwork. */
+static void study_draw(lv_event_t *e) {
+    lv_obj_t *o=lv_event_get_target(e); lv_area_t a; lv_obj_get_coords(o,&a);
+    int side=lv_obj_get_width(o); unsigned v=(unsigned)(uintptr_t)lv_event_get_user_data(e)%3;
+    const uint32_t skies[]={0x6a796a,0x8b7160,0x596875};
+    const uint32_t depths[]={0x243c34,0x493b37,0x25343e};
+    const uint32_t suns[]={0xddd6b7,0xe2c39b,0xccd5ce};
+    lv_draw_ctx_t *ctx=lv_event_get_draw_ctx(e); lv_draw_rect_dsc_t d; lv_draw_rect_dsc_init(&d);
+    d.bg_color=lv_color_hex(skies[v]); d.bg_grad.dir=LV_GRAD_DIR_VER; d.bg_grad.stops_count=2;
+    d.bg_grad.stops[0].color=d.bg_color; d.bg_grad.stops[0].frac=0;
+    d.bg_grad.stops[1].color=lv_color_hex(depths[v]); d.bg_grad.stops[1].frac=255;
+    lv_draw_rect(ctx,&d,&a);
+    d.bg_grad.dir=LV_GRAD_DIR_NONE; d.bg_color=lv_color_hex(suns[v]); d.radius=LV_RADIUS_CIRCLE;
+    lv_area_t sun={a.x1+side*42/100,a.y1+side*13/100,a.x1+side*80/100,a.y1+side*51/100};
+    lv_draw_rect(ctx,&d,&sun);
+    d.bg_color=lv_color_hex(depths[v]); d.bg_opa=LV_OPA_80;
+    lv_area_t hill={a.x1-side*35/100,a.y1+side*43/100,a.x1+side*90/100,a.y1+side*168/100};
+    lv_draw_rect(ctx,&d,&hill);
+    d.bg_color=lv_color_hex(0x182b29); d.bg_opa=LV_OPA_50;
+    hill=(lv_area_t){a.x1+side*30/100,a.y1+side*59/100,a.x1+side*160/100,a.y1+side*189/100}; lv_draw_rect(ctx,&d,&hill);
+    lv_draw_line_dsc_t line; lv_draw_line_dsc_init(&line); line.color=lv_color_hex(suns[v]); line.width=1; line.opa=LV_OPA_20;
+    for(int n=0;n<3;n++) {
+        lv_point_t p={a.x1+side*9/100,a.y1+side*(65+n*3)/100},q={a.x1+side*91/100,p.y}; lv_draw_line(ctx,&line,&p,&q);
+    }
+}
+static void study_cover(lv_obj_t *frame,unsigned variant) {
+    lv_obj_update_layout(frame); int size=lv_obj_get_width(frame);
+    lv_obj_t *drawing=lv_obj_create(frame); lv_obj_remove_style_all(drawing);
+    lv_obj_clear_flag(drawing,LV_OBJ_FLAG_CLICKABLE|LV_OBJ_FLAG_SCROLLABLE); lv_obj_set_size(drawing,size,size);
+    lv_obj_add_event_cb(drawing,study_draw,LV_EVENT_DRAW_MAIN_END,(void *)(uintptr_t)variant);
+    const char *names[]={"STILL WATER","SOFT LIGHT","QUIET HOURS"};
+    lv_obj_t *title=label(frame,names[variant%3],size*9/100,size*80/100,size*82/100,28,&lv_font_montserrat_16);
+    lv_obj_set_style_text_letter_space(title,2,0); lv_obj_set_style_text_color(title,lv_color_hex(0xeee6d4),0);
 }
