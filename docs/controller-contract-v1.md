@@ -47,3 +47,34 @@ Snapshot optionally includes `current_item` (null when no verified TIDAL track i
 An available reply carries `available: true`, matching `reference`, `width: 80`, `height: 80`, `format: "rgb565be-hex"`, `pixels` (exactly 25,600 lowercase hex characters, big-endian RGB565) and `valid_for_ms` (1-60,000). Existing request/response ceilings remain. Client validity starts at request start and requires fresh authoritative state plus the still-visible reference/generation. Expiry, navigation, changed artwork and disconnect remove the cover. Optional image failures cannot cause mutation replay or a playback failure. These previews are initial bounded integration, not final image quality.
 
 Bridge input: JPEG only, 1 MiB maximum, at most 1024 pixels per side, checked before decode. Normalized cache: four entries; registrations: 32; validity: 60 seconds. Raw bytes are discarded after normalization; negative caching suppresses corrupt-image decode loops. The existing URL allowlist/redirect refusal remains; clients cannot supply source URLs. See [memory and deployment limits](m2-artwork.md).
+
+
+## Still Water Brief A extension — 23 September 2026
+
+All actions below use authenticated TLS `POST /v1/request`, version 1, with the existing request IDs, trust/revocation checks, Origin rejection, 8-KiB request and 32-KiB response ceilings and single-flight execution. No new HTTP route exists. The current server bounds concurrency (one worker, queue of eight, five-second socket timeout); it has no independent requests-per-second limiter. Existing provider limits are unchanged. Screen selection remains open; neither UI is implemented by this extension.
+
+### Artwork chunks
+
+`artwork` still requires `reference`; optional `side` is an integer 1–320 (default 80), and `pixel_offset` is an integer multiple of 6,400, starting at zero and strictly below `side * side`. Booleans, floats, unknown arguments and invalid offsets are rejected. Omitting both additions preserves the complete legacy 80 × 80 response, including its original fields and format.
+
+For a non-80 size, an available response carries the existing fields plus `offset`, `total_pixels`, `next_offset` (null on completion), and `image_id` (SHA-256 of the whole resized RGB888 image). Width and height describe the whole square, while `pixels` contains at most 6,400 row-major RGB565 pixels, at most 25,600 hex characters. A 320 × 320 image requires 16 reads. For example, send `{"reference": "<registered reference>", "side": 320, "pixel_offset": 0}`, then follow `next_offset`.
+
+Clients must assemble only matching reference, dimensions, image_id, boot and visible generation; validate offsets/lengths and finish within every chunk's validity measured from its request start. Discard the assembly on unavailable data, mismatched identity, expiry, navigation or disconnect. A changed source between reads produces a different image_id; never mix it with earlier chunks. No client assembler or renderer is added in this bridge-only slice.
+
+The same allowlisted registered JPEG source, RGB conversion, Lanczos square resize and RGB565 quantization apply. Registration count (32), registration/cache TTL (60 s), four-entry LRU and source bounds (1 MiB compressed, at most 1024 × 1024 before decode) are retained. Cache keys include reference/side/offset; each entry stores at most the original 25,600 hex characters plus its digest, so total cached pixel payload remains at most 102,400 characters. Only one chunk is encoded at a time. The transient resized RGB888 raster is at most 307,200 bytes, within the existing source decode/conversion scale; no complete high-resolution hex image or persistent source image is retained. A cache miss may re-fetch/re-decode the source, trading throughput for bounded retention. Deployment-host peak memory and throughput remain unprofiled. Corruption is negatively cached per chunk. Registration refresh does not extend an existing cache entry's expiry.
+
+### Last battery report and charge query
+
+`battery_report` requires `level` (integer percentage 0–100), `charging` (JSON boolean) and `client_id` (1–64 ASCII letters, digits, underscore or hyphen). Unknown/unavailable battery measurements must not be sent as a valid level. The authenticated write replaces one in-memory last report, with a bridge-owned monotonic receipt timestamp; response is `observed` with `{"accepted": true}`. Client id is a label, not a credential or role grant. Existing paired-device authority applies; this does not introduce separate display/module ACLs. No history, persistence, provider call, playback freshness renewal or mutation-journal entry is created. Reports are observations, not commands: send fresh measurements, never queue/replay old reports on reconnect. Invalid reports leave the previous report and its age intact.
+
+`charge?` takes empty args and returns `observed` with both `charge` and `reason`. Brief A.1 adds the reason without changing charge decisions:
+
+| Last report | `charge` | `reason` |
+| --- | --- | --- |
+| None since this bridge boot (including after restart) | `no` | `none` |
+| Exists, but no longer younger than 3,600 seconds | `no` | `stale` |
+| Fresh (age from 0 inclusive to 3,600 seconds exclusive) | `yes` or `no`, per the window below | `window` |
+
+`reason` is always one of these three strings; every fresh reply uses `window`, including `{"charge": "yes", "reason": "window"}`. A report with a negative age is treated as stale. The distinction lets a power module distinguish a current window decision from missing/expired telemetry; it does not implement a fallback or authorize a hardware action.
+
+No report, a restart, or report age >= 3,600 seconds gives no. With a fresh report: below 35% gives yes; at or above 75% gives no; 35–74% follows the reported charging boolean. This uses the last physical charging observation to maintain the window, without a second latched state or treating a prior yes as proof that charging started. Querying never refreshes report age. This is an advisory read only: no power switch, MCU fallback, battery-life claim or hardware control is implemented.

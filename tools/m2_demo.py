@@ -2,6 +2,7 @@
 from pathlib import Path
 import tempfile
 import threading
+import time
 from m2_bridge import Contract, FixtureService, server
 from m2_certificates import create
 from m2_client import Client, Controller
@@ -12,7 +13,9 @@ def main():
     with tempfile.TemporaryDirectory() as temporary:
         root=Path(temporary); create(root/'tls'); vault=Vault(root/'vault')
         pairing=Pairing(vault); service=FixtureService()
-        bridge=server(Contract(service,vault),pairing,root/'tls/trust.pem',root/'tls/key.pem',port=0)
+        fixture_time = [0.0]
+        contract = Contract(service, vault, lambda: time.monotonic() + fixture_time[0])
+        bridge=server(contract,pairing,root/'tls/trust.pem',root/'tls/key.pem',port=0)
         worker=threading.Thread(target=bridge.serve_forever,daemon=True); worker.start()
         try:
             client=Client('https://127.0.0.1:'+str(bridge.server_port),root/'tls/trust.pem')
@@ -38,6 +41,25 @@ def main():
             model.pending='play'; model.wake(); assert model.outcome=='unknown'; assert not model.available
             model.touch(False); assert model.available; assert len(service.naim.calls)==1
             print('PASS wake contact consumed / pending command discarded / no replay')
+            cover = client.request('snapshot')['data']['player']['artwork']
+            assert len(client.request('artwork', {'reference': cover})['data']['pixels']) == 25600
+            image_ids, count, offset = set(), 0, 0
+            while offset is not None:
+                chunk = client.request('artwork', {'reference': cover, 'side': 320, 'pixel_offset': offset})['data']
+                assert chunk['available'] and chunk['offset'] == offset
+                image_ids.add(chunk['image_id']); count += len(chunk['pixels']) // 4
+                offset = chunk['next_offset']
+            assert count == 320 * 320 and len(image_ids) == 1
+            assert client.request('charge?')['data'] == {'charge': 'no', 'reason': 'none'}
+            for level, charging, expected in ((34, False, 'yes'), (50, True, 'yes'), (75, True, 'no')):
+                assert client.request('battery_report', {'level': level, 'charging': charging,
+                                                        'client_id': 'fixture-display'})['data']['accepted']
+                assert client.request('charge?')['data'] == {'charge': expected, 'reason': 'window'}
+            assert len(service.naim.calls) == 1
+            fixture_time[0] += 3600
+            assert client.request('charge?')['data'] == {'charge': 'no', 'reason': 'stale'}
+            assert len(service.naim.calls) == 1
+            print('PASS 80/320 artwork / bounded chunks / battery report / charge window and reasons (SILENT FIXTURE)')
         finally:
             bridge.shutdown(); bridge.server_close(); worker.join(); vault.close()
 

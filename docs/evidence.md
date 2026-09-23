@@ -240,3 +240,15 @@ Final object-design package gate: corrected smoke readiness/press duration and r
 ## Chat closeout and design pause - 23 September 2026
 
 The user retained the working prototype but rejected the visual direction and paused design work (D028). The prior designer gate must not be described as user acceptance. [Closeout](chat-closeout-2026-09-23.md) records implementation b36098d, prior tests, final package identity, local artifacts, untracked revised-design materials and continuing constraints. This is documentation-only; no application tests, live actions or physical checks were rerun. Git/diff and documentation integrity checks are the closeout validation.
+
+
+## Still Water Brief A — offline bridge evidence, 23 September 2026
+
+136 Python tests, five JavaScript navigation tests and the six-stage silent TLS `tools/m2_demo.py` passed. Eight new tests cover complete 320 × 320 reassembly against independently normalized fixture pixels, digest mismatch on changed source, partial chunks, legacy 80 response, cache payload/entry bounds, registration/expiry/corruption, strict report validation, charge thresholds, exact one-hour expiry, replacement/restart, single-flight rejection and TLS unauthenticated/revoked refusal. GET paths for root/artwork/charge remain unsupported. No new route exists.
+
+The first restricted targeted run hit Windows access denial creating protected temporary TLS files. Normal host execution retained ACL/trust checks. One new test import bug was then corrected; the final full suite passed. This is synthetic contract and localhost TLS evidence, not deployment-host memory profiling, live artwork/NDX operation, hardware charging, physical power or UI validation. Firmware and all UI/reference material were unchanged. See D029 and the contract extension for precise behavior and remaining client obligations.
+
+
+### Brief A.1 — charge reasons, 23 September 2026
+
+Fresh requested validation passed: `python -m unittest discover -s tests -v` (137 tests), `node --test tests/test_navigation.cjs` (five tests), and `python tools/m2_demo.py` (six stages). The existing fixture exercises the same contract as the bridge and now asserts window for fresh yes/no, none before any report and stale after advancing only its injected clock by one hour. Tests additionally cover exact expiry of both yes and no decisions, invalid-report rejection without freshness renewal, fresh replacement and reset to none after restart. The TLS test verifies the fresh reason field under authentication and retains revoked/unauthenticated refusal. Protected temporary vault and TLS checks ran outside the Windows sandbox with no security checks weakened. No live NDX, UI, firmware or new HTTP-route behavior is claimed.

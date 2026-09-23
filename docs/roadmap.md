@@ -1,6 +1,8 @@
 # Roadmap
 
-> **Current status — 23 September 2026:** Work is paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.
+> **Current scope — 23 September 2026, Brief A/A.1:** Bridge additions are validated; screen selection is open and neither UI is authorized for implementation. D029 records this bounded revised-direction scope; D028 remains the design pause. Older display/visual-selection statements below are history.
+
+> **Historical closeout — before Brief A:** Design work was paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.
 
 ## M0 — Concept and native playback feasibility
 
@@ -142,3 +144,20 @@ Next/Previous had the same silent-fixture gap: commands were logged without chan
 ## Object-led native design - 23 September 2026
 
 The user clarified that the approved screens were rough prototypes and authorized expert iteration for the coffee-table ornament outcome (D027). [Design gate and evidence](m2-object-design.md) records three native iterations: 280 px artwork, quieter chrome/navigation, stronger Play/Pause emphasis, bounded long titles and larger browse text. The 13-state desktop composition gate passes; photographic artwork resolution, physical readability/touch/power and user acceptance remain separate. Six CTests, 128 Python tests, native TLS/transport/preferences/recovery checks and both builds passed; ESP32 `0x98810`, 40% free. Original demo sleeves are fixture-only and never conceal missing real covers.
+
+
+## Still Water Brief A — 23 September 2026
+
+- [x] Authenticated artwork sizes 1–320, chunked under the existing 32-KiB response and four-entry pixel-cache bounds; default 80 × 80 remains compatible.
+- [x] Strictly validated, volatile last battery report; read-only `charge?` with 35–75% window and no at age >= one hour.
+- [x] Silent fixtures, TLS authentication/revocation and bounded concurrency coverage; no additional HTTP/static route.
+- [x] Fresh validation: 136 Python tests, five JavaScript navigation tests and all six stages of `python tools/m2_demo.py` passed. Tests use synthetic adapters/localhost only.
+- [ ] Screen selection and subsequent UI brief. No firmware, UI, physical charging or live NDX operation in this slice.
+- [ ] Deployment-host peak memory/throughput profiling, physical power and on-table acceptance remain open.
+
+Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection assertions and draft D028 conflict with this task's explicit open screen selection and the existing D028; D029 records precedence, without rewriting those source materials. The on-table trial must use a private artifact link or an external throwaway static server, never a new bridge route. Existing envelope concurrency/provider limits are preserved; no per-second bridge limiter existed or is claimed. See [contract](controller-contract-v1.md#still-water-brief-a-extension--23-september-2026) and [evidence](evidence.md).
+
+
+### Brief A.1 follow-up — D029 amendment
+
+`charge?` now reports `reason: "window"` for all fresh yes/no decisions, `"stale"` for expired reports and `"none"` for no report since boot. Stale and none remain no. Fresh validation: 137 Python tests, five JavaScript navigation tests and all six silent TLS demo stages passed. Boundary tests distinguish window/no from stale/no at exactly one hour, verify invalid reports cannot refresh expiry and confirm restart returns none. Brief A/A.1 and the unchanged 39-file Still Water source package form one coherent repository checkpoint. No new decision ID, UI, firmware, route or live-device operation.

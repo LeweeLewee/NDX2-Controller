@@ -1,17 +1,24 @@
 """Bounded bridge-only JPEG normalization. No controller-supplied URLs."""
 from collections import OrderedDict
+import hashlib
 import io
 import re
 import time
 
 SIDE = 80
+MAX_SIDE = 320
+CHUNK_PIXELS = SIDE * SIDE
 TTL = 60
 MAX_SOURCE_BYTES = 1024 * 1024
 MAX_SOURCE_SIDE = 1024
 REFERENCE = re.compile(r'/artwork/[0-9a-f]{64}\.jpg')
 
 
-def normalize(raw):
+def normalize(raw, side=SIDE, offset=0, *, with_digest=False):
+    if type(side) is not int or not 1 <= side <= MAX_SIDE:
+        raise ValueError("Artwork side")
+    if type(offset) is not int or not 0 <= offset < side * side or offset % CHUNK_PIXELS:
+        raise ValueError("Artwork offset")
     # Pillow stays on the bridge. Check headers before allocating decoded pixels.
     from PIL import Image
     if len(raw) > MAX_SOURCE_BYTES:
@@ -20,13 +27,15 @@ def normalize(raw):
         if image.format != 'JPEG' or not (0 < image.width <= MAX_SOURCE_SIDE and 0 < image.height <= MAX_SOURCE_SIDE):
             raise ValueError('Artwork dimensions or format')
         image.load()  # truncated/corrupt images must fail
-        small = image.convert('RGB').resize((SIDE, SIDE), Image.Resampling.LANCZOS)
+        small = image.convert('RGB').resize((side, side), Image.Resampling.LANCZOS)
         pixels = bytearray()
         rgb = small.tobytes()
+        digest = hashlib.sha256(rgb).hexdigest()
+        rgb = rgb[offset * 3:(offset + CHUNK_PIXELS) * 3]
         for r, g, b in zip(rgb[0::3], rgb[1::3], rgb[2::3]):
             value = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
             pixels.extend(value.to_bytes(2, 'big'))
-        return pixels.hex()
+        return (pixels.hex(), digest) if with_digest else pixels.hex()
 
 
 class ArtworkDelivery:
@@ -52,34 +61,40 @@ class ArtworkDelivery:
             if expiry <= now:
                 del self.registered[key]
         for key, (expiry, _) in list(self.cache.items()):
-            if expiry <= now or key not in self.registered:
+            if expiry <= now or key[0] not in self.registered:
                 del self.cache[key]
 
-    def get(self, reference):
+    def get(self, reference, side=SIDE, offset=0):
         self.prune()
         if reference not in self.registered or reference not in self.service.artwork_refs:
             return {'available': False}
         now = self.clock()
-        if reference not in self.cache:
+        key = (reference, side, offset)
+        if key not in self.cache:
             # Do not let the older source cache extend this cache's lifetime.
             url = self.service.artwork_refs[reference]
             self.service.artwork.images.pop(url, None)
             try:
-                pixels = normalize(self.service.image(reference))
+                pixels = normalize(self.service.image(reference), side, offset, with_digest=True)
             except Exception:
                 pixels = None
             finally:
                 self.service.artwork.images.pop(url, None)
-            self.cache[reference] = (now + TTL, pixels)
+            self.cache[key] = (now + TTL, pixels)
             while len(self.cache) > 4:
                 self.cache.popitem(last=False)
-        expiry, pixels = self.cache[reference]
-        self.cache.move_to_end(reference)
+        expiry, pixels = self.cache[key]
+        self.cache.move_to_end(key)
         valid = max(0, int((min(expiry, self.registered[reference]) - self.clock()) * 1000))
         if pixels is None or valid == 0:
             return {'available': False}
-        return {'available': True, 'reference': reference, 'width': SIDE, 'height': SIDE,
-                'format': 'rgb565be-hex', 'pixels': pixels, 'valid_for_ms': valid}
+        pixels, digest = pixels
+        result = {'available': True, 'reference': reference, 'width': side, 'height': side,
+                  'format': 'rgb565be-hex', 'pixels': pixels, 'valid_for_ms': valid}
+        if side != SIDE or offset:
+            result.update(offset=offset, total_pixels=side * side, image_id=digest,
+                          next_offset=offset + CHUNK_PIXELS if offset + CHUNK_PIXELS < side * side else None)
+        return result
 
 
 def fixture_jpeg(alternate=False):

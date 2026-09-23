@@ -10,7 +10,7 @@ import time
 import uuid
 
 from controller_service import Bridge
-from m2_artwork import ArtworkDelivery, fixture_jpeg
+from m2_artwork import ArtworkDelivery, fixture_jpeg, SIDE, MAX_SIDE, CHUNK_PIXELS
 from m2_security import Pairing, Vault
 
 MAX_REQUEST = 8192
@@ -22,7 +22,8 @@ FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 
           'library_state': {'reference'}, 'library_save': {'reference', 'saved'},
           'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command'},
           'voice_review': {'fixture'}, 'suggest': {'prompt'},
-          'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference'}}
+          'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference', 'side', 'pixel_offset'},
+          'battery_report': {'level', 'charging', 'client_id'}, 'charge?': set()}
 
 
 def configured_service(vault):
@@ -134,6 +135,7 @@ class Contract:
         self.fresh = {}
         self.revision = 0
         self.artwork = ArtworkDelivery(service, clock)
+        self.last_battery_report = None
 
     def detail_links(self, item):
         # Only exact provider relationships; absence never becomes a search guess.
@@ -163,19 +165,29 @@ class Contract:
         if not isinstance(action, str) or action not in FIELDS or not isinstance(args, dict) or set(args) - FIELDS[action]:
             raise ContractError('INVALID_ACTION')
         for key, value in args.items():
-            if key == 'saved':
+            if key in ('saved', 'charging'):
                 if type(value) is not bool: raise ContractError('INVALID_ARGUMENT')
+            elif key in ('level', 'side', 'pixel_offset'):
+                upper = {'level': 100, 'side': MAX_SIDE, 'pixel_offset': MAX_SIDE * MAX_SIDE - 1}[key]
+                if type(value) is not int or not 0 <= value <= upper: raise ContractError('INVALID_ARGUMENT')
+            elif key == 'client_id':
+                if not isinstance(value, str) or not re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', value):
+                    raise ContractError('INVALID_ARGUMENT')
             elif key == 'offset':
                 if type(value) is not int or not 0 <= value <= 10000: raise ContractError('INVALID_ARGUMENT')
             elif not isinstance(value, str) or len(value.encode()) > (4096 if key == 'cursor' else 256):
                 raise ContractError('INVALID_ARGUMENT')
-        required = {'play': {'reference'}, 'browse': {'reference'}, 'artwork': {'reference'}, 'library_state': {'reference'},
+        required = {'battery_report': {'level', 'charging', 'client_id'}, 'play': {'reference'}, 'browse': {'reference'}, 'artwork': {'reference'}, 'library_state': {'reference'},
                     'library_save': {'reference', 'saved'}, 'amplifier': {'direction'}, 'transport': {'command'}}
         if not required.get(action, set()).issubset(args): raise ContractError('INVALID_ARGUMENT')
         if action == 'amplifier' and args['direction'] not in ('up', 'down'): raise ContractError('INVALID_ARGUMENT')
         if action == 'transport' and args['command'] not in ('pause', 'resume', 'stop', 'next', 'prev'): raise ContractError('INVALID_ARGUMENT')
         if action in ('search', 'library_page') and args.get('kind', 'albums') not in ('albums','tracks','artists','playlists'):
             raise ContractError('INVALID_ARGUMENT')
+        if action == 'artwork':
+            side, offset = args.get('side', SIDE), args.get('pixel_offset', 0)
+            if side < 1 or offset >= side * side or offset % CHUNK_PIXELS:
+                raise ContractError('INVALID_ARGUMENT')
         return rid, action, args
 
     def handle(self, device, request):
@@ -204,7 +216,17 @@ class Contract:
             self.vault.update(lambda d: d['commands'].update({key: {'fingerprint': fingerprint, 'outcome': 'unknown'}}))
         try:
             if action == 'artwork':
-                data = self.artwork.get(args['reference'])
+                data = self.artwork.get(args['reference'], args.get('side', SIDE), args.get('pixel_offset', 0))
+            elif action == 'battery_report':
+                # One volatile observation, receipt time owned by the bridge. No journal or NDX I/O.
+                self.last_battery_report = dict(args, received_at=self.clock())
+                data = {'accepted': True}
+            elif action == 'charge?':
+                report = self.last_battery_report
+                fresh = report is not None and 0 <= self.clock() - report['received_at'] < 3600
+                charge = fresh and (report['level'] < 35 or (report['level'] < 75 and report['charging']))
+                reason = 'none' if report is None else 'window' if fresh else 'stale'
+                data = {'charge': 'yes' if charge else 'no', 'reason': reason}
             elif action == 'snapshot':
                 sampled_at = self.clock()
                 player = self.service.request('status', {})
