@@ -12,12 +12,12 @@ static SDL_Renderer *renderer;
 static SDL_Texture *texture;
 static uint32_t pixels[800*480];
 static lv_color_t draw_buffer[800*40];
-static bool down;
+static bool down, smoke_press_pending;
 static int px,py;
 static uint64_t release_at, smoke_clock_offset;
 static void tap(int x,int y) { px=x; py=y; down=true;
     /* Reserve the contact before the next LVGL timer pass can start a read. */
-    controller_ui_touch(true); release_at=SDL_GetTicks64()+smoke_clock_offset+90; }
+    controller_ui_touch(true); smoke_press_pending=true; release_at=0; }
 static void capture(const char *directory,const char *name) {
     /* UI timers can update widgets after the display timer in the same pass. */
     lv_refr_now(NULL);
@@ -31,11 +31,20 @@ static void flush(lv_disp_drv_t *drv,const lv_area_t *area,lv_color_t *colors) {
     for(int y=area->y1;y<=area->y2;y++) for(int x=area->x1;x<=area->x2;x++) {
         uint32_t c=lv_color_to32(*colors++); if(x>=0&&x<800&&y>=0&&y<480) pixels[y*800+x]=c;
     }
-    SDL_UpdateTexture(texture,NULL,pixels,800*4); SDL_RenderCopy(renderer,texture,NULL,NULL); SDL_RenderPresent(renderer);
+    /* Present the completed frame once, not the entire texture for every
+     * 40-line LVGL strip. This avoids redundant full-screen software copies. */
+    if(lv_disp_flush_is_last(drv)) {
+        SDL_UpdateTexture(texture,NULL,pixels,800*4); SDL_RenderCopy(renderer,texture,NULL,NULL); SDL_RenderPresent(renderer);
+    }
     lv_disp_flush_ready(drv);
 }
 static void read_pointer(lv_indev_drv_t *drv,lv_indev_data_t *data) {
     (void)drv; data->point.x=px; data->point.y=py;
+    if(down&&smoke_press_pending) {
+        /* Hold one synthetic contact for 90 ms after the input driver observes
+         * it, not from before a potentially expensive draw/timer pass. */
+        release_at=SDL_GetTicks64()+smoke_clock_offset+90; smoke_press_pending=false;
+    }
     data->state=down?LV_INDEV_STATE_PRESSED:LV_INDEV_STATE_RELEASED;
     if(!controller_ui_touch(down)) data->state=LV_INDEV_STATE_RELEASED;
 }
@@ -128,16 +137,16 @@ int main(int argc,char **argv) {
             }
             switch(stage) {
             case 0: if(controller_ui_ready()) { capture(smoke,"01-now"); tap(290,440); stage++; } break;
-            case 1: if(s->context.screen==FIND) { tap(664,108); stage++; } break;
-            case 2: if(s->context.count) { capture(smoke,"02-find"); tap(330,236); stage++; } break;
+            case 1: if(s->context.screen==FIND&&controller_ui_ready()) { tap(664,108); stage++; } break;
+            case 2: if(s->context.count&&controller_ui_ready()) { capture(smoke,"02-find"); tap(330,236); stage++; } break;
             case 3: if(s->context.screen==DETAILS&&controller_ui_ready()) { capture(smoke,"03-details"); tap(60,30); stage++; } break;
-            case 4: if(s->context.screen==FIND) { if(s->context.count!=12) { exit_code=3; running=false; } tap(330,236); stage++; } break;
+            case 4: if(s->context.screen==FIND&&controller_ui_ready()) { if(s->context.count!=12) { exit_code=3; running=false; } tap(330,236); stage++; } break;
             case 5: if(s->context.screen==DETAILS&&controller_ui_ready()&&s->context.playable) { tap(310,356); stage++; } break;
             case 6: if(s->context.screen==NOW&&strstr(s->title,"A Still Morning")&&controller_ui_ready()) { capture(smoke,"04-playing"); tap(290,440); stage++; } break;
             case 7: if(s->context.screen==FIND&&controller_ui_ready()) { tap(744,108); stage++; } break;
             case 8: if(s->context.screen==VOICE&&s->voice==VOICE_RECORDING) { capture(smoke,"05-recording"); tap(390,292); stage++; } break;
             case 9: if(s->voice==VOICE_RECORDING) { tap(160,292); stage++; } break;
-            case 10: if(s->context.screen==FIND&&s->context.count&&strstr(s->context.query,"quiet")) { capture(smoke,"06-voice-search"); tap(744,108); stage++; } break;
+            case 10: if(s->context.screen==FIND&&s->context.count&&strstr(s->context.query,"quiet")&&controller_ui_ready()) { capture(smoke,"06-voice-search"); tap(744,108); stage++; } break;
             case 11: if(s->voice==VOICE_RECORDING) { tap(620,292); stage++; } break;
             case 12: if(s->context.screen==FIND&&s->voice==VOICE_IDLE) { tap(756,30); stage++; } break;
             case 13: if(s->context.screen==SETTINGS) { capture(smoke,"07-settings"); tap(330,120); stage++; } break;

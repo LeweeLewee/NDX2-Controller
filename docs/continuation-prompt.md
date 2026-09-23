@@ -69,3 +69,5 @@ Fresh transport follow-up validation: 128 Python tests, five desktop CTests, sta
 Latest visual checkpoint: see `docs/m2-visual-polish.md` for fresh native/build evidence and the recorded intermittent stage-21 smoke wait. Earlier instructions to start the first polish pass are historical. User confirmed the transport correction before requesting polish.
 
 Latest visual authority: D027 and `docs/m2-object-design.md`. The 13-state native designer gate passes at desktop scope. Next quality work is bounded high-resolution authenticated photographic artwork, or concrete user feedback, followed by physical readability/touch trials when hardware permits. Do not claim final live or physical quality from the synthetic sleeves.
+
+Preserve the desktop input-handoff and smoke-driver fixes in the final object-design checkpoint: register contact before timers, hold synthetic taps from driver observation, wait for enabled read-dependent controls, and present SDL once per completed LVGL frame. These do not authorize queued or replayed mutations. Final package gate is recorded in `docs/m2-object-design.md`.

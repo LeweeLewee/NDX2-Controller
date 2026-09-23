@@ -46,3 +46,9 @@ Actual screen contrast, seated viewing distance, finger accuracy, glare, enclosu
 ## Desktop input handoff follow-up
 
 The first extracted design package timed out at native smoke stage 6 after a tap. Inspection found that SDL/synthetic press state could wait until the later LVGL input poll while a UI timer started a background read. Desktop input now reports contact immediately, before the timer pass; ordinary LVGL pressed/released delivery remains in place. It does not queue, retry or replay a mutation. Desktop rebuild/six CTests and the full native TLS screen/artwork/wake-contact sequence pass after this change. The earlier intermittent stage-21 result is historical; a shared root cause is not claimed. The replacement package must contain this later desktop executable; ESP32 sources and compiler evidence are unchanged.
+
+## Final packaged gate
+
+A further package run exposed two synthetic-driver assumptions: Search could be tapped before its read-dependent enable state, and a timed contact could expire before the input driver observed it during a slow draw. The smoke now waits for readiness where needed and holds one contact for 90 ms after driver observation; it never repeats a tap to force success. Desktop presentation also now copies/presents once per completed LVGL frame, rather than once per 40-line strip. This removes redundant software copies without claiming a measured frame rate.
+
+After those corrections, the desktop build and six CTests pass. The extracted candidate package passes the full native TLS UI/artwork flow, isolated bundled runtime checks, side-by-side preservation of pairing/preferences, and standalone/TLS Play/Pause/Next/Previous pointer/pixel checks with one command per tap. The final clean-source archive is checked for payload identity with that tested candidate and manifest integrity. Earlier failed design/verified ZIPs are development attempts; deliver only the final package.
