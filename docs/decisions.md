@@ -117,3 +117,5 @@ D024 implementation follow-up: the [host setup console](m2-setup.md) now require
 ## D026 - Replaceable desktop package with external user state
 
 **Authorized offline slice, 22 September 2026.** Assemble a Windows x64 portable development package from the existing native build, SDL and installed Python 3.14.3 standard runtime. Include an explicit client file list, isolated imports, license notices and content hashes. Keep configuration, trust, pairing and preferences outside replaceable application files; launch checks setup and allows transient offline recovery without replay. No provider adapter/service, credential migration, installer privileges or automatic update is added. [Evidence and release limits](m2-package.md) distinguish a same-host upgrade rehearsal from production distribution.
+
+D020 implementation follow-up, 23 September 2026: user requested high-end native visual polish after confirming transport fixes. The [bounded native refinement](m2-visual-polish.md) preserves the approved layout and source identity, using native outline icons and palette/type hierarchy. This does not revise D011/D018/D021 or close physical gates.

@@ -37,6 +37,14 @@ static void read_pointer(lv_indev_drv_t *drv,lv_indev_data_t *data) {
     data->state=down?LV_INDEV_STATE_PRESSED:LV_INDEV_STATE_RELEASED;
     if(!controller_ui_touch(down)) data->state=LV_INDEV_STATE_RELEASED;
 }
+/* Smoke checks locate widget types, independent of decorative child order. */
+static lv_obj_t *find_widget(lv_obj_t *parent,const lv_obj_class_t *type) {
+    if(lv_obj_check_type(parent,type)) return parent;
+    for(unsigned i=0;i<lv_obj_get_child_cnt(parent);i++) {
+        lv_obj_t *found=find_widget(lv_obj_get_child(parent,i),type); if(found) return found;
+    }
+    return NULL;
+}
 int main(int argc,char **argv) {
     const char *smoke=NULL,*python=NULL,*config=NULL,*preferences_path=NULL,*preferences_smoke=NULL;
     bool transport_smoke=false;
@@ -103,8 +111,8 @@ int main(int argc,char **argv) {
                 } break;
                 case 3: if(s->palette==1) {
                     /* Native value-change events from the actual Display widgets. */
-                    lv_obj_t *body=lv_obj_get_child(lv_scr_act(),3);
-                    lv_obj_t *slider=lv_obj_get_child(body,1), *dropdown=lv_obj_get_child(body,6);
+                    lv_obj_t *slider=find_widget(lv_scr_act(),&lv_slider_class), *dropdown=find_widget(lv_scr_act(),&lv_dropdown_class);
+                    if(!slider||!dropdown) { exit_code=8; running=false; break; }
                     lv_slider_set_value(slider,65,LV_ANIM_OFF); lv_event_send(slider,LV_EVENT_VALUE_CHANGED,NULL);
                     lv_dropdown_set_selected(dropdown,2); lv_event_send(dropdown,LV_EVENT_VALUE_CHANGED,NULL);
                     next=now+1200; stage++;
