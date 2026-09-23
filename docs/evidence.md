@@ -236,3 +236,7 @@ The user clarified that the approved screens were rough prototypes and authorize
 Desktop design delivery follow-up: an extracted-package missed-tap timeout exposed an event-to-LVGL contact handoff gap. Immediate contact registration now precedes desktop UI timers without command retries. Rebuild/six CTests and the full native TLS smoke pass; details and limits are in [the design record](m2-object-design.md).
 
 Final object-design package gate: corrected smoke readiness/press duration and redundant desktop frame presentation. Full extracted-package UI/artwork, isolated runtime, retained external state and standalone/TLS transport checks pass; no repeated commands were added. See [the complete iteration record](m2-object-design.md).
+
+## Chat closeout and design pause - 23 September 2026
+
+The user retained the working prototype but rejected the visual direction and paused design work (D028). The prior designer gate must not be described as user acceptance. [Closeout](chat-closeout-2026-09-23.md) records implementation b36098d, prior tests, final package identity, local artifacts, untracked revised-design materials and continuing constraints. This is documentation-only; no application tests, live actions or physical checks were rerun. Git/diff and documentation integrity checks are the closeout validation.

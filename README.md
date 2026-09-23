@@ -1,5 +1,7 @@
 # NDX2-Controller
 
+**23 September 2026: design work paused.** The user retained the working prototype but rejected its visual direction. Start with the [chat closeout](docs/chat-closeout-2026-09-23.md) and [current continuation](docs/continuation-prompt.md); older design approvals below are historical.
+
 A compact, battery-powered coffee-table touchscreen for native Naim music playback, starting with TIDAL.
 
 Project repository: [leweelewee/NDX2-Controller](https://github.com/leweelewee/NDX2-Controller).

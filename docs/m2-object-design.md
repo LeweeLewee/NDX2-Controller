@@ -1,5 +1,7 @@
 # River Stone: native design for the object
 
+> **Current status — 23 September 2026:** Work is paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.
+
 23 September 2026. D027 supersedes treating the rough approved browser prototypes as a final visual constraint. The target is a deliberate listening-room object: calm in the original mineral pebble enclosure, readable when approached on the coffee table, and recognizably music-first rather than a diagnostic terminal.
 
 ## Iteration and judgement

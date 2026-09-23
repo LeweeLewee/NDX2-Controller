@@ -1,5 +1,7 @@
 # Project instructions
 
+- Current handover: read docs/chat-closeout-2026-09-23.md and docs/continuation-prompt.md before resuming. The user paused work and rejected the current visual direction (D028). Preserve the working prototype and newer work; do not resume design implementation without the revised direction.
+
 - Read README.md and docs/decisions.md before changing architecture.
 - Native Naim TIDAL playback is non-negotiable. Do not substitute Music Assistant-to-DLNA, AirPlay, Chromecast, Roon, a Pi audio relay or generic URL playback. TIDAL Connect is a distinct route, not an automatically accepted replacement.
 - Distinguish live observations, reference-code behaviour, hypotheses and untested implementation claims. Computer-side success does not prove ESP32 firmware or battery life.

@@ -1,5 +1,7 @@
 # M2 software and UI review closeout — 22 September 2026
 
+> **Current status — 23 September 2026:** Work is paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.
+
 ## Current preferences checkpoint - 22 September 2026
 
 Continuation from `ece0fa3` implements local display preference persistence: versioned bounded records, atomic desktop replacement, native save/error feedback and an ESP32 NVS adapter. [Behavior, fresh tests and limits](m2-preferences.md) distinguish desktop restart evidence from compiled-only firmware storage. Fresh validation: 77 Python tests, five JavaScript tests, four CTests, both TLS demos, preferences restart smoke and both builds passed. Final ESP32 size: 0x97090 (41% partition free). Brightness and timeout remain intent only; physical gates are open.

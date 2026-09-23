@@ -1,5 +1,7 @@
 # Approved UI port — 22 September 2026
 
+> **Current status — 23 September 2026:** Work is paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.
+
 Implements D020 in shared C/LVGL, using the approved browser source unchanged. Implementation began in `local/river-stone-repo` on main at `fcf1406`, preserving the pre-existing modified/untracked deliverables and `software-feasibility-v1`. The user subsequently authorized updating the repository; this checkpoint collects the foundation, approved UI port, tests and evidence. Generated builds, captures and private configuration remain ignored.
 
 ## Parity inventory
