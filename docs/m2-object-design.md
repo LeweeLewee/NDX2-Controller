@@ -42,3 +42,7 @@ Production photographic artwork remains the prior bounded 80 x 80 preview. Enlar
 ## Still outside this gate
 
 Actual screen contrast, seated viewing distance, finger accuracy, glare, enclosure-material samples, LCD frame timing and power require physical trials. The documented display visible area has a slightly different aspect ratio from 800 x 480; inspect the actual panel rather than treating a desktop screenshot as a physical-size proof. No always-on ornament mode or battery-life claim is added. HP-01 and P3/P4/P5 remain open. Native TIDAL resolution, D011, protected state, authentication and no-replay rules are unchanged.
+
+## Desktop input handoff follow-up
+
+The first extracted design package timed out at native smoke stage 6 after a tap. Inspection found that SDL/synthetic press state could wait until the later LVGL input poll while a UI timer started a background read. Desktop input now reports contact immediately, before the timer pass; ordinary LVGL pressed/released delivery remains in place. It does not queue, retry or replay a mutation. Desktop rebuild/six CTests and the full native TLS screen/artwork/wake-contact sequence pass after this change. The earlier intermittent stage-21 result is historical; a shared root cause is not claimed. The replacement package must contain this later desktop executable; ESP32 sources and compiler evidence are unchanged.

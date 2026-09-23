@@ -15,7 +15,9 @@ static lv_color_t draw_buffer[800*40];
 static bool down;
 static int px,py;
 static uint64_t release_at, smoke_clock_offset;
-static void tap(int x,int y) { px=x; py=y; down=true; release_at=SDL_GetTicks64()+smoke_clock_offset+90; }
+static void tap(int x,int y) { px=x; py=y; down=true;
+    /* Reserve the contact before the next LVGL timer pass can start a read. */
+    controller_ui_touch(true); release_at=SDL_GetTicks64()+smoke_clock_offset+90; }
 static void capture(const char *directory,const char *name) {
     /* UI timers can update widgets after the display timer in the same pass. */
     lv_refr_now(NULL);
@@ -78,7 +80,7 @@ int main(int argc,char **argv) {
     while(running) {
         SDL_Event e; while(SDL_PollEvent(&e)) {
             if(e.type==SDL_QUIT) running=false;
-            if(e.type==SDL_MOUSEBUTTONDOWN||e.type==SDL_MOUSEBUTTONUP) { down=e.type==SDL_MOUSEBUTTONDOWN; px=e.button.x; py=e.button.y; }
+            if(e.type==SDL_MOUSEBUTTONDOWN||e.type==SDL_MOUSEBUTTONUP) { down=e.type==SDL_MOUSEBUTTONDOWN; px=e.button.x; py=e.button.y; controller_ui_touch(down); }
             if(e.type==SDL_MOUSEMOTION) { px=e.motion.x; py=e.motion.y; }
         }
         uint64_t now=now_ms(); lv_tick_inc((uint32_t)(now-last)); last=now; lv_timer_handler(); SDL_Delay(5);

@@ -232,3 +232,5 @@ Fresh transport follow-up validation: 128 Python tests, five desktop CTests, sta
 ## Object-led native design - 23 September 2026
 
 The user clarified that the approved screens were rough prototypes and authorized expert iteration for the coffee-table ornament outcome (D027). [Design gate and evidence](m2-object-design.md) records three native iterations: 280 px artwork, quieter chrome/navigation, stronger Play/Pause emphasis, bounded long titles and larger browse text. The 13-state desktop composition gate passes; photographic artwork resolution, physical readability/touch/power and user acceptance remain separate. Six CTests, 128 Python tests, native TLS/transport/preferences/recovery checks and both builds passed; ESP32 `0x98810`, 40% free. Original demo sleeves are fixture-only and never conceal missing real covers.
+
+Desktop design delivery follow-up: an extracted-package missed-tap timeout exposed an event-to-LVGL contact handoff gap. Immediate contact registration now precedes desktop UI timers without command retries. Rebuild/six CTests and the full native TLS smoke pass; details and limits are in [the design record](m2-object-design.md).
