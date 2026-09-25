@@ -24,15 +24,28 @@ struct Preview {
 }
 
 @MainActor final class ControllerModel: ObservableObject {
-    @Published var context = BrowseContext(), player = Player(), queue: [MusicItem] = []
-    @Published var online = false, fixture = false, active = false, consumeContact = true
-    @Published var rest: Rest = .still, status = "", account = "disconnected"
-    @Published var pendingAction: String?, unknownAction: String?, pendingTarget: String?
-    @Published var artwork: Preview?, preferences = DisplayPreferences.load()
+    @Published var context = BrowseContext()
+    @Published var player = Player()
+    @Published var queue: [MusicItem] = []
+    @Published var online = false
+    @Published var fixture = false
+    @Published var active = false
+    @Published var consumeContact = true
+    @Published var rest: Rest = .still
+    @Published var status = ""
+    @Published var account = "disconnected"
+    @Published var pendingAction: String?
+    @Published var unknownAction: String?
+    @Published var pendingTarget: String?
+    @Published var artwork: Preview?
+    @Published var preferences = DisplayPreferences.load()
     @Published var colorPreview: Preview?
     @Published var queueArtwork: [String:Preview] = [:]
-    @Published var voiceState = "idle", transcript = "", voiceSeconds = 0
-    @Published var loading = false, keyboardVisible = false
+    @Published var voiceState = "idle"
+    @Published var transcript = ""
+    @Published var voiceSeconds = 0
+    @Published var loading = false
+    @Published var keyboardVisible = false
     var voiceStart: (() -> Void)?, voiceCancel: (() -> Void)?
     var reportBattery: (() async -> Void)?
     var applyIdlePolicy: ((Bool) -> Void)?

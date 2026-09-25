@@ -3,8 +3,15 @@ import UniformTypeIdentifiers
 
 struct PairingView: View {
     @ObservedObject var model: ControllerModel
-    @State private var origin = "", code = "", certificate: Data?, fingerprint = ""
-    @State private var showImporter = false, confirm = false, forget = false, replace = false, working = false
+    @State private var origin = ""
+    @State private var code = ""
+    @State private var certificate: Data?
+    @State private var fingerprint = ""
+    @State private var showImporter = false
+    @State private var confirm = false
+    @State private var forget = false
+    @State private var replace = false
+    @State private var working = false
     @State private var message = "Import independently verified bridge trust before pairing."
     var body: some View {
         ScrollView {
