@@ -59,11 +59,11 @@ import UIKit
             if musicStates.contains(state) {
                 let touched = ["touched","paused","offline","pending","unknown"].contains(state)
                 let cover = try XCTUnwrap(visible.first { $0.id == "cover" }?.frame)
-                XCTAssertEqual(cover.minX,48,accuracy:4); XCTAssertEqual(cover.minY,touched ? 56 : 72,accuracy:4)
-                XCTAssertEqual(cover.width,touched ? 248 : 272,accuracy:4); XCTAssertEqual(cover.width,cover.height,accuracy:1)
+                XCTAssertEqual(cover.minX,48,accuracy:4); XCTAssertEqual(cover.minY,touched ? 56 : 60,accuracy:4)
+                XCTAssertEqual(cover.width,touched ? 248 : 296,accuracy:4); XCTAssertEqual(cover.width,cover.height,accuracy:1)
                 let text = try XCTUnwrap(visible.first { $0.id == "now-text-block" }?.frame)
-                XCTAssertEqual(text.minX,touched ? 336 : 368,accuracy:4)
-                XCTAssertEqual(text.width,touched ? 664 : 632,accuracy:4)
+                XCTAssertEqual(text.minX,touched ? 336 : 392,accuracy:4)
+                XCTAssertEqual(text.width,touched ? 664 : 608,accuracy:4)
                 if state != "stopped" {
                     let line = try XCTUnwrap(visible.first { $0.id == "waterline" }?.frame)
                     XCTAssertEqual(line.minY,472,accuracy:4); XCTAssertEqual(line.width,1048,accuracy:1)

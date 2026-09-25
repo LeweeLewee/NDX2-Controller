@@ -140,13 +140,13 @@ struct StillWaterView: View {
     }
     private var now: some View {
         let touched = model.touched, stopped = model.player.state == "stopped" || model.player.title.isEmpty
-        let x: CGFloat = touched ? 336 : 368, width: CGFloat = touched ? 664 : 632
+        let x: CGFloat = touched ? 336 : 392, width: CGFloat = touched ? 664 : 608
         let size: CGFloat = model.player.title.count > 18 ? 44 : 56
         let title = stopped ? "Nothing playing" : model.player.title
         let artist = !model.online ? "RECONNECTING" : stopped ? model.player.source :
             (model.player.state == "paused" ? "PAUSED · " : "") + model.player.artist
         return ZStack(alignment:.topLeading) {
-            sleeve(x:48,y:touched ? 56 : 72,size:touched ? 248 : 272,hidden:stopped)
+            sleeve(x:48,y:touched ? 56 : 60,size:touched ? 248 : 296,hidden:stopped)
             VStack(alignment:.leading,spacing:8) {
                 if touched, let ref = model.player.current.artistReference, !ref.isEmpty {
                     Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
