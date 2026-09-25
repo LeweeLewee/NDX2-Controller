@@ -1,5 +1,7 @@
 # Architecture
 
+> **D030 update — 25 September 2026:** iPhone 11 + selected UGREEN power bank replace Waveshare as active physical hardware. [Mounting/interface proposal](hardware/river-stone/iphone-mount/README.md) is under discussion. Earlier Waveshare hardware/UI implementation details below are retained fallback; native playback and bridge security requirements remain. This physical-design update does not implement or approve the entire iPhone software/power draft.
+
 ## Detailed-design status — 21 September 2026
 
 D017 selects Waveshare ESP32-S3-Touch-LCD-4.3B without case and rules out Android. D018 specifies a provisional embedded-controller/always-on-bridge partition; Pi reuse depends on private host inventory. See [deployment design](deployment-design.md) for credentials, pairing, renewal and recovery gates, and [phase plan](detailed-design-plan.md) for dependencies. The development-host v1 bridge, secure storage/recovery, desktop contract harness and native LVGL fixture foundation are implemented; see [M2 software](m2-software.md) and [contract](controller-contract-v1.md). The ESP32 HTTPS worker is implemented and compiled; protected provisioning, on-device networking, Pi hosting and physical validation remain open. The optional/direct paths below describe feasibility-era architecture, not the current deployment recommendation.

@@ -1,5 +1,7 @@
 # Detailed design and hardware proof
 
+> **D030 update — 25 September 2026:** iPhone 11 + selected UGREEN power bank replace Waveshare as active physical hardware. [Mounting/interface proposal](hardware/river-stone/iphone-mount/README.md) is under discussion. Earlier Waveshare hardware/UI implementation details below are retained fallback; native playback and bridge security requirements remain. This physical-design update does not implement or approve the entire iPhone software/power draft.
+
 Started 20 September 2026. Updated 21 September: parallel M2 software implementation is now present; see [implementation, validation and hardware-arrival checklist](m2-software.md). No hardware or Pi deployment proof is claimed.
 
 **Scope update, 21 September 2026:** Waveshare ESP32-S3-Touch-LCD-4.3B without case is selected; Android is ruled out (D017). The [comparison](hardware/display-comparison.md) is retained as history. HP-01 is the first hardware experiment; purchase and hardware proof remain outstanding.

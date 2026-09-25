@@ -1,6 +1,6 @@
 # NDX2-Controller
 
-**23 September 2026: design work paused.** The user retained the working prototype but rejected its visual direction. Start with the [chat closeout](docs/chat-closeout-2026-09-23.md) and [current continuation](docs/continuation-prompt.md); older design approvals below are historical.
+**25 September 2026: iPhone 11 + selected UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030).** Physical design resumes with [concealed internal phone mounting](docs/hardware/river-stone/iphone-mount/README.md) for agreement. [Waveshare CAD/slicing is parked fallback](docs/hardware/river-stone/fallback-waveshare.md). The earlier visual implementation remains unapproved; no iOS implementation is authorized by this mounting brief. Read the [current continuation](docs/continuation-prompt.md).
 
 A compact, battery-powered coffee-table touchscreen for native Naim music playback, starting with TIDAL.
 
@@ -17,7 +17,7 @@ The frozen reference is tagged `software-feasibility-v1`. Start the next phase f
 ## The product
 
 - Compact form with flexible proportions, bespoke touch interface and a substantial, well-finished 3D-printed enclosure.
-- Selected display: Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case, 800 × 480 (D017). Android ruled out; hardware validation and procurement remain outstanding.
+- Selected hardware: iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030). Concealed mounting and exact bank variant/fit are being resolved; physical validation is outstanding.
 - Large rechargeable battery and deliberate weight; cable-free use on the coffee table.
 - Weeks of standby is a target, not a measured specification.
 - Full TIDAL browsing and native playback; other sources can follow.
@@ -30,7 +30,7 @@ Start current work with the [detailed-design plan](docs/detailed-design-plan.md)
 
 | Document | Purpose |
 | --- | --- |
-| [Updated design concept](docs/design-concept.md) | Selected Waveshare screen, physical direction and parallel investigation brief |
+| [Updated design concept](docs/design-concept.md) | Historical Waveshare concept; current hardware is D030 |
 | [Voice and AI discovery](docs/voice-discovery.md) | Describe a mood, refine suggestions and explore native TIDAL content |
 | [TIDAL collection](docs/tidal-library.md) | Real hearts, library saves, account connection and Back navigation |
 | [Prototype UI](docs/prototype-ui.md) | Run the 800 × 480 demo and configure the experimental live bridge |

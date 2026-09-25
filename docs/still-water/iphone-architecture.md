@@ -1,5 +1,7 @@
 # Still Water on iPhone 11: hardware-only architecture
 
+> **Current selection — 25 September 2026 (D030):** user selected iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank. Waveshare is parked fallback. Earlier “selection open” text below is historical. [Concealed mounting proposal](../hardware/river-stone/iphone-mount/README.md) governs the current physical discussion; the 118 × 54 mm window remains provisional. The draft custom battery/boost/MCU architecture, operating configuration and runtime expectations below are not validated or adopted wholesale. Do not execute embedded implementation prompts from this hardware-selection update.
+
 23 September 2026. Working architecture after the decision to use an iPhone 11 as the display, touch and microphone hardware inside the River Stone, running a single thin app, with the Pi bridge doing everything else. Supersedes the Waveshare display selection for this design; see `decision-draft.md`. Housing direction (D014), native Naim playback (D001), bounded amplifier control (D011), recovery, trust and no-replay rules are unchanged.
 
 ## 1. Roles
@@ -23,14 +25,14 @@ Jailbreaking is not used. It does not reduce power draw and pins the phone to ol
 
 ## 3. Display window
 
-The panel is a 6.1" IPS LCD, 1792 × 828 px at 2× (326 ppi), about 139.9 × 64.6 mm in landscape, with a notch band on one long edge and rounded corners. The inlay exposes a rectangular window and the app paints pure black outside it. Because this is an LCD, black is backlit dark grey rather than off: the opaque inlay hides everything outside the window, and Asleep is always the panel off through auto-lock, never a black frame. Inside the window the darkest tones carry a faint glow in a dark room, which suits the wet-stone reading.
+The panel is a 6.1" IPS LCD, 1792 × 828 px at 2× (326 ppi), about 139.9 × 64.6 mm in landscape, with a notch at one short end in landscape and rounded corners. The inlay exposes a rectangular window and the app paints pure black outside it. Because this is an LCD, black is backlit dark grey rather than off: the opaque inlay hides everything outside the window, and Asleep is always the panel off through auto-lock, never a black frame. Inside the window the darkest tones carry a faint glow in a dark room, which suits the wet-stone reading.
 
 | | Value |
 |---|---|
 | Window, physical | 118 × 54 mm, centred on the panel, notch band and corners hidden by the inlay |
 | Window, points | 755 × 346 pt at 2×, inset 70 pt from the long edges and 34 pt from the short edges of the 896 × 414 pt landscape screen |
 | Design units | 1048 × 480, where 1 unit = 0.7206 pt = 0.1126 mm. `spec.md` coordinates are in these units |
-| Orientation | Landscape, notch on the left (home indicator side to the right), locked in the app |
+| Orientation | Landscape, notch on the left (Lightning connector at the right; home indicator along the bottom long edge), locked in the app |
 
 The old 800 × 480 canvas was 95.5 × 54.4 mm. The window is the same height and 22.5 mm wider, so every physical size in `spec.md` carries over unchanged. Section 0b of `spec.md` says how the extra width is used.
 

@@ -1,5 +1,7 @@
 # HP-01 — USB-powered display, touch wake and energy baseline
 
+> **D030 update — 25 September 2026:** active hardware is iPhone 11 + selected UGREEN Nexode 20000mAh PD 20W QC Power Bank. See [current mounting and power packaging](river-stone/iphone-mount/README.md). Waveshare-specific parts, experiments and purchase recommendations below are fallback history; actual prior order records remain valid. This update does not cancel orders or authorize more purchases.
+
 Status: ready-to-execute protocol, not executed. [Native fixture build recipe and diagnostic hooks](../../firmware/README.md) are prepared; compilation and hardware trials remain open. 20 September 2026. No procurement recorded. Dependencies: HW-001 exact model available, measurement equipment inventoried, revision-matched schematic and example reviewed.
 
 ## Question and setup

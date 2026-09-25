@@ -1,5 +1,7 @@
 # Hardware
 
+> **D030 update — 25 September 2026:** active hardware is iPhone 11 + selected UGREEN Nexode 20000mAh PD 20W QC Power Bank. See [current mounting and power packaging](river-stone/iphone-mount/README.md). Waveshare-specific parts, experiments and purchase recommendations below are fallback history; actual prior order records remain valid. This update does not cancel orders or authorize more purchases.
+
 Status: concept and parts planning; no physical build or purchases recorded.
 Last reviewed: 21 September 2026.
 

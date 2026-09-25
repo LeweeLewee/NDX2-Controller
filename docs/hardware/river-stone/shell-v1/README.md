@@ -1,5 +1,7 @@
 # River Stone shell and assembly study v1
 
+> **PARKED FALLBACK — 25 September 2026 (D030).** This is Waveshare-specific work, preserved without changing its geometry/results. Active design is [iPhone 11 mounting](../iphone-mount/README.md); old printing/next-step instructions below are suspended. See [fallback status](../fallback-waveshare.md).
+
 21 September 2026. **Dedicated Waveshare 4.3B, without case (D017); original 01 River Stone, stationary (D014).** Engineering study, not a production housing or a release for powered assembly.
 
 ![Actual CAD geometry](assembly-preview.png)

@@ -1,5 +1,7 @@
 # Parts BOM
 
+> **D030 update — 25 September 2026:** active hardware is iPhone 11 + selected UGREEN Nexode 20000mAh PD 20W QC Power Bank. See [current mounting and power packaging](river-stone/iphone-mount/README.md). Waveshare-specific parts, experiments and purchase recommendations below are fallback history; actual prior order records remain valid. This update does not cancel orders or authorize more purchases.
+
 Revision 0.9 — 22 September 2026. Prototype procurement BOM; see [UK prototype shopping list](prototype-shopping-list.md) for supplier baskets, current quotes and purchase-readiness limits.
 Six Pi Hut items are ordered, user confirmed 22 September: display, charger, converter, microphone and two harness parts. Delivery not yet confirmed. USB-C PSU, tools and wires are already owned. MicroSD sniffer is ordered from SK Pang, user confirmed 22 September; Pimoroni BAT0014 10,050 mAh battery is also ordered, user confirmed 22 September.
 

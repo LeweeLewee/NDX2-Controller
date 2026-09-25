@@ -1,5 +1,7 @@
 # Decision draft: D028, iPhone 11 as hardware-only display inside the River Stone
 
+> Historical draft only. D028 is already occupied; current accepted hardware selection is **D030**. Its scope is narrower than this draft: bank and phone selected, mounting under discussion, app/power-module implementation not authorized by this update.
+
 For Codex to record in `docs/decisions.md` without renumbering. Draft wording; the user accepts or edits.
 
 ## D028 - iPhone 11 as hardware-only display, touch and microphone

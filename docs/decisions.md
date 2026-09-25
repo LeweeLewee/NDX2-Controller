@@ -76,6 +76,8 @@ Validate both routes for seated usability, touch wake, real energy consumption, 
 
 ## D017 — Waveshare selected; Android ruled out
 
+**Historical selection; superseded by D030 on 25 September 2026. Waveshare is parked fallback.**
+
 **Accepted user decision, 21 September 2026.** Select Waveshare ESP32-S3-Touch-LCD-4.3B, standard without case (SKU 27848), 800 × 480. Repurposed phones are ruled out for the visual-design reasons recorded in D015; no failed phone trial is claimed. This supersedes the D016 comparison and closes display choice while retaining D015's rationale. Continue with HP-01 screen/touch/wake/power proof, embedded UI, microphone selection and River Stone packaging. Selection is not purchase authorization or proof of touch wake, battery runtime, charging compatibility or enclosure fit. Procurement remains not ordered pending a recorded update. All native Naim playback and existing System Automation requirements remain unchanged.
 
 ## D018 — Bridge partition for detailed-design trials
@@ -139,3 +141,11 @@ Screen selection remains open; no iPhone selection is recorded. D028 continues t
 
 
 **D029 amendment — Brief A.1, 23 September 2026.** The user authorized a single coherent commit and non-force push of Brief A/A.1 and the adopted `docs/still-water/` package. Extend `charge?` with `reason`: `window` for every fresh report, whether the charge answer is yes or no (explicit user clarification); `stale` when a report exists but is not younger than one hour; `none` when no report has arrived since boot. Stale and none always return `charge: "no"`. Preserve thresholds, receipt-time freshness, last-report-only storage and the authenticated envelope. No new decision ID, UI, firmware or HTTP route change; screen selection remains open. The source design package is committed unchanged, with its draft selection claims still subject to the preceding D029 scope.
+
+## D030 — iPhone 11 and selected UGREEN power bank; Waveshare parked
+
+**Explicit user direction, 25 September 2026.** Active hardware is iPhone 11 with the selected **UGREEN Nexode 20000mAh PD 20W QC Power Bank**. Park the Waveshare base design as a retained fallback. This supersedes D017's active screen selection, D015's exclusion of an intact iPhone for this concealed mounting approach, and D029's open-selection status. Keep past purchasing and validation records intact; no cancellation, new purchase, physical fit or runtime proof is implied. Exact bank SKU remains to be confirmed for dimensions.
+
+The user suggests mounting from behind/inside the stone so the phone edges disappear and it reads as a purpose-made screen. Develop the [rear-loaded cradle and masked aperture proposal](hardware/river-stone/iphone-mount/README.md) for agreement. A 118 × 54 mm aperture, recess depth, gasket, sensor masking and cradle details are provisional, not accepted production dimensions. The supplied “04 Tide pool” image informs the interface; wholesale replacement of the body concept is not inferred.
+
+This resumes physical mounting/interface design under the revised brief, not automatic execution of embedded Still Water prompts or authorization to implement the iOS app. D029 bridge semantics, native Naim playback, D011, credentials, trust and no-replay requirements remain unchanged. The iPhone software/power-module draft is not adopted wholesale: operating mode, charge switching and runtime require separate proof with the selected commercial bank. The [fallback index](hardware/river-stone/fallback-waveshare.md) preserves the Waveshare CAD/slicing work.

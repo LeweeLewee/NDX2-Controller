@@ -1,5 +1,7 @@
 # Coffee-table controller — design concept
 
+> **D030 update — 25 September 2026:** iPhone 11 + selected UGREEN power bank replace Waveshare as active physical hardware. [Mounting/interface proposal](hardware/river-stone/iphone-mount/README.md) is under discussion. Earlier Waveshare hardware/UI implementation details below are retained fallback; native playback and bridge security requirements remain. This physical-design update does not implement or approve the entire iPhone software/power draft.
+
 Revision 0.2 — 20 September 2026. Published baseline for parts investigation and the first UI prototype.
 
 ## Selected screen for the concept

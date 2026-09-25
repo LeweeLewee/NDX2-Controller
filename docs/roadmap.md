@@ -1,5 +1,12 @@
 # Roadmap
 
+> **Current scope — 25 September 2026, D030:** iPhone 11 + selected UGREEN 20,000mAh PD20W bank. Agree rear-loaded mounting and masked screen/stone interface, confirm exact bank SKU, then validate a physical aperture/cradle sample. Waveshare CAD, fit-coupon printing and display bring-up are parked fallback. Older scope/selection statements below are historical.
+
+- [x] Preserve and mark Waveshare mechanical/slicing work as fallback.
+- [x] Record iPhone/bank selection and publish [mounting proposal](hardware/river-stone/iphone-mount/README.md).
+- [ ] Agree aperture/interface details and verify physical mask, touch, sensors and voice.
+- [ ] Confirm bank variant, phone/plug/camera measurements and fresh internal layout.
+
 > **Current scope — 23 September 2026, Brief A/A.1:** Bridge additions are validated; screen selection is open and neither UI is authorized for implementation. D029 records this bounded revised-direction scope; D028 remains the design pause. Older display/visual-selection statements below are history.
 
 > **Historical closeout — before Brief A:** Design work was paused at the user's request. The working prototype is retained, but its visual direction is not accepted. Earlier approval/gate/next-step statements below are historical and do not authorize further design work. Read [the chat closeout](chat-closeout-2026-09-23.md) and D028; resume only under the user's revised direction.

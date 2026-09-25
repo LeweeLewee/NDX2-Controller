@@ -1,6 +1,6 @@
 # Project instructions
 
-- Current handover: read docs/chat-closeout-2026-09-23.md and docs/continuation-prompt.md before resuming. The user paused work and rejected the current visual direction (D028). Preserve the working prototype and newer work; do not resume design implementation without the revised direction.
+- Current handover: read docs/continuation-prompt.md and D030 before resuming. On 25 September the user selected iPhone 11 plus the UGREEN Nexode 20000mAh PD 20W QC Power Bank and resumed physical mounting/interface design. Waveshare CAD/slicing is parked fallback. Preserve the working prototype and newer work; the old UI aesthetic remains unapproved, and this physical-design brief does not authorize executing embedded app-implementation prompts.
 
 - Read README.md and docs/decisions.md before changing architecture.
 - Native Naim TIDAL playback is non-negotiable. Do not substitute Music Assistant-to-DLNA, AirPlay, Chromecast, Roon, a Pi audio relay or generic URL playback. TIDAL Connect is a distinct route, not an automatically accepted replacement.

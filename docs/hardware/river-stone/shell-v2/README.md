@@ -1,5 +1,7 @@
 # River Stone screen-retention study v2
 
+> **PARKED FALLBACK — 25 September 2026 (D030).** This is Waveshare-specific work, preserved without changing its geometry/results. Active design is [iPhone 11 mounting](../iphone-mount/README.md); old printing/next-step instructions below are suspended. See [fallback status](../fallback-waveshare.md).
+
 21 September 2026. Original 01 River Stone, stationary, Waveshare ESP32-S3-Touch-LCD-4.3B without case. **Engineering study; complete housing not released for printing.**
 
 ![CAD assembly](assembly-preview.png)

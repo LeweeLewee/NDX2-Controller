@@ -1,5 +1,7 @@
 # River Stone P1S slicing study and fit trial
 
+> **PARKED FALLBACK — 25 September 2026 (D030).** This is Waveshare-specific work, preserved without changing its geometry/results. Active design is [iPhone 11 mounting](../iphone-mount/README.md); old printing/next-step instructions below are suspended. See [fallback status](../fallback-waveshare.md).
+
 21 September 2026. Based on [shell v3](../shell-v3/README.md), dedicated Waveshare 4.3B and stationary original River Stone. Offline slicing completed; no printer connection, print, or physical fit test occurred.
 
 ## Small fit trial

@@ -1,5 +1,7 @@
 # Still Water: native UI specification
 
+> **Current selection — 25 September 2026 (D030):** user selected iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank. Waveshare is parked fallback. Earlier “selection open” text below is historical. [Concealed mounting proposal](../hardware/river-stone/iphone-mount/README.md) governs the current physical discussion; the 118 × 54 mm window remains provisional. The draft custom battery/boost/MCU architecture, operating configuration and runtime expectations below are not validated or adopted wholesale. Do not execute embedded implementation prompts from this hardware-selection update.
+
 Platform: pending screen selection between the iPhone 11 (see `iphone-architecture.md`, sections 0 and 0b below) and the Waveshare ESP32-S3-Touch-LCD-4.3B (Appendix A). The design is platform-neutral: coordinates are design units from the top-left of the visible window, and every physical size is in millimetres, so the screen tables apply to both. Sections 0, 0b, 2.2 implementation notes, 7, 9 and 10 are written for the iPhone; Appendix A carries the Waveshare equivalents. Reference renders in `reference/` were made for the earlier 800 × 480 canvas; sizes carry over, widths do not. Where a value here differs from a render, this document wins.
 
 Revision note, 23 September 2026: sections 0, 0b, 2.2 implementation, 2.4, 7, 9 and 10 were rewritten for the iPhone platform; the Waveshare and LVGL versions moved to Appendix A. Design lock is independent of the platform choice.
