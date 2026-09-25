@@ -174,9 +174,9 @@ struct StillWaterView: View {
             if touched {
                 button(model.player.current.saved == "saved" ? "♥  Liked" : model.player.current.saved == "unsaved" ? "♡  Like" : "Like unavailable",id:"now-like",x:800,y:212,w:200,h:64,
                        enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),border:false,size:22) { model.toggleCurrentLike() }
-                icon(.previous,id:"previous",label:"Previous track",x:356,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
+                icon(.previous,id:"previous",label:"Previous track",x:355,y:296,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
                 icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:288,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
-                icon(.next,id:"next",label:"Next track",x:580,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
+                icon(.next,id:"next",label:"Next track",x:579,y:296,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
                 icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:304,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
                 icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:304,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
                 Button { model.navigate(.queue) } label: {

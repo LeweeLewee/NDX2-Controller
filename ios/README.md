@@ -38,7 +38,7 @@ The application uses only existing `/v1/pair` and authenticated `/v1/request`. I
 
 ## Device configuration and limits
 
-- Fixed landscape-right interface, status bar hidden, home indicator requested hidden, 755 × 346 pt centered window with black outside. Physical notch/inlay alignment still needs checking. OS alerts, keyboard, document picker and lock screen remain system UI.
+- Fixed landscape-right interface, status bar hidden and home indicator requested hidden. The music colour field fills the display; content fits the system safe area with an additional 8 pt inactive inset. The perimeter uses the same background rather than a black frame. Physical notch/inlay alignment still needs checking. OS alerts, keyboard, document picker and lock screen remain system UI.
 - Start brightness is 35%; Display saves palette, brightness and idle-hold timeout locally. Actual lock is owned by iOS Auto-Lock. Set and test Auto-Lock on the device; the app does not force-lock the phone or simulate screen-off with a black view.
 - Enable microphone and Speech permissions for Ask. Recognition requires the selected locale to support on-device recognition; otherwise use typing. No server speech fallback or audio upload is implemented.
 - Keep the phone connected to the selected UGREEN bank for phase 1 and enable Optimised Battery Charging in iOS. There is no app-controlled charge switch and no promised 75% cutoff. The built-in cable/phone connection must be verified against the actual bank.
