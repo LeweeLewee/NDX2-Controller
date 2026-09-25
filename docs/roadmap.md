@@ -1,5 +1,14 @@
 # Roadmap
 
+**Software follow-up — Brief B / D031, 25 September 2026:** native SwiftUI source and an unsigned private GitHub Mac-runner workflow are implemented. The user authorized the cloud build from Windows. [Cloud instructions](ios-cloud-build.md) and [implementation report](ios-still-water.md) track native evidence separately from the parallel mounting work.
+
+- [x] Create the app, fixture codec/lifecycle tests, native snapshot gate and keyboard UI tests.
+- [x] Push a separate build branch based on the newer mounting commits; keep the original dirty checkout.
+- [x] Native compilation and 17 simulator tests pass at `5c211f7`; inspect all 23 states plus three interaction captures ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36130364216)).
+- [x] Prepare a Windows gallery with unchanged native PNGs, reference comparisons and exact build/artifact identity.
+- [ ] Complete user review of the native design; retain known keyboard, OS-chrome and native-control differences.
+- [ ] Sign/install on the selected physical phone and complete device/bridge and physical evaluation separately.
+
 > **Current scope — 25 September 2026, D030:** iPhone 11 + selected UGREEN 20,000mAh PD20W bank. Agree rear-loaded mounting and masked screen/stone interface, confirm exact bank SKU, then validate a physical aperture/cradle sample. Waveshare CAD, fit-coupon printing and display bring-up are parked fallback. Older scope/selection statements below are historical.
 
 - [x] Preserve and mark Waveshare mechanical/slicing work as fallback.

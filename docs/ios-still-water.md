@@ -1,6 +1,6 @@
 # Still Water Brief B — implementation and review report
 
-25 September 2026. The user explicitly requested action on the revised `codex-prompt-B.md`, authorizing a native SwiftUI client under D030. This is a **source and offline-validation checkpoint, not iOS build or visual acceptance**. The host has no Xcode, Swift compiler or iPhone simulator. [Build and silent-trial instructions](../ios/README.md) are ready for a Mac.
+25 September 2026. The user explicitly requested action on the revised `codex-prompt-B.md`, authorizing a native SwiftUI client under D030. The native project has now compiled and run on a private GitHub Mac runner, controlled from Windows. All 17 native tests passed, including the 23-state snapshot matrix and both interaction tests. This is not user or physical acceptance. [Cloud build and Windows review instructions](ios-cloud-build.md) supplement the [local Xcode guide](../ios/README.md).
 
 ## Implemented source
 
@@ -22,17 +22,17 @@ The spec tables and section 0b anchoring take precedence over the old 800 × 480
 
 - Move the whole transport trio 124 units to keep its spacing with the centered play ring. Moving only Play would overlap Next. Right-side amplifier halves are 72 × 64 separated by eight units inside the 152-unit pill; the older touching 76-unit halves conflict with the target-gap rule.
 - Use caps-15 for the voice state rather than the isolated caps-13 instruction. Use the revised 70% secondary ink rather than the older 62% table entries. Font sizes follow the larger app table, not the render's smaller type.
-- Compute contrast from the complete field including both glows. A luminance cap of 0.12 alone cannot provide 7:1 with the specified ink. The implementation darkens until sampled primary/secondary ratios exceed 7.2/4.7, then the native snapshot test checks rendered pixels at 7/4.5. These are source assertions until run on iOS.
+- Compute contrast from the complete field including both glows. A luminance cap of 0.12 alone cannot provide 7:1 with the specified ink. The implementation darkens until sampled primary/secondary ratios exceed 7.2/4.7, then the native snapshot test checks rendered pixels at 7/4.5. The native snapshot suite now executes these checks. It averages the title-adjacent strip before computing contrast, matching the supplied Python gate; the palette calculation also checks the field grid independently.
 - Keep the fixture label at y=24 on NOW; place it at y=6 on secondary screens to avoid their y=30 titles. Expand time-label height to 24 units, moving its top to 444, to retain glyphs in the actual font.
 - Header buttons move two units upward to preserve the query/filter gap. Find rows begin at 224, Library rows at 148, with 64-unit row hit areas centered inside 72-unit rows. Settings hit areas are 72 inside an 80-unit pitch. This resolves table overlaps against the eight-unit target-gap requirement; the Library row shift exceeds the four-unit comparison tolerance and is explicitly documented rather than silently counted as a match.
 - A native artist relationship needs a 56-unit link target below the two-line Detail title. The membership line moves to y=270 to avoid colliding with that target. Exact artist/album links are used when supplied; no guessed catalogue relationship is promoted to a native link.
 - System Auto-Lock owns actual sleep. System keyboard, permission prompts and the trust file picker are not clipped by the application's inlay mask. A custom keyboard or private force-lock API is not substituted.
 
-These choices do not revise D030 or edit the retained reference package. Physical acceptance can still require design changes. The source snapshot gate must not be described as passed before Xcode execution and inspection.
+These choices do not revise D030 or edit the retained reference package. Physical acceptance can still require design changes. The automated snapshot gate has now passed Xcode execution and all captures have been inspected; this does not close user or physical acceptance.
 
 ## Validation actually performed
 
-| Check | Result on Windows |
+| Check | Recorded result |
 | --- | --- |
 | `python -m unittest discover -s tests -v` | 141 tests passed |
 | `node --test tests/test_navigation.cjs` | Five tests passed |
@@ -40,14 +40,14 @@ These choices do not revise D030 or edit the retained reference package. Physica
 | Python-generated iOS fixture vectors | Match real `Contract`; socket creation forbidden during the new conformance test |
 | Xcode build-input graph, scheme, plist, fonts | Four new Python tests pass, including file coverage, dependency references, permissions, hashes and actual font PostScript names |
 | Swift grammar parse | All 15 Swift files parsed using tree-sitter-swift; this does **not** type-check Apple APIs or prove compilation |
-| Xcode build, XCTest and simulator snapshots | **Not run: unavailable on this host** |
+| Xcode build and unit/snapshot tests on hosted Mac | Native compilation and all 17 tests passed on iPhone 11 / iOS 18.6: 15 unit/snapshot plus two UI interaction tests |
 | Physical phone, on-device speech and bank tests | **Not run** |
 
-The full Python and demo runs used normal Windows permissions for existing protected temporary vault/TLS checks; protections were not weakened. No live NDX/playback/volume operation occurred. Firmware and `docs/still-water/` were checked against their task-start hashes and preserved, including pre-existing D030 edits. The existing prototype and bridge A/A.1 implementation were not changed. New Python work is confined to project/fixture generation and tests.
+The full Python and demo runs used normal Windows permissions for existing protected temporary vault/TLS checks; protections were not weakened. No live NDX/playback/volume operation occurred. Firmware and `docs/still-water/` were checked against their task-start hashes and preserved, including pre-existing D030 edits. The existing prototype and bridge A/A.1 implementation were not changed. Python additions cover project/fixture generation, tests, cloud evidence export and the local screenshot review helper.
 
 ## Native review matrix and remaining gate
 
-All 22 supplied reference renders were opened and inspected before implementation. No render is evidence of the native app. Unit snapshots retain images as `.xcresult` attachments and audit layout bounds, minimum type size, measured text height, target dimensions/overlap/gaps, selected table coordinates and sampled rendered title contrast. The UI test exercises the actual keyboard; lifecycle tests cover consumed wake contact, stale state, cancellation, the 30-second limit and uncertain/late writes without replay.
+All 22 supplied reference renders were opened and inspected before implementation. All 23 native state captures from the corrected iPhone 11 snapshot harness were subsequently inspected at full size. The supplied renders remain references, separate from native evidence. Unit snapshots retain images as `.xcresult` attachments and audit layout bounds, minimum type size, measured text height, target dimensions/overlap/gaps, selected table coordinates and sampled rendered title contrast. The UI test exercises the actual keyboard; lifecycle tests cover consumed wake contact, stale state, cancellation, the 30-second limit and uncertain/late writes without replay.
 
 | Reference | Native review state / check |
 | --- | --- |
@@ -65,4 +65,22 @@ All 22 supplied reference renders were opened and inspected before implementatio
 | 21, 22 | `settings`, `display` |
 | Additional utilities | `connection`, `device`, `wifi`, `pairing` |
 
-The next gate is to compile/type-check with Xcode, fix any build or test failures, inspect **every** resulting native capture against its reference and the anchored tables, and verify labels/targets within the declared exceptions. Geometry instrumentation is not a substitute for visual inspection. Then install on the selected phone, verify signing, trust enrollment/recovery, keyboard/inlay interference, lock/wake and microphone permissions, and run the physical evaluation in `iphone-architecture.md` section 8. No standby duration, wake latency, speech quality, visual acceptance, heat, inlay fit or seated readability is claimed.
+The cloud interaction suite is complete. Review the native gallery with the user next. Install on the selected phone only through a separately configured signing route, verify trust enrollment/recovery, keyboard/inlay interference, lock/wake and microphone permissions, and run the physical evaluation in `iphone-architecture.md` section 8. No standby duration, wake latency, speech quality, visual acceptance, heat, inlay fit or seated readability is claimed.
+
+## Native capture inspection — 25 September 2026
+
+The corrected snapshot harness removes the device notch safe-area inset from the isolated 755 × 346 pt test window. All 23 native state captures were inspected: the serif title hierarchy, two-line long titles, retained offline metadata, disabled/uncertain command states, wake mask, seven queue sleeves/reflections, rows, detail, speech states and utility text are present without accidental non-scroll clipping. Rows intentionally clip at their scroll viewport. Table anchoring and the D031 exceptions remain the comparison basis; the 800-unit reference is not stretched to the 1048-unit native canvas.
+
+The review led to selected-palette markers and removal of the extra explicit dimming from the pending target; the target stays disabled and retains its pending ring. Native interaction checks exposed missed button taps. Idle observation now separates taps from drags, and transparent button labels declare their entire touch rectangle inside the label. The final UI tests pass first-contact consumption, navigation, a search-icon tap near the target edge, and keyboard Return dismissal.
+
+Remaining design/device limits are explicit. The brightness slider and trust form use native controls, so their detailed appearance is not exact reference parity. The system keyboard covers part of the inlay and draws outside the app mask. The system home indicator is visible immediately after touch in the full-screen capture despite the app's auto-hide request. A snapshot of the isolated inlay cannot prove absence of OS chrome on the physical phone; mounted keyboard access and kiosk/Guided Access behavior remain open. Simulator fixture battery is unavailable. No user acceptance, physical speech, TLS/Keychain enrollment on a phone, power or runtime result follows from these captures.
+
+## Passing cloud run and retained evidence
+
+[Run 36130364216](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36130364216) tested `5c211f7e2dbe36f1e36d6156d73b23f105098597` with Xcode 16.4 (16F6), iPhone 11 and iOS 18.6 on macOS 15.7.9. All **17 tests passed**, none skipped: eight controller/lifecycle, five protocol/artwork, two snapshot/palette and two native UI interaction tests. The snapshot test covers **23 states**. The exported review adds full-screen first-contact, real keyboard and after-search captures, giving **26 PNGs**. The final changed captures were inspected; unchanged captures match the previously inspected native pixels.
+
+Private artifact `still-water-ios-6` (ID `10861144380`) has SHA-256 `7a4ac56bcc9926eb9a1d320a8bfae749355caaa109076ed120086a15fe3dfaec` and GitHub expiry 2 October 2026. A local copy and `local/ios/review/review.html` are retained outside Git. [The Windows guide](ios-cloud-build.md) explains regeneration without extracting long xcresult paths. Original PNG bytes and orientation metadata are preserved. The browser tool refused automatic local-file preview; the gallery was checked for valid image links and JavaScript syntax, and PNGs were inspected directly. Open the saved HTML manually in a browser.
+
+Early cloud attempts exposed invalid multiple property-wrapper declarations, a private synthesized initializer, the isolated-window safe-area offset, an incorrectly implemented contrast-strip calculation, ambiguous Search matching and missed button hit areas. These were corrected before the passing run; earlier failures are not counted as passes. Contrast thresholds remain 7:1/4.5:1, with the title-adjacent strip averaged as in the supplied Python gate. The full Windows Python suite initially hit the previously observed connection-aborted error in an existing origin/host rejection test; its unchanged full rerun passed all 141 tests without weakened ACL/TLS checks. Navigation (five tests), the six-stage silent TLS demo, and generated project/vector checks also passed.
+
+The final documentation/gallery-helper commit does not change the tested app, test targets or cloud workflow; its commit message skips redundant CI. No simulator result proves signed installation, real-phone trust/recovery, speech, mounted touch/keyboard access, heat or battery performance.

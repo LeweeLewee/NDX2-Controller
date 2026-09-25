@@ -1,6 +1,6 @@
 # Still Water iPhone client
 
-Brief B source checkpoint, 25 September 2026. **Not built, signed or run on iOS yet.** The implementation host is Windows and has neither Xcode nor Swift. D030 remains the hardware decision; D031 records this task's implementation choices. See the [implementation and review report](../docs/ios-still-water.md).
+Brief B native client, 25 September 2026. The app compiles and runs in an iPhone 11 simulator on a private GitHub Mac runner, controlled from Windows. Follow [the cloud build and Windows review guide](../docs/ios-cloud-build.md); a local Mac is optional for simulator review. See [the implementation report](../docs/ios-still-water.md) for the exact tested revision, results and remaining physical/signing gates. D030 remains the hardware decision; D031 records implementation boundaries.
 
 ## Build and review on a Mac
 
@@ -22,7 +22,7 @@ The shared test action sets `STILL_WATER_FIXTURE=1` for the application host, so
 
 Add **`--fixture`** to the scheme's Run arguments for the first visual trial. This uses bundled synthetic responses in process: no server, LAN, pairing, microphone capture or NDX is needed. `--fixture --review-state touched` opens a deterministic review composition; other state names are listed in `StillWater/Core/ReviewStates.swift`. Remove `--review-state` to exercise the real timers and navigation in the silent fixture. Review mode freezes timers, so it is not a wake or power measurement.
 
-Open the `.xcresult` in Xcode to inspect retained screenshots. Native captures target **1510 × 692 pixels**. Compare each with the corresponding reference in `docs/still-water/reference/`, applying the 1048-unit canvas anchoring rule rather than stretching the old 800-unit image. The UI test captures the actual system keyboard separately. No native capture has been produced or approved on Windows.
+Open the `.xcresult` in Xcode to inspect retained screenshots. Native captures target **1510 × 692 pixels**. Compare each with the corresponding reference in `docs/still-water/reference/`, applying the 1048-unit canvas anchoring rule rather than stretching the old 800-unit image. The UI test captures the actual system keyboard separately. The cloud artifact exports the native captures for Windows inspection; user design acceptance remains open.
 
 ## Pair a real display later
 

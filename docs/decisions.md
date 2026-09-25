@@ -162,3 +162,5 @@ This is not visual or hardware acceptance. Windows lacks Xcode/Swift; native bui
 
 
 **Cloud validation follow-up:** the user authorized a GitHub-hosted unsigned simulator build from Windows. Use the private build branch, read-only workflow permissions, silent fixtures and bounded runtime/artifact retention. No signing or distribution is part of this follow-up.
+
+D031 cloud validation outcome, 25 September 2026: native compilation, the 23-state snapshot matrix and both UI interaction tests now pass (17 tests total). The Windows review gallery retains original captures and references. [The evidence report](ios-still-water.md#passing-cloud-run-and-retained-evidence) identifies the tested commit, corrections and remaining physical/user gates. This follow-up completes simulator validation without a new platform decision or signing/distribution authorization.
