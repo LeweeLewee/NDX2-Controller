@@ -49,7 +49,8 @@ def build(archive, output, revision=None):
                     'after-search' if name.startswith('Find-after-search_') else
                     'find-idle-phone' if name.startswith('Find-idle_') else
                     'remediation-phone' if name.startswith('Remediation-full-phone_') else
-                    'remediation-album' if name.startswith('Remediation-album-actions_') else None)
+                    'remediation-album' if name.startswith('Remediation-album-actions_') else
+                    'artist-tracks-phone' if name.startswith('Artist-tracks-full-phone_') else None)
                 if not state:
                     continue
                 exported = attachment['exportedFileName']

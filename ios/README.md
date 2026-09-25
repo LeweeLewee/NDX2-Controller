@@ -1,5 +1,7 @@
 # Still Water iPhone client
 
+**D034 UI amendment — 25 September 2026:** **0.1.0 (5.1.0)** has been signed and uploaded; Apple processing and existing-group assignment are pending. Album and artist pages are redesigned, NOW elapsed/total time is removed, and Find uses a keyboard icon, microphone-centered ripples, progressive fixture text, Tap to search and microphone clear/restart. Presence is explicitly excluded and not queued. All **26 native tests** and the unsigned archive passed in [run 36191105906](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36191105906), source `10313a8e417b29274112af09548c5d7546707182`. Nine local project/distribution checks also passed. Gallery: `local/ios/review-amendment/review.html` (40 captures). This remains UI-only: simulated speech, fictional artist metadata and neutral portrait fallback; no live NDX or audio. Mounted-phone/user acceptance remains open.
+
 Brief B native client, 25 September 2026. The app compiles and runs in an iPhone 11 simulator on a private GitHub Mac runner, controlled from Windows. Follow [the cloud build and Windows review guide](../docs/ios-cloud-build.md); a local Mac is optional for simulator review. See [the implementation report](../docs/ios-still-water.md) for the exact tested revision, results and remaining physical/signing gates. D030 remains the hardware decision; D031 records implementation boundaries.
 
 ## Build and review on a Mac
