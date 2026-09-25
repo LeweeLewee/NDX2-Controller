@@ -1,0 +1,63 @@
+name: Still Water iOS simulator
+
+on:
+  push:
+    branches: [codex/still-water-cloud-build]
+    paths:
+      - 'ios/**'
+      - 'tools/ios_ci.py'
+      - 'tools/generate_ios_project.py'
+      - '.github/workflows/ios-simulator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: still-water-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 25
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      STILL_WATER_FIXTURE: '1'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verify generated project
+        run: python3 tools/generate_ios_project.py --check
+      - name: Prepare iPhone 11 simulator
+        id: simulator
+        run: python3 tools/ios_ci.py prepare
+      - name: Build and test unsigned simulator app
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project ios/StillWater.xcodeproj -scheme StillWater \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device }}' \
+            -parallel-testing-enabled NO \
+            -derivedDataPath local/ios-ci/DerivedData \
+            -resultBundlePath local/ios-ci/StillWater.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee local/ios-ci/xcodebuild.log
+      - name: Export results and screenshots for Windows
+        if: always()
+        run: python3 tools/ios_ci.py export
+      - name: Keep build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: still-water-ios-${{ github.run_number }}
+          path: |
+            local/ios-ci/environment.json
+            local/ios-ci/xcodebuild.log
+            local/ios-ci/test-summary.json
+            local/ios-ci/screenshots/
+            local/ios-ci/StillWater.xcresult/
+          retention-days: 7
+          if-no-files-found: warn
