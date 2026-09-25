@@ -8,6 +8,33 @@
 
 **User clarification, 25 September 2026: original 01 River Stone is the sole visual reference for both the body and screen-to-stone interface.** Preserve its low asymmetric pebble, soft shoulders, inset landscape screen and mineral finish while adapting the internals for iPhone 11 and the selected UGREEN bank. The supplied “04 Tide pool” image is retained only as superseded reference history; do not use its bowl/rim geometry to drive the design. The section diagram below explains mounting layers only and does not prescribe the exterior contour.
 
+## First mounting layout — 25 September 2026
+
+![Front, section, underside and acoustic reservations](mounting-layout.svg)
+
+[Layout checks](layout-checks.json) · [1:1 paper aperture template](mask-trial.svg) · [Reproducible layout generator](../../../../tools/iphone_mount_layout.py)
+
+The user repeated the selected bank name, UGREEN Nexode 20000mAh PD 20W QC Power Bank, and authorized proceeding. Use the matching manufacturer's 147 × 72 × 28 mm envelope to progress the layout; the exact physical unit and port arrangement still require checking before a fitted cradle. This is a working assumption, not a substitution of another power bank or a request to reopen the selection.
+
+| Proposal | Working value |
+|---|---|
+| Overall planning bounds | 240 W × 170 D × 105 H mm |
+| Phone angle | 50 degrees from the table |
+| Lower phone glass edge | 36 mm above underside datum |
+| Visible aperture | 118 × 54 mm, provisional |
+| Local glass recess | 1.2 mm trial target |
+| Bank bay | 151 × 76 × 32 mm, around the 147 × 72 × 28 envelope |
+| Rear-of-phone reserve | 6 mm beyond nominal phone body, not a measured camera dimension |
+| Phone connector / bank service reservations | 25 mm each at opposite sides; actual plugs and bend radius unmeasured |
+
+The bank sits across the base, low and behind the inclined phone. Coordinates and exact reservations are in the JSON. The bank bay clears the conservative infinite phone-rear allowance plane by **15.08 mm vertically** at its closest corner. This is only an analytical plane/box check. It does not establish curved-shell clearance, fitting tolerances, vent dimensions, screw access, insertion or temperature. Body dimensions and tilt are engineering proposals; they are not dimensions recovered from the original concept image. Revisit them after the mask and hardware measurements.
+
+Use a cradle with open front-notch, rear-camera and connector-end zones. Avoid a full clamshell around the phone. Keep long-edge buttons free; place padded chassis supports only after mapping the actual button and microphone positions. Interrupt the light-seal gasket around the front acoustic inlet and preserve an open route beneath an optically concealing lip. Reserve a separate rear-camera acoustic route and keep the Lightning-end openings clear of cable plugs and restraints. Vents must open to room air above the table contact plane, not into a sealed bank cavity. The sketch shows protected zones, not verified inlet coordinates or finished ducts. Exact port mapping and mounted recordings are mandatory before claiming unobstructed microphone performance.
+
+Assembly proposal: phone into cradle, cradle into open stone, connect lead, then fit the separately restrained bank and underside cover. The projected volumes overlap, so assume the bank must come out first for phone removal; independent phone removal with the bank installed is not proven. No load-bearing back clamp over the phone battery, and no lens contact.
+
+Print the paper template at 100% and verify its 50 mm scale. Cut the window and hold the mask over the phone without sticking it across the earpiece or any microphone opening. Check notch/edge concealment, oblique views and touch reach; remove the paper for unmounted voice baselines. The next 3D sample should reproduce the aperture edge and interrupted gasket/acoustic passage, not just a decorative frame. Compare Voice Memos and front/rear camera recordings, then the intended voice app, at the same distance/orientation before and after mounting. Apple provides separate microphone checks for [voice recordings and both camera directions](https://support.apple.com/en-gb/101600). This is a test plan; nothing has been physically recorded or printed here.
+
 ## Recommended construction
 
 ![Interface schematic](interface-section.svg)
@@ -16,7 +43,7 @@ Mount the intact, case-free phone from inside/underneath the stone in a removabl
 
 An opaque stone lip masks the phone perimeter, rounded screen corners and notch. A thin, replaceable black closed-cell gasket under that lip controls light leaks and the visible joint; it is not the structural clamp. Keep pad contact on verified non-display perimeter regions. The exposed touch surface is the phone's own glass: no added glass/acrylic overlay, external phone frame or adhesive bonding to the phone. A separate hidden mask insert remains available if printing the stone lip cleanly proves difficult; it is not an extra required visible trim.
 
-Use a shallow local glass recess, initially around 1–1.5 mm for a physical mock-up, with a gently relieved stone edge. That is a proposal, not a print tolerance. The broader bowl can curve above it, but the immediate aperture edge must allow a fingertip to reach controls. Avoid a deep vertical tunnel. Keep interface controls away from the lip and verify at seated viewing angles; app layout must match the physical aperture rather than squeezing the entire iPhone interface into view.
+Use a shallow local glass recess, initially around 1–1.5 mm for a physical mock-up, with a gently relieved stone edge. That is a proposal, not a print tolerance. The surrounding pebble surface follows original 01 River Stone; the immediate aperture edge must allow a fingertip to reach controls. Avoid a deep vertical tunnel. Keep interface controls away from the lip and verify at seated viewing angles; app layout must match the physical aperture rather than squeezing the entire iPhone interface into view.
 
 ## Window and phone envelope
 

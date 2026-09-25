@@ -262,3 +262,9 @@ The supplied “04 Tide pool” image was read after correcting the Windows path
 ## River Stone reference clarification — 25 September 2026
 
 User clarified original 01 River Stone is the design basis; it now governs both the body and screen/stone interface. Tide pool is retained solely as superseded history. The user also requires that mounting not obstruct the iPhone microphones. Updated the mounting proposal, D030 and continuation records. These are requirements, not evidence of physical fit or acoustic performance; no CAD, printing or device tests occurred.
+
+## iPhone mounting layout — 25 September 2026
+
+User authorized proceeding and repeated the selected UGREEN Nexode 20000mAh PD 20W QC Power Bank name. Used the matching manufacturer 25683 dimensions (147 × 72 × 28 mm) provisionally, without claiming an exact physical-unit match. Generated front/section/underside layout and numerical record: 50-degree phone, 151 × 76 × 32 mm bank bay, and 6 mm rear allowance beyond nominal phone depth give 15.08 mm minimum vertical separation between the bay and the infinite rear allowance plane. No curved shell, insertion, connector or microphone-passage solids were checked. Original 01 River Stone remains the only visual reference.
+
+Created a 118 × 54 mm paper aperture registration template with a 50 mm scale. Reserved separate front/notch, rear-camera and Lightning-end acoustic zones, with interrupted gasket and open passage proposals; exact microphone locations and acoustic behaviour remain unverified. Phone service currently assumes removing the bank first. No physical sample, voice recording, power trial or new slice was performed.

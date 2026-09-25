@@ -4,6 +4,7 @@
 
 - [x] Preserve and mark Waveshare mechanical/slicing work as fallback.
 - [x] Record iPhone/bank selection and publish [mounting proposal](hardware/river-stone/iphone-mount/README.md).
+- [x] Prepare iPhone front/section/underside layout, working UGREEN bay, acoustic reservations and a 1:1 paper aperture template. Plane/box clearance checked; no fitted shell or acoustic proof.
 - [ ] Agree aperture/interface details and verify physical mask, touch, sensors and voice.
 - [ ] Confirm bank variant, phone/plug/camera measurements and fresh internal layout.
 

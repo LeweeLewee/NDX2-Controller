@@ -1,0 +1,90 @@
+{
+  "status": "provisional layout only; no shell, insertion, connector or acoustic clearance certification",
+  "phone_body_mm": [
+    150.9,
+    75.7,
+    8.3
+  ],
+  "phone_angle_deg": 50,
+  "phone_lower_front_yz_mm": [
+    -55,
+    36
+  ],
+  "window_mm": [
+    118,
+    54
+  ],
+  "nominal_glass_recess_mm": 1.2,
+  "bank_working_envelope_mm": [
+    147,
+    72,
+    28
+  ],
+  "bank_model_mapping": "user product name retained; manufacturer 25683 envelope used provisionally",
+  "bank_bay_mm": [
+    151,
+    76,
+    32
+  ],
+  "bank_bounds_xyz_mm": {
+    "x": [
+      -73.5,
+      73.5
+    ],
+    "y": [
+      -20,
+      52
+    ],
+    "z": [
+      8,
+      36
+    ]
+  },
+  "bay_bounds_xyz_mm": {
+    "x": [
+      -75.5,
+      75.5
+    ],
+    "y": [
+      -22,
+      54
+    ],
+    "z": [
+      6,
+      38
+    ]
+  },
+  "rear_extra_allowance_mm": 6,
+  "phone_side_corners_yz_mm": [
+    [
+      -55.0,
+      36.0
+    ],
+    [
+      -6.3409779467289695,
+      93.98956434410664
+    ],
+    [
+      0.01719093115854875,
+      88.65442718370836
+    ],
+    [
+      -48.64183112211248,
+      30.664862839601724
+    ]
+  ],
+  "minimum_infinite_rear_plane_to_bay_vertical_gap_mm": 15.081017831505036,
+  "planning_body_bounds_mm": [
+    240,
+    170,
+    105
+  ],
+  "phone_connector_reservation_mm": 25,
+  "bank_port_service_reservation_mm": 25,
+  "limits": [
+    "Overall silhouette and angle are proposals, not measured from the concept image",
+    "Rear allowance is not measured camera/cradle geometry",
+    "Plane versus box check only; curved shell and acoustic paths are not solids",
+    "No full insertion sweep, fastener positions, thermal test or print release"
+  ]
+}
