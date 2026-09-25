@@ -9,6 +9,7 @@
 - [ ] Complete user review of the native design; retain known keyboard, OS-chrome and native-control differences.
 - [x] Prepare the silent internal TestFlight workflow, app icon, privacy manifest and signed-archive checks; Apple account configuration is pending.
 - [x] Pass 19 native tests and unsigned iOS device archive validation under Xcode 26.3 ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36134704504)); inspect changed captures.
+- [x] Revalidate the registered bundle identity: 19 native tests and unsigned archive passed ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36152860230)); configure the GitHub environment and app-identity variables.
 - [x] Verify the Apple team and register `com.ndx2.controller` plus the NDX2 Controller iOS app record; keep Still Water as the phone display name.
 - [ ] Configure protected signing inputs and upload the internal preview. Banking details remain outside this non-commercial trial.
 - [ ] Install the preview on the selected phone and complete user/device evaluation; live bridge and speech require a later trial.
