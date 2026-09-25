@@ -24,6 +24,10 @@ Add **`--fixture`** to the scheme's Run arguments for the first visual trial. Th
 
 Open the `.xcresult` in Xcode to inspect retained screenshots. Native captures target **1510 × 692 pixels**. Compare each with the corresponding reference in `docs/still-water/reference/`, applying the 1048-unit canvas anchoring rule rather than stretching the old 800-unit image. The UI test captures the actual system keyboard separately. The cloud artifact exports the native captures for Windows inspection; user design acceptance remains open.
 
+## Internal TestFlight design preview
+
+Follow [the Windows signing and TestFlight guide](../docs/ios-testflight.md). The newer Xcode 26.3 run passes 19 tests plus an unsigned device archive. The upload workflow is prepared and awaits Apple account configuration. It builds with `STILL_WATER_MODE=STILL_WATER_PREVIEW`: the app starts in fixtures, refuses live transport/enrollment and real speech, and needs no launch arguments on the phone. Its privacy manifest and temporary app icon are included. This preview does not exercise the real pairing instructions below.
+
 ## Pair a real display later
 
 Use the existing provisioned HTTPS bridge and its one-use pairing workflow. On the phone, reveal controls, hold the artist line for 700 ms, then choose **Connection → Pairing**. Import the independently supplied PEM/DER trust certificate, verify its displayed SHA-256 fingerprint through a trusted independent channel, enter the origin and one-use code, and approve that specific pairing. Trust is never learned from the first network response. Keep private certificates/configuration out of committed fixtures.

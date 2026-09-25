@@ -28,8 +28,10 @@ def run(*args, private=False):
         raise RuntimeError(f'{Path(args[0]).name} failed (exit {result.returncode})')
 
 
-def value(name, pattern=None):
-    text = os.environ.get(name, '').strip()
+def value(name, pattern=None, *, strip=True):
+    text = os.environ.get(name, '')
+    if strip:
+        text = text.strip()
     if not text or (pattern and not re.fullmatch(pattern, text)):
         raise ValueError(f'Missing or invalid {name}')
     return text
@@ -123,7 +125,7 @@ def upload():
     issuer = value('ASC_ISSUER_ID', r'[a-fA-F0-9-]{36}')
     p12 = base64.b64decode(value('APPLE_CERTIFICATE_P12_BASE64'), validate=True)
     profile_raw = base64.b64decode(value('APPLE_PROFILE_BASE64'), validate=True)
-    password = value('APPLE_CERTIFICATE_PASSWORD')
+    password = value('APPLE_CERTIFICATE_PASSWORD', strip=False)
     key_raw = value('ASC_PRIVATE_KEY').encode()
     if b'-----BEGIN PRIVATE KEY-----' not in key_raw or len(key_raw) > 16384:
         raise ValueError('Invalid ASC_PRIVATE_KEY')
@@ -161,7 +163,7 @@ def upload():
             options = folder / 'ExportOptions.plist'
             options.write_bytes(plistlib.dumps(export_options(team, bundle, identifier)))
             run('xcodebuild', '-exportArchive', '-archivePath', str(ARCHIVE), '-exportPath', str(OUTPUT / 'export'),
-                '-exportOptionsPlist', str(options), '-authenticationKeyPath', str(folder / f'AuthKey_{key_id}.p8'),
+                '-exportOptionsPlist', str(options), '-allowProvisioningUpdates', '-authenticationKeyPath', str(folder / f'AuthKey_{key_id}.p8'),
                 '-authenticationKeyID', key_id, '-authenticationKeyIssuerID', issuer)
             print('Upload command completed; confirm Apple processing and tester assignment in App Store Connect.')
         finally:

@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from ios_testflight import build_number, export_options, profile_identity
+from ios_testflight import build_number, export_options, profile_identity, value
 
 
 class TestFlightGates(unittest.TestCase):
@@ -43,6 +43,10 @@ class TestFlightGates(unittest.TestCase):
         self.assertIs(options['testFlightInternalTestingOnly'], True)
         self.assertIs(options['manageAppVersionAndBuildNumber'], False)
         self.assertEqual(options['provisioningProfiles'], {'com.example.test': 'profile'})
+
+    def test_signing_password_preserves_significant_whitespace(self):
+        with patch.dict(os.environ, {'APPLE_CERTIFICATE_PASSWORD': ' synthetic password '}):
+            self.assertEqual(value('APPLE_CERTIFICATE_PASSWORD', strip=False), ' synthetic password ')
 
     def test_build_numbers_distinguish_reruns_and_refuse_invalid_counters(self):
         with patch.dict(os.environ, {'GITHUB_RUN_NUMBER': '42', 'GITHUB_RUN_ATTEMPT': '2'}):

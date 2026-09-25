@@ -1,12 +1,12 @@
 # Build Still Water from Windows
 
-The private GitHub repository runs Xcode on a hosted Mac. A local Mac and an Apple Developer membership are not needed for the unsigned **simulator** build. This does not produce an installable iPhone `.ipa` or configure TestFlight.
+The private GitHub repository runs Xcode on a hosted Mac. A local Mac and an Apple Developer membership are not needed for the unsigned **simulator** build. Unsigned validation does not produce an installable iPhone `.ipa`. The separate [TestFlight setup guide](ios-testflight.md) covers the subsequently requested signed preview.
 
 ## Current workflow
 
 `Still Water iOS simulator` runs on pushes changing iOS/build files on `codex/still-water-cloud-build`. The branch preserves the newer mounting work from `main`; the original local checkout and its uncommitted documentation are separate. There is also a manual-dispatch declaration, available in the GitHub UI once this workflow is on the default branch. Until then, push a build change or use **Re-run jobs** on an existing run.
 
-The job uses `macos-15`, Xcode 16.4 and an available iOS 18 runtime with the **iPhone 11** device type. It records the exact environment. The 25-minute timeout bounds each run, and a newer push cancels an older run on the same branch. The workflow token can only read repository contents; checkout does not retain its credential. No provider secrets, signing material, LAN address or live bridge configuration is supplied. Test-host and UI-test launches use the in-process silent fixture, including no physical microphone capture or background battery reporting.
+The job uses `macos-15`, Xcode 26.3 and an available iOS 18 runtime with the **iPhone 11** device type. It records the exact environment. The 25-minute timeout bounds each run, and a newer push cancels an older run on the same branch. The workflow token can only read repository contents; checkout does not retain its credential. No provider secrets, signing material, LAN address or live bridge configuration is supplied. Test-host and UI-test launches use the in-process silent fixture, including no physical microphone capture or background battery reporting.
 
 ## Results on Windows
 
@@ -17,7 +17,7 @@ The job uses `macos-15`, Xcode 16.4 and an available iOS 18 runtime with the **i
 5. Keep the original ZIP. It retains `xcodebuild.log`, the attachment manifest and the complete `.xcresult` for later Xcode inspection. Direct extraction of xcresult internals can exceed Windows path limits; the gallery command avoids those internals.
 6. Compare every composition with the supplied reference and the anchored tables, using [the review matrix](ios-still-water.md#native-review-matrix-and-remaining-gate). Review actual keyboard screenshots separately. A failed assertion remains a failed gate until its cause is corrected; do not substitute browser renders for native evidence.
 
-GitHub may charge usage beyond the account's included private-repository allowance. This setup does not change account billing, enable paid plans or purchase Apple membership. The current workflow builds and tests only; signing, real-phone installation and hardware measurements remain a separate step.
+GitHub may charge usage beyond the account's included private-repository allowance. This setup does not change account billing, enable paid plans or purchase Apple membership. Normal source pushes build/test and validate an unsigned device archive. The separately triggered [internal TestFlight workflow](ios-testflight.md) requires protected Apple signing setup; it has not uploaded a build. Real-phone installation and hardware measurements remain separate.
 
 ## Reproduce or inspect
 

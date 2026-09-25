@@ -30,8 +30,9 @@ def build(archive, output, revision=None):
     output.mkdir(parents=True, exist_ok=True)
     states = []
     with zipfile.ZipFile(archive) as source:
+        prefix = '' if 'test-summary.json' in source.namelist() else 'ios-ci/'
         def read(name, limit):
-            item = source.getinfo(name)
+            item = source.getinfo(prefix + name)
             if item.file_size > limit:
                 raise ValueError(f'Oversized evidence file: {name}')
             return source.read(item)
