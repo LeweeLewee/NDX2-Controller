@@ -31,7 +31,7 @@ enum RuntimeMode {
     }
     var body: some Scene {
         WindowGroup {
-            KioskHost(model:model).ignoresSafeArea().persistentSystemOverlays(.hidden).statusBarHidden()
+            KioskHost(model:model).persistentSystemOverlays(.hidden).statusBarHidden()
                 .onAppear {
                     UIDevice.current.isBatteryMonitoringEnabled = true
                     UIScreen.main.brightness = model.preferences.brightness
@@ -60,12 +60,33 @@ struct KioskHost: View {
     @ObservedObject var model: ControllerModel
     var body: some View {
         GeometryReader { proxy in
-            ZStack {
-                Color.black
-                StillWaterView(model:model)
-                    .scaleEffect(Design.fit(proxy.size)).frame(width:Design.width * Design.fit(proxy.size),height:Design.height * Design.fit(proxy.size))
-                    .clipped().position(x:proxy.size.width/2,y:proxy.size.height/2)
-            }
-        }.ignoresSafeArea().background(.black)
+            let scale = Design.fit(proxy.size)
+            StillWaterView(model:model, drawsBackground:false)
+                .scaleEffect(scale)
+                .frame(width:Design.width * scale,height:Design.height * scale)
+                .clipped().position(x:proxy.size.width/2,y:proxy.size.height/2)
+        }
+        .ignoresSafeArea(.keyboard)
+        .background { ControllerField(model:model).ignoresSafeArea().allowsHitTesting(false) }
+    }
+}
+
+// Only the colour field extends underneath the notch and home indicator.
+// The GeometryReader above retains UIKit's safe area in the locked orientation.
+struct ControllerField: View {
+    @ObservedObject var model: ControllerModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var palette = FieldPalette.fallback("sage")
+    private var utility: Bool { [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) }
+    private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : [.find,.library,.detail].contains(model.context.screen) ? 0.35 : 1 }
+    private var paletteKey: String { (model.colorPreview?.reference ?? "fallback") + ":" + model.preferences.palette }
+    var body: some View {
+        MusicField(palette:utility ? .fallback(model.preferences.palette) : palette,intensity:intensity)
+            .onAppear { updatePalette() }
+            .onChange(of:paletteKey) { _,_ in updatePalette() }
+    }
+    private func updatePalette() {
+        let next = model.colorPreview.map { FieldPalette.extract($0,fallback:model.preferences.palette) } ?? .fallback(model.preferences.palette)
+        withAnimation(reduceMotion ? nil : .easeInOut(duration:0.6)) { palette = next }
     }
 }

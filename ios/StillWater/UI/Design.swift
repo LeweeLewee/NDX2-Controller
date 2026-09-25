@@ -81,7 +81,7 @@ struct FieldPalette: Equatable {
 enum Design {
     static let width: CGFloat = 1048, height: CGFloat = 480, scale: CGFloat = 0.7206
     static let windowWidth: CGFloat = 755, windowHeight: CGFloat = 346
-    // The decorative border receives no input; interior margins clear the landscape notch.
+    // Input size is the system safe area, not the full display. Keep an extra 8 pt inset.
     static func fit(_ size: CGSize) -> CGFloat {
         min(max(0,size.width - 16)/width, max(0,size.height - 16)/height)
     }

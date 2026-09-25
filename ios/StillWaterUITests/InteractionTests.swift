@@ -7,14 +7,21 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["wake-contact"].waitForExistence(timeout:5)); app.buttons["wake-contact"].tap()
         let play = app.buttons["play-pause"]
         XCTAssertTrue(play.waitForExistence(timeout:10))
-        XCTAssertGreaterThanOrEqual(play.frame.width,80)
+        XCTAssertGreaterThanOrEqual(play.frame.width,76)
         XCTAssertGreaterThanOrEqual(app.buttons["previous"].frame.width,72)
         XCTAssertGreaterThanOrEqual(app.buttons["next"].frame.width,72)
         XCTAssertEqual(app.buttons["amp-down"].label,"Volume down")
         XCTAssertFalse(app.staticTexts["AMP"].exists)
         let screen = app.windows.firstMatch.frame
         XCTAssertLessThan(app.buttons["library"].frame.maxX,screen.maxX - 8)
-        XCTAssertGreaterThan(app.buttons["library"].frame.maxX,screen.maxX - 70)
+        XCTAssertGreaterThan(app.buttons["library"].frame.maxX,screen.maxX - 110)
+        // iPhone 11 landscape safe area: 44 pt at each side, 21 pt below.
+        for id in ["previous","play-pause","next","now-artist","now-album","now-like","up-next","settings","find","library"] {
+            let frame = app.buttons[id].frame
+            XCTAssertGreaterThanOrEqual(frame.minX,screen.minX + 52,id)
+            XCTAssertLessThanOrEqual(frame.maxX,screen.maxX - 52,id)
+            XCTAssertLessThanOrEqual(frame.maxY,screen.maxY - 29,id)
+        }
         let like = app.buttons["now-like"]
         XCTAssertTrue(like.isEnabled); like.tap()
         expectLabel(like,"♥  Liked")
@@ -24,13 +31,17 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(membership.waitForExistence(timeout:5)); expectLabel(membership,"Follow")
         membership.tap(); expectLabel(membership,"Unfollow")
         membership.tap(); expectLabel(membership,"Follow")
-        app.buttons["back-now"].tap()
+        app.buttons["back"].tap()
+        app.buttons["settings"].tap()
+        XCTAssertTrue(app.buttons["back"].waitForExistence(timeout:5))
+        XCTAssertFalse(app.buttons["back-now"].exists)
+        app.buttons["back"].tap()
         app.buttons["now-album"].tap()
         XCTAssertTrue(membership.waitForExistence(timeout:5)); expectLabel(membership,"Add to library")
         membership.tap(); expectLabel(membership,"Remove from library")
         membership.tap(); expectLabel(membership,"Add to library")
         let detail = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); detail.name = "Remediation-album-actions"; detail.lifetime = .keepAlways; add(detail)
-        app.buttons["back-now"].tap()
+        app.buttons["back"].tap()
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "Remediation-full-phone"; image.lifetime = .keepAlways; add(image)
     }
     private func expectLabel(_ element: XCUIElement,_ label: String) {

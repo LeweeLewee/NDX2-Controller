@@ -33,9 +33,10 @@ struct StillWaterView: View {
     @FocusState private var queryFocused: Bool
     var auditSink: (([AuditElement]) -> Void)?
     var snapshot = false
+    var drawsBackground = true
     var body: some View {
         ZStack(alignment: .topLeading) {
-            MusicField(palette: isUtility ? .fallback(model.preferences.palette) : palette, intensity: intensity)
+            if drawsBackground { MusicField(palette: isUtility ? .fallback(model.preferences.palette) : palette, intensity: intensity) }
             switch model.context.screen {
             case .now: now
             case .find: find
@@ -161,7 +162,7 @@ struct StillWaterView: View {
                     if touched, let ref = model.player.current.albumReference, !ref.isEmpty {
                         Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
                             Text(model.player.album).font(Design.font(28,serif:true,italic:true)).lineLimit(1)
-                                .frame(width:width,height:64,alignment:.leading).contentShape(Rectangle())
+                                .frame(width:width-216,height:64,alignment:.leading).contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityIdentifier("now-album").audit("now-album",font:28,tap:true,truncates:true)
                     } else {
                         DesignText(value:model.player.album,units:28,serif:true,italic:true).opacity(0.7)
@@ -171,8 +172,8 @@ struct StillWaterView: View {
             }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
                 .position(x:x+width/2,y:touched ? 154 : 208)
             if touched {
-                button(model.player.current.saved == "saved" ? "♥  Liked" : model.player.current.saved == "unsaved" ? "♡  Like" : "Like unavailable",id:"now-like",x:48,y:328,w:248,h:64,
-                       enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),size:26) { model.toggleCurrentLike() }
+                button(model.player.current.saved == "saved" ? "♥  Liked" : model.player.current.saved == "unsaved" ? "♡  Like" : "Like unavailable",id:"now-like",x:800,y:212,w:200,h:64,
+                       enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),border:false,size:22) { model.toggleCurrentLike() }
                 icon(.previous,id:"previous",label:"Previous track",x:356,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
                 icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:288,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
                 icon(.next,id:"next",label:"Next track",x:580,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
@@ -209,8 +210,7 @@ struct StillWaterView: View {
     private func header(_ title: String) -> some View {
         ZStack {
             label(title,id:"screen-title",x:48,y:30,w:560,h:42,size:32,serif:true)
-            if model.history.count > 1 { button("Back",id:"back",x:704,y:24,w:140) { model.back() } }
-            button("Back to now",id:"back-now",x:860,y:24,w:140) { model.back(toNow:true) }
+            button("‹ Back",id:"back",x:860,y:24,w:140,border:false,size:26) { model.back() }
         }
     }
     private func connectionLine() -> some View {
