@@ -52,6 +52,7 @@ struct StillWaterView: View {
             if !snapshot && (model.consumeContact || (model.context.screen == .now && model.rest != .touched)) {
                 Color.clear.contentShape(Rectangle()).frame(width:1048,height:480)
                     .gesture(DragGesture(minimumDistance: 0).onEnded { _ in model.contactEnded() })
+                    .accessibilityIdentifier("wake-contact")
                     .accessibilityLabel("Wake and reveal controls").accessibilityAddTraits(.isButton)
                     .accessibilityAction { model.contactEnded() }
             }

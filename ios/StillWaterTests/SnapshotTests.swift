@@ -11,6 +11,8 @@ import UIKit
             let content = StillWaterView(model:model,auditSink:{ elements = $0 },snapshot:true)
                 .scaleEffect(Design.scale).frame(width:Design.windowWidth,height:Design.windowHeight).clipped()
             let controller = UIHostingController(rootView:content)
+            // This test window represents only the inlay, not the phone's notched screen.
+            controller.safeAreaRegions = []
             let bounds = CGRect(x:0,y:0,width:Design.windowWidth,height:Design.windowHeight)
             let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
             let window = scene.map { UIWindow(windowScene:$0) } ?? UIWindow(frame:bounds)
@@ -97,14 +99,19 @@ import UIKit
         let scale = Double(w)/1048
         // Match the source gate's field strip above each title, using the native rendered pixels.
         let y = max(0,min(h-1,Int((title.frame.minY-8)*scale)))
-        var minimum = Double.infinity
+        var red = 0, green = 0, blue = 0, count = 0
         for x in stride(from:max(0,Int(title.frame.minX)),to:min(1048,Int(title.frame.maxX)),by:8) {
             let index = (y*w + min(w-1,Int(Double(x)*scale)))*4
-            let bg = RGB(Double(pixels[index])/255,Double(pixels[index+1])/255,Double(pixels[index+2])/255)
-            let fg = bg.mix(RGB(0xF1EBDF),title.opacity)
-            minimum = min(minimum,(fg.luminance+0.05)/(bg.luminance+0.05))
+            red += Int(pixels[index]); green += Int(pixels[index+1]); blue += Int(pixels[index+2]); count += 1
         }
-        XCTAssertGreaterThanOrEqual(minimum,title.opacity >= 0.99 ? 7 : 4.5,"\(state) contrast: \(title.id)")
+        XCTAssertGreaterThan(count,0)
+        guard count > 0 else { return }
+        // Match still-water-gates.py: average the strip, then blend ink and measure.
+        // Taking its brightest pixel mistakes the adjacent kicker's glyph for the field.
+        let bg = RGB(Double(red/count)/255,Double(green/count)/255,Double(blue/count)/255)
+        let fg = bg.mix(RGB(0xF1EBDF),title.opacity)
+        let ratio = (fg.luminance+0.05)/(bg.luminance+0.05)
+        XCTAssertGreaterThanOrEqual(ratio,title.opacity >= 0.99 ? 7 : 4.5,"\(state) contrast: \(title.id)")
     }
     func testPaletteExtractionAndFallbackContrast() async throws {
         for name in ["sage","sand","slate"] {
