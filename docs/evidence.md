@@ -1,5 +1,11 @@
 # Evidence ledger
 
+## First signed internal TestFlight build — 25 September 2026
+
+**Internal TestFlight ready — 25 September 2026:** version **0.1.0 (1.2.0)** was signed and uploaded from `eb72f22fe764f91687e16bff5f4a74714ba56102` in [run 36166397352, attempt 2](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36166397352). All 19 native tests passed. Apple processed the build and reports **Ready to Test**. The user-created internal group **Naim NDX2 Controller TestFlight** contains this build and only the explicitly approved tester, whose status is **Invited**. Build distribution is **Manual for Xcode Builds**. Phone installation and hands-on acceptance remain unverified. This is the compile-time silent fixture preview; live bridge, playback and speech remain disabled. This checkpoint supersedes older pending-signing/upload statements below.
+
+The first upload attempt stopped during keychain setup before upload. Repackaging the same certificate/key into a macOS-compatible PKCS12 container resolved the failure; no app/workflow change or new certificate was needed. The compatible local package is additionally protected with current-user Windows DPAPI; GitHub transfer used environment-public-key encryption. Only the certificate-package secret changed. The retry retained the successful validation job and completed archive, code-sign verification and internal-only export/upload. Private receipt/logs are retained under ignored `local/ios/`. Validation artifact 10878875181 has SHA-256 `fa063adaa3a66f52595bd8a624a40fae6b3e78c6b4b8bfd1c9e3fd1af2ad8105`; exact validation JSON is retained under `local/ios/testflight-validation/`. This is distribution evidence, not physical runtime or design acceptance.
+
 Last updated: 21 September 2026.
 
 ## Detailed-design entry audit — 20 September 2026

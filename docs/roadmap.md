@@ -1,5 +1,7 @@
 # Roadmap
 
+**Internal TestFlight ready — 25 September 2026:** version **0.1.0 (1.2.0)** was signed and uploaded from `eb72f22fe764f91687e16bff5f4a74714ba56102` in [run 36166397352, attempt 2](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36166397352). All 19 native tests passed. Apple processed the build and reports **Ready to Test**. The user-created internal group **Naim NDX2 Controller TestFlight** contains this build and only the explicitly approved tester, whose status is **Invited**. Build distribution is **Manual for Xcode Builds**. Phone installation and hands-on acceptance remain unverified. This is the compile-time silent fixture preview; live bridge, playback and speech remain disabled. This checkpoint supersedes older pending-signing/upload statements below.
+
 **Software follow-up — Brief B / D031, 25 September 2026:** native SwiftUI source and an unsigned private GitHub Mac-runner workflow are implemented. The user authorized the cloud build from Windows. [Cloud instructions](ios-cloud-build.md) and [implementation report](ios-still-water.md) track native evidence separately from the parallel mounting work.
 
 - [x] Create the app, fixture codec/lifecycle tests, native snapshot gate and keyboard UI tests.
@@ -12,7 +14,7 @@
 - [x] Revalidate the registered bundle identity: 19 native tests and unsigned archive passed ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36152860230)); configure the GitHub environment and app-identity variables.
 - [x] Verify the Apple team and register `com.ndx2.controller` plus the NDX2 Controller iOS app record; keep Still Water as the phone display name.
 - [x] Configure and verify protected certificate, exact-app profile and Developer-role upload key in the private GitHub environment.
-- [ ] Upload the signed internal preview. Banking details remain outside this non-commercial trial.
+- [x] Upload the signed internal preview and verify Apple processing. Banking details remain outside this non-commercial trial.
 - [ ] Install the preview on the selected phone and complete user/device evaluation; live bridge and speech require a later trial.
 
 > **Current scope — 25 September 2026, D030:** iPhone 11 + selected UGREEN 20,000mAh PD20W bank. Agree rear-loaded mounting and masked screen/stone interface, confirm exact bank SKU, then validate a physical aperture/cradle sample. Waveshare CAD, fit-coupon printing and display bring-up are parked fallback. Older scope/selection statements below are historical.
