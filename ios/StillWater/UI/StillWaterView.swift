@@ -107,6 +107,7 @@ struct StillWaterView: View {
                 .background(filled ? Design.ink : .clear, in: Capsule())
                 .overlay(Capsule().stroke(Design.ink.opacity(border ? 0.18 : 0),lineWidth:1))
                 .overlay(alignment:.bottom) { if indicator { Rectangle().fill(Design.ink).frame(width:24,height:1).padding(.bottom,8) } }
+                .contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(!enabled).opacity(enabled ? 1 : 0.35)
             .accessibilityIdentifier(id).audit(id,font:size,tap:true,pill:true,text:title)
             .position(x:x+w/2,y:y+h/2)
@@ -119,7 +120,9 @@ struct StillWaterView: View {
                 .background((accent ? Design.accent : Design.ink).opacity(ring ? 0.12 : 0),in:Circle())
                 .overlay(Circle().stroke((accent ? Design.accent : Design.ink).opacity(ring ? 0.7 : 0),lineWidth:1.5))
                 .overlay { if model.pendingAction != nil && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
-        }.buttonStyle(.plain).disabled(!enabled).opacity(enabled ? 1 : 0.35)
+                .contentShape(Rectangle())
+        }.buttonStyle(.plain).disabled(!enabled)
+            .opacity(enabled || (model.pendingAction != nil && model.pendingTarget == id) ? 1 : 0.35)
             .accessibilityLabel(label).accessibilityIdentifier(id).audit(id,tap:true).position(x:x+w/2,y:y+h/2)
     }
     private func sleeve(x: CGFloat,y: CGFloat,size: CGFloat, hidden: Bool = false) -> some View {
@@ -177,7 +180,7 @@ struct StillWaterView: View {
                     VStack(alignment:.leading,spacing:3) {
                         Text("UP NEXT").font(Design.font(15,caps:true)).tracking(2.7).opacity(0.55)
                         Text(model.queue.dropFirst().first?.title ?? "Up next").font(Design.font(26,serif:true)).lineLimit(1)
-                    }.frame(width:260,height:56,alignment:.leading)
+                    }.frame(width:260,height:56,alignment:.leading).contentShape(Rectangle())
                 }.buttonStyle(.plain).audit("up-next",tap:true,pill:true).position(x:178,y:416)
                 icon(.mic,id:"ask",label:"Ask for music",x:488,y:376,w:72,h:72,ring:true,accent:true) { model.navigate(.ask) }
                 button("Find",id:"find",x:800,y:392,w:96,border:false) { model.navigate(.find) }
@@ -319,6 +322,7 @@ struct StillWaterView: View {
                                     else { Text(item.title).font(Design.font(18,serif:true)).lineLimit(2).padding(8) }
                                 }.frame(width:side,height:side).opacity(alphas[min(i,6)])
                                     .overlay { if model.context.queueSelection == i { Rectangle().stroke(Design.ink.opacity(0.8),lineWidth:1.5).padding(-4) } }
+                                    .frame(width:max(72,side),height:side).contentShape(Rectangle())
                             }.buttonStyle(.plain).frame(width:max(72,side),height:side).contentShape(Rectangle())
                                 .audit("queue-\(i)",tap:true,scroll:true).position(x:max(72,side)/2,y:204-side/2)
                             if let image {
@@ -354,7 +358,7 @@ struct StillWaterView: View {
     }
     private var utility: some View {
         ZStack(alignment:.topLeading) {
-            header(model.context.screen.rawValue.capitalized)
+            header(model.context.screen == .wifi ? "Wi-Fi" : model.context.screen.rawValue.capitalized)
             switch model.context.screen {
             case .settings:
                 settingRow("Display",value:"Palette, brightness and idle time",index:0) { model.navigate(.display) }
@@ -364,7 +368,9 @@ struct StillWaterView: View {
             case .display:
                 label("Palette",id:"palette-label",x:48,y:96,w:300,h:28,size:22)
                 ForEach(Array(["sage","sand","slate"].enumerated()),id:\.offset) { i,name in
-                    button(name.capitalized,id:"palette-"+name,x:48+CGFloat(i)*128,y:128,w:120,border:false) { model.preferences.palette = name; model.preferences.save() }
+                    button(name.capitalized,id:"palette-"+name,x:48+CGFloat(i)*128,y:128,w:120,border:false,
+                           indicator:model.preferences.palette == name) { model.preferences.palette = name; model.preferences.save() }
+                        .opacity(model.preferences.palette == name ? 1 : 0.55)
                 }
                 label("Brightness",id:"brightness-label",x:48,y:210,w:300,h:28,size:22)
                 Slider(value:$model.preferences.brightness,in:0.1...1).tint(Design.ink)
@@ -373,7 +379,7 @@ struct StillWaterView: View {
                 label("Release idle timer after",id:"timeout-label",x:48,y:320,w:500,h:30,size:22)
                 Menu {
                     ForEach([30,60,120,300],id:\.self) { seconds in Button("\(seconds) seconds") { model.preferences.timeout = seconds; model.preferences.save() } }
-                } label: { Text("\(model.preferences.timeout) seconds⌄").font(Design.font(22)).frame(width:240,height:56).overlay(Capsule().stroke(Design.ink.opacity(0.18))) }
+                } label: { Text("\(model.preferences.timeout) seconds⌄").font(Design.font(22)).frame(width:240,height:56).overlay(Capsule().stroke(Design.ink.opacity(0.18))).contentShape(Rectangle()) }
                     .audit("timeout",font:22,tap:true,pill:true).position(x:168,y:388)
             case .connection:
                 settingRow("Bridge",value:model.online ? "Connected with provisioned trust" : model.status,index:0) { Task { await model.refresh() } }
@@ -399,6 +405,7 @@ struct StillWaterView: View {
                 Text(value).font(Design.font(18)).opacity(0.7).lineLimit(1)
             }.frame(width:952,height:72,alignment:.leading).overlay(alignment:.trailing) { Text("›").font(Design.font(22)).opacity(0.45) }
                 .overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }
+                .contentShape(Rectangle())
         }.buttonStyle(.plain).audit("settings-\(index)",font:22,tap:true).position(x:524,y:136+CGFloat(index)*80)
     }
 }

@@ -14,7 +14,8 @@ final class InteractionTests: XCTestCase {
         // Label-based matching also finds the system keyboard's Search key.
         let search = app.buttons.matching(NSPredicate(format:"identifier == %@","search")).element
         XCTAssertTrue(search.exists)
-        search.tap()
+        // Exercise the declared target outside the small outline glyph itself.
+        search.coordinate(withNormalizedOffset:CGVector(dx:0.1,dy:0.5)).tap()
         assertKeyboardDismissed(app)
         XCTAssertTrue(app.buttons["filter-albums"].exists)
         field.tap(); field.typeText("\n")
