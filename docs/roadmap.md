@@ -11,7 +11,8 @@
 - [x] Pass 19 native tests and unsigned iOS device archive validation under Xcode 26.3 ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36134704504)); inspect changed captures.
 - [x] Revalidate the registered bundle identity: 19 native tests and unsigned archive passed ([run](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36152860230)); configure the GitHub environment and app-identity variables.
 - [x] Verify the Apple team and register `com.ndx2.controller` plus the NDX2 Controller iOS app record; keep Still Water as the phone display name.
-- [ ] Configure protected signing inputs and upload the internal preview. Banking details remain outside this non-commercial trial.
+- [x] Configure and verify protected certificate, exact-app profile and Developer-role upload key in the private GitHub environment.
+- [ ] Upload the signed internal preview. Banking details remain outside this non-commercial trial.
 - [ ] Install the preview on the selected phone and complete user/device evaluation; live bridge and speech require a later trial.
 
 > **Current scope — 25 September 2026, D030:** iPhone 11 + selected UGREEN 20,000mAh PD20W bank. Agree rear-loaded mounting and masked screen/stone interface, confirm exact bank SKU, then validate a physical aperture/cradle sample. Waveshare CAD, fit-coupon printing and display bring-up are parked fallback. Older scope/selection statements below are historical.

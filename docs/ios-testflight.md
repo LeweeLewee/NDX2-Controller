@@ -1,5 +1,7 @@
 # Still Water internal TestFlight preview
 
+**Signing setup complete — 25 September 2026:** the approved distribution certificate, matching App Store profile and Developer-role upload key are prepared; all six signing inputs are encrypted in the private GitHub `apple-testflight` environment. The profile signature, exact app/team identity, certificate match and encrypted key storage were verified. No signed upload or phone installation is claimed yet. Private identifiers and recovery history remain in ignored `local/ios/apple-setup-status.md`.
+
 25 September 2026. This guide prepares a private **silent design preview** for installation on the selected iPhone. The explicit App ID `com.ndx2.controller` and an iOS App Store Connect record named **NDX2 Controller** are now registered. The account-record name **Still Water** was unavailable; the on-phone display name remains **Still Water**. Team/account details stay under ignored `local/ios/`. Signing materials and the first upload remain pending. The user confirms this app will not be sold; leave banking information unchanged.
 
 ## What will be installed
