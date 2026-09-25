@@ -41,6 +41,20 @@ import XCTest
         m.toggleCurrentLike(); await settle(); XCTAssertEqual(m.player.current.saved,"unsaved")
         m.deactivate()
     }
+    func testResultMembershipTargetsRowAndPreservesBrowsingContext() async {
+        let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.navigate(.find); m.context.query = "quiet"; m.context.kind = "albums"
+        m.context.items = t.sample("search-albums")["data"]["items"].values.map(MusicItem.init)
+        let row = m.context.items[1], other = m.context.items[0]
+        m.context.scrollID = row.id
+        m.mutate("library_save",["reference":.string(row.reference),"saved":.bool(true)]); await settle()
+        XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"quiet"); XCTAssertEqual(m.context.scrollID,row.id)
+        XCTAssertEqual(m.context.items[1].saved,"saved"); XCTAssertEqual(m.context.items[0],other)
+        await m.currentMembership()
+        XCTAssertEqual(m.player.current.saved,"unsaved")
+        m.deactivate()
+    }
     func testUnknownMembershipCannotWriteAndUnrelatedReadCannotResolveUncertainty() async {
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         t.saved = "unknown"

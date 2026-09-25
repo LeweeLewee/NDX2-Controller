@@ -46,7 +46,9 @@ def build(archive, output, revision=None):
                 match = re.match(r'^StillWater-([a-z-]+)-1510x692_', name)
                 state = match[1] if match else 'keyboard' if name.startswith('Find-system-keyboard_') else (
                     'first-contact' if name.startswith('First-contact-touched_') else
-                    'after-search' if name.startswith('Find-after-search_') else None)
+                    'after-search' if name.startswith('Find-after-search_') else
+                    'remediation-phone' if name.startswith('Remediation-full-phone_') else
+                    'remediation-album' if name.startswith('Remediation-album-actions_') else None)
                 if not state:
                     continue
                 exported = attachment['exportedFileName']
@@ -84,7 +86,7 @@ nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:24px 0}select
 section{margin:24px 0}h2{font-size:18px}figure{margin:0;overflow:auto;border:1px solid #354037;background:#000;padding:8px}
 img{display:block;width:min(100%,1510px);height:auto}body.full img{width:auto;max-width:none}a{color:#d8c49a}small{color:#bac3b9}
 </style><h1>Still Water · native simulator review</h1>
-<p>__EVIDENCE__</p><p>Actual iPhone 11 simulator captures. This page reviews screenshots; it does not run the app or send commands. The original reference is 800 × 480; native layout follows the 1048 × 480 anchored tables and documented D031 exceptions. Physical and user acceptance remain separate.</p>
+<p>__EVIDENCE__</p><p>Actual iPhone 11 simulator captures. This page reviews screenshots; it does not run the app or send commands. The original reference is 800 × 480; D032 expands the phone layout and restores functional parity; the original references are historical visual guidance. Physical and user acceptance remain separate.</p>
 <nav><button id="prev">Previous</button><label>State <select id="state">__OPTIONS__</select></label><button id="next">Next</button><label><input type="checkbox" id="full"> Full pixel size</label><a href="test-summary.json">Test evidence</a><a href="environment.json">Build environment</a><a href="provenance.json">Artifact identity</a></nav>
 <section><h2 id="caption"></h2><figure><img id="native" alt="Native simulator screenshot"></figure></section>
 <section id="reference-block"><h2>Original design reference</h2><p>Compare hierarchy, type, spacing and state feedback. Do not stretch this narrower reference to match the native canvas.</p><figure><img id="reference" alt="Original supplied design reference" style="max-width:800px"></figure></section>

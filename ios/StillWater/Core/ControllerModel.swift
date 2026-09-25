@@ -310,7 +310,19 @@ struct Preview {
             guard let r = await self.perform(BridgeRequest(action, args)) else { return }
             if r.outcome == "submitted" { self.status = "Request sent; checking player" }
             await self.refresh()
-            if action == "library_save", self.context.screen == .detail { await self.membership() }
+            if action == "library_save", let ref = args["reference"]?.text {
+                let gen = self.generation
+                if let observed = await self.perform(BridgeRequest("library_state",["reference":.string(ref)])), observed.outcome == "observed", gen == self.generation {
+                    let state = observed.data["saved_state"].text ?? "unknown"
+                    if self.player.current.reference == ref { self.player.current.saved = state }
+                    if self.context.selected.reference == ref { self.context.membership = state }
+                    self.context.items = self.context.items.map { var item = $0; if item.reference == ref { item.saved = state }; return item }
+                    for i in self.history.indices {
+                        if self.history[i].selected.reference == ref { self.history[i].membership = state }
+                        self.history[i].items = self.history[i].items.map { var item = $0; if item.reference == ref { item.saved = state }; return item }
+                    }
+                }
+            }
         }
     }
     func loadArtwork() async {

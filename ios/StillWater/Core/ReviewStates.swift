@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -36,6 +36,13 @@ import Foundation
                 model.context.items = d["items"].values.map(MusicItem.init); model.context.playable = true
             } else { model.context.screen = state == "library" ? .library : .find }
             if state == "keyboard" { model.keyboardVisible = true; model.context.query = "Evening listening" }
+        case "artist-following","track-liked","album-saved":
+            let fixture = FixtureTransport()
+            let kind = state == "artist-following" ? "artists" : state == "track-liked" ? "tracks" : "albums"
+            let d = fixture.sample("browse-"+kind)["data"]
+            model.context.screen = .detail; model.context.selected = MusicItem(d["item"])
+            model.context.items = d["items"].values.map(MusicItem.init)
+            model.context.playable = d["playable"].flag == true; model.context.membership = "saved"
         case "ask-recording","ask-stopped":
             model.context.screen = .ask; model.voiceState = state == "ask-recording" ? "recording" : "stopped"
             model.transcript = "Something like this, but more acoustic"; model.voiceSeconds = 4

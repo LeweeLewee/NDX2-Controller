@@ -171,7 +171,7 @@ struct StillWaterView: View {
             }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
                 .position(x:x+width/2,y:touched ? 154 : 208)
             if touched {
-                button(model.player.current.saved == "saved" ? "♥  Liked" : "♡  Like",id:"now-like",x:48,y:328,w:248,h:64,
+                button(model.player.current.saved == "saved" ? "♥  Liked" : model.player.current.saved == "unsaved" ? "♡  Like" : "Like unavailable",id:"now-like",x:48,y:328,w:248,h:64,
                        enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),size:26) { model.toggleCurrentLike() }
                 icon(.previous,id:"previous",label:"Previous track",x:356,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
                 icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:288,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
@@ -255,12 +255,20 @@ struct StillWaterView: View {
                                     Text(item.title).font(Design.font(26,serif:true)).lineLimit(1)
                                         .audit("row-title-"+item.id,font:26,scroll:true,truncates:true)
                                     Text(item.artist + " / " + item.kind).font(Design.font(22)).lineLimit(1).opacity(0.7)
-                                }.frame(maxWidth:.infinity,minHeight:64,alignment:.leading).contentShape(Rectangle())
+                                }.frame(maxWidth:.infinity,alignment:.leading).frame(height:72).contentShape(Rectangle())
                             }.buttonStyle(.plain).audit("row-"+item.id,tap:true,scroll:true)
-                            OutlineMark(mark:item.saved == "saved" ? .check : item.saved == "unsaved" ? .plus : .question)
-                                .stroke(Design.ink.opacity(0.7),lineWidth:1.6).frame(width:24,height:24).frame(width:72,height:64)
-                                .accessibilityLabel("Library status " + item.saved)
-                        }.frame(height:72).overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }.id(item.id)
+                            Button {
+                                model.mutate("library_save",["reference":.string(item.reference),"saved":.bool(item.saved != "saved")],target:"row-membership-"+item.id)
+                            } label: {
+                                OutlineMark(mark:item.saved == "unknown" ? .question : item.kind == "tracks" ? .heart : item.saved == "saved" ? .check : .plus)
+                                    .stroke(Design.ink.opacity(item.saved == "saved" ? 1 : 0.7),lineWidth:2)
+                                    .frame(width:32,height:32).frame(width:72,height:64).contentShape(Rectangle())
+                            }.buttonStyle(.plain)
+                                .disabled(!model.controlsAvailable || model.unknownAction == "library_save" || !["saved","unsaved"].contains(item.saved))
+                                .accessibilityIdentifier("row-membership-"+item.id)
+                                .accessibilityLabel(item.saved == "unknown" ? "Membership unavailable" : item.kind == "artists" ? (item.saved == "saved" ? "Unfollow artist" : "Follow artist") : item.kind == "tracks" ? (item.saved == "saved" ? "Unlike track" : "Like track") : (item.saved == "saved" ? "Remove from library" : "Add to library"))
+                                .audit("row-membership-"+item.id,tap:true,scroll:true)
+                        }.frame(height:88).overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }.id(item.id)
                     }
                     if model.context.nextOffset != nil || model.context.cursor != nil {
                         Button("More") { if model.context.screen == .detail { model.moreChildren() } else { model.loadPage(more:true) } }
