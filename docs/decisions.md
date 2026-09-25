@@ -179,3 +179,8 @@ D032 delivery: the internal silent remediation build **0.1.0 (2.1.0)** passed 23
 
 
 **D032 layout amendment, 25 September 2026:** user review of build 2.1.0 identified notch collision and the black perimeter. Retain the existing landscape-right lock only. Fit content inside the system safe area plus an 8 pt inactive inset; extend the same music colour field across the full display, including the safe perimeter. Make NOW Like a compact borderless action alongside the album; simplify secondary headers to one plain chevron-and-Back action preserving previous-screen history. Other suggested rearrangements are not adopted. All 23 native tests passed; signed build 0.1.0 (3.1.0) was uploaded and Apple shows Testing in the existing internal group. Physical mounted-phone acceptance remains open.
+
+
+## D033 — One voice-first Find entry with explicit recording
+
+**Explicit user direction, 25 September 2026:** enlarge NOW's heart and remove its visible label; use icons for Find and Library. Find opens the voice input screen idle, never recording automatically, with Type instead as a secondary input. Remove the redundant NOW microphone shortcut and the former dedicated text-entry Find page. Typed and spoken submissions share the existing bounded results/filter/detail flow. Results can reopen Find, while Back preserves browsing history and always cancels recording. Keep accessible icon labels, observed membership state, the locked safe-area layout and the silent preview boundary. Search never initiates playback. Native validation and TestFlight delivery pending.

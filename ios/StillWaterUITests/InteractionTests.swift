@@ -24,8 +24,8 @@ final class InteractionTests: XCTestCase {
         }
         let like = app.buttons["now-like"]
         XCTAssertTrue(like.isEnabled); like.tap()
-        expectLabel(like,"♥  Liked")
-        like.tap(); expectLabel(like,"♡  Like")
+        expectLabel(like,"Unlike track")
+        like.tap(); expectLabel(like,"Like track")
         app.buttons["now-artist"].tap()
         let membership = app.buttons["membership-write"]
         XCTAssertTrue(membership.waitForExistence(timeout:5)); expectLabel(membership,"Follow")
@@ -50,25 +50,45 @@ final class InteractionTests: XCTestCase {
     }
     func testSystemKeyboardAndLandscapeMask() {
         let app = XCUIApplication()
-        app.launchArguments = ["--fixture","--review-state","find"]
-        // Device orientation is opposite the matching interface orientation.
-        XCUIDevice.shared.orientation = .landscapeLeft
-        app.launch()
-        let field = app.textFields.firstMatch
-        XCTAssertTrue(field.waitForExistence(timeout:10)); field.tap(); field.typeText("Evening listening")
+        app.launchArguments = ["--fixture","--review-state","ask-idle"]
+        XCUIDevice.shared.orientation = .landscapeLeft; app.launch()
+        let record = app.buttons["voice-record"]
+        XCTAssertTrue(record.waitForExistence(timeout:10)); expectLabel(record,"Start recording")
+        XCTAssertFalse(app.keyboards.firstMatch.exists)
+        let idle = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); idle.name = "Find-idle"; idle.lifetime = .keepAlways; add(idle)
+        app.buttons["type-instead"].tap()
+        let field = app.textFields["typed-query"]
+        XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("Evening listening")
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout:5))
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "Find-system-keyboard"; image.lifetime = .keepAlways; add(image)
-        // Label-based matching also finds the system keyboard's Search key.
         let search = app.buttons.matching(NSPredicate(format:"identifier == %@","search")).element
         XCTAssertTrue(search.exists)
-        // Exercise the declared target outside the small outline glyph itself.
         search.coordinate(withNormalizedOffset:CGVector(dx:0.1,dy:0.5)).tap()
         assertKeyboardDismissed(app)
-        XCTAssertTrue(app.buttons["filter-albums"].exists)
-        field.tap(); field.typeText("\n")
+        XCTAssertTrue(app.buttons["filter-albums"].waitForExistence(timeout:5))
+        app.buttons["edit-search"].tap()
+        expectLabel(record,"Start recording")
+        app.buttons["type-instead"].tap()
+        XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("\n")
         assertKeyboardDismissed(app)
         let result = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); result.name = "Find-after-search"; result.lifetime = .keepAlways; add(result)
         XCTAssertEqual(app.statusBars.count,0)
+    }
+    func testVoiceStartsOnlyOnTapAndUsesSharedResults() {
+        let app = XCUIApplication(); app.launchArguments = ["--fixture","--review-state","ask-idle"]
+        XCUIDevice.shared.orientation = .landscapeLeft; app.launch()
+        let record = app.buttons["voice-record"]
+        XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Start recording")
+        record.tap(); expectLabel(record,"Stop recording")
+        app.buttons["type-instead"].tap()
+        XCTAssertTrue(app.textFields["typed-query"].waitForExistence(timeout:5))
+        // The top typing-mode switch remains reachable above the landscape keyboard.
+        app.buttons["use-voice"].tap(); expectLabel(record,"Start recording")
+        record.tap(); expectLabel(record,"Stop recording")
+        app.buttons["voice-search"].tap()
+        XCTAssertTrue(app.buttons["filter-albums"].waitForExistence(timeout:5))
+        app.buttons["back"].tap(); expectLabel(record,"Start recording")
+        XCTAssertFalse(app.buttons["voice-search"].exists)
     }
     func testFirstContactRevealsWithoutTransportCommand() {
         let app = XCUIApplication(); app.launchArguments = ["--fixture"]
@@ -82,7 +102,9 @@ final class InteractionTests: XCTestCase {
         XCTAssertGreaterThan(app.windows.firstMatch.frame.width,app.windows.firstMatch.frame.height)
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "First-contact-touched"; image.lifetime = .keepAlways; add(image)
         app.buttons["find"].tap()
-        XCTAssertTrue(app.textFields.firstMatch.waitForExistence(timeout:5))
+        XCTAssertTrue(app.buttons["voice-record"].waitForExistence(timeout:5))
+        expectLabel(app.buttons["voice-record"],"Start recording")
+        XCTAssertFalse(app.buttons["ask"].exists)
     }
     private func assertKeyboardDismissed(_ app: XCUIApplication) {
         let hidden = XCTNSPredicateExpectation(predicate:NSPredicate(format:"exists == false"),object:app.keyboards.firstMatch)

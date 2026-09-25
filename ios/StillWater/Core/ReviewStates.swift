@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -35,7 +35,8 @@ import Foundation
                 model.context.screen = .detail; model.context.selected = MusicItem(d["item"])
                 model.context.items = d["items"].values.map(MusicItem.init); model.context.playable = true
             } else { model.context.screen = state == "library" ? .library : .find }
-            if state == "keyboard" { model.keyboardVisible = true; model.context.query = "Evening listening" }
+            model.context.query = "Evening listening"
+            if state == "keyboard" { model.context.screen = .ask; model.context.typing = true; model.keyboardVisible = true }
         case "artist-following","track-liked","album-saved":
             let fixture = FixtureTransport()
             let kind = state == "artist-following" ? "artists" : state == "track-liked" ? "tracks" : "albums"
@@ -43,6 +44,9 @@ import Foundation
             model.context.screen = .detail; model.context.selected = MusicItem(d["item"])
             model.context.items = d["items"].values.map(MusicItem.init)
             model.context.playable = d["playable"].flag == true; model.context.membership = "saved"
+        case "ask-idle","ask-typing","ask-unavailable":
+            model.context.screen = .ask; model.context.typing = state == "ask-typing"
+            model.voiceState = state == "ask-unavailable" ? "unavailable" : "idle"
         case "ask-recording","ask-stopped":
             model.context.screen = .ask; model.voiceState = state == "ask-recording" ? "recording" : "stopped"
             model.transcript = "Something like this, but more acoustic"; model.voiceSeconds = 4

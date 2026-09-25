@@ -47,6 +47,7 @@ def build(archive, output, revision=None):
                 state = match[1] if match else 'keyboard' if name.startswith('Find-system-keyboard_') else (
                     'first-contact' if name.startswith('First-contact-touched_') else
                     'after-search' if name.startswith('Find-after-search_') else
+                    'find-idle-phone' if name.startswith('Find-idle_') else
                     'remediation-phone' if name.startswith('Remediation-full-phone_') else
                     'remediation-album' if name.startswith('Remediation-album-actions_') else None)
                 if not state:

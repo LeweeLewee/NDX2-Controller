@@ -114,9 +114,10 @@ struct StillWaterView: View {
             .position(x:x+w/2,y:y+h/2)
     }
     private func icon(_ mark: Mark, id: String, label: String, x: CGFloat, y: CGFloat, w: CGFloat = 72, h: CGFloat = 64,
-                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 36, action: @escaping () -> Void) -> some View {
+                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 36, selected: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             OutlineMark(mark: mark).stroke(accent ? Design.accent : Design.ink, style: StrokeStyle(lineWidth:ring ? 2.2 : 1.6,lineCap:.round,lineJoin:.round))
+                .background { if selected { OutlineMark(mark:mark).fill(Design.ink) } }
                 .frame(width:glyph,height:glyph).frame(width:w,height:h)
                 .background((accent ? Design.accent : Design.ink).opacity(ring ? 0.12 : 0),in:Circle())
                 .overlay(Circle().stroke((accent ? Design.accent : Design.ink).opacity(ring ? 0.7 : 0),lineWidth:1.5))
@@ -172,8 +173,9 @@ struct StillWaterView: View {
             }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
                 .position(x:x+width/2,y:touched ? 154 : 208)
             if touched {
-                button(model.player.current.saved == "saved" ? "♥  Liked" : model.player.current.saved == "unsaved" ? "♡  Like" : "Like unavailable",id:"now-like",x:800,y:212,w:200,h:64,
-                       enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),border:false,size:22) { model.toggleCurrentLike() }
+                icon(.heart,id:"now-like",label:model.player.current.saved == "saved" ? "Unlike track" : model.player.current.saved == "unsaved" ? "Like track" : "Like unavailable",
+                     x:856,y:204,w:88,h:80,enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),
+                     glyph:48,selected:model.player.current.saved == "saved") { model.toggleCurrentLike() }
                 icon(.previous,id:"previous",label:"Previous track",x:355,y:296,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
                 icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:288,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
                 icon(.next,id:"next",label:"Next track",x:579,y:296,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
@@ -185,10 +187,9 @@ struct StillWaterView: View {
                         Text(model.queue.dropFirst().first?.title ?? "Queue").font(Design.font(24,serif:true)).lineLimit(1)
                     }.frame(width:248,height:64,alignment:.leading).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("up-next").audit("up-next",font:26,tap:true).position(x:172,y:432)
-                icon(.mic,id:"ask",label:"Ask for music",x:488,y:400,w:72,h:64,accent:true) { model.navigate(.ask) }
                 icon(.settings,id:"settings",label:"Settings",x:704,y:400,w:72,h:64) { model.navigate(.settings) }
-                button("Find",id:"find",x:800,y:400,w:96,h:64,border:false,size:26) { model.navigate(.find) }
-                button("Library",id:"library",x:904,y:400,w:96,h:64,border:false,size:26) { model.navigate(.library) }
+                icon(.search,id:"find",label:"Find music",x:800,y:400,w:96,h:64,glyph:40) { model.navigate(.ask) }
+                icon(.library,id:"library",label:"Library",x:904,y:400,w:96,h:64,glyph:40) { model.navigate(.library) }
                 if model.unknownAction != nil {
                     label("Outcome unknown",id:"unknown",x:48,y:304,w:280,h:24,size:18,alpha:0.7)
                 } else if let position = model.player.position {
@@ -224,15 +225,10 @@ struct StillWaterView: View {
     }
     private var find: some View {
         ZStack(alignment:.topLeading) {
-            header("Find")
-            TextField("Artist, album or a kind of music",text:$model.context.query)
-                .font(Design.font(26,serif:true)).focused($queryFocused).submitLabel(.search).autocorrectionDisabled()
-                .onSubmit { queryFocused = false; model.search() }
-                .frame(width:784,height:64).audit("query",font:26,tap:true).position(x:440,y:120)
-            Rectangle().fill(Design.ink.opacity(queryFocused ? 0.75 : 0.18)).frame(width:784,height:1).position(x:440,y:152)
-            icon(.search,id:"search",label:"Search",x:848,y:88) { queryFocused = false; model.search() }
-            icon(.mic,id:"search-voice",label:"Search by voice",x:928,y:88,accent:true) { model.navigate(.ask) }
-            if !queryFocused && !model.keyboardVisible { filters(y:160); rows(y:224,height:256) }
+            header("Results")
+            button(model.context.query,id:"search-query",x:48,y:88,w:864,h:64,border:false,size:26) { model.editSearch() }
+            icon(.search,id:"edit-search",label:"New search",x:928,y:88) { model.editSearch() }
+            filters(y:160); rows(y:224,height:256)
             connectionLine()
         }
     }
@@ -357,16 +353,38 @@ struct StillWaterView: View {
     }
     private var ask: some View {
         ZStack(alignment:.topLeading) {
-            label(model.voiceState == "recording" ? "LISTENING · 0:\(String(format:"%02d",model.voiceSeconds)) OF 0:30" : model.voiceState == "unavailable" ? "MICROPHONE UNAVAILABLE" : "RECORDING STOPPED",
-                  id:"voice-state",x:124,y:40,w:800,h:24,size:15,alpha:0.7,caps:true,align:.center)
-            if model.voiceState == "recording" { Ripples(reduce:reduceMotion || snapshot).frame(width:600,height:600).position(x:524,y:270).allowsHitTesting(false) }
-            label(model.transcript.isEmpty ? "Say an artist, an album or the kind of music you want" : "“\(model.transcript)”",id:"transcript",x:204,y:126,w:640,h:124,size:model.transcript.isEmpty ? 32 : 56,
-                  alpha:model.transcript.isEmpty ? 0.7 : 1,serif:true,italic:true,lines:2,align:.center)
-            OutlineMark(mark:.mic).stroke(Design.accent,lineWidth:1.6).frame(width:30,height:30).frame(width:72,height:72)
-                .background(Design.accent.opacity(0.12),in:Circle()).overlay(Circle().stroke(Design.accent.opacity(0.8),lineWidth:1.5)).position(x:524,y:294)
-            button("Cancel",id:"voice-cancel",x:244,y:388,w:152) { model.back() }
-            button("Restart",id:"voice-restart",x:452,y:388,w:160) { model.startVoice() }
-            button("Stop & search",id:"voice-search",x:634,y:388,w:192,enabled:!model.transcript.isEmpty,filled:true) { model.submitVoice() }
+            header("Find")
+            if model.context.typing {
+                TextField("Artist, album or a kind of music",text:$model.context.query)
+                    .font(Design.font(26,serif:true)).focused($queryFocused).submitLabel(.search).autocorrectionDisabled()
+                    .accessibilityIdentifier("typed-query")
+                    .onSubmit { queryFocused = false; model.submitTypedSearch() }
+                    .onAppear { if !snapshot { queryFocused = true } }
+                    .frame(width:864,height:64).audit("query",font:26,tap:true).position(x:480,y:120)
+                Rectangle().fill(Design.ink.opacity(0.5)).frame(width:864,height:1).position(x:480,y:152)
+                icon(.search,id:"search",label:"Search",x:928,y:88,enabled:!model.context.query.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && model.context.query.utf8.count <= 256) {
+                    queryFocused = false; model.submitTypedSearch()
+                }
+                if model.context.query.utf8.count > 256 {
+                    label("Search text too long; use fewer words.",id:"query-limit",x:48,y:168,w:864,h:24,size:18,alpha:0.7)
+                }
+                button("Use voice",id:"use-voice",x:636,y:24,w:200,border:false) { queryFocused = false; model.setTyping(false) }
+            } else {
+                label(model.voiceState == "recording" ? "LISTENING · 0:\(String(format:"%02d",model.voiceSeconds)) OF 0:30" : model.voiceState == "unavailable" ? "MICROPHONE UNAVAILABLE" : model.voiceState == "idle" ? "VOICE SEARCH" : "RECORDING STOPPED",
+                      id:"voice-state",x:204,y:96,w:640,h:24,size:15,alpha:0.7,caps:true,align:.center)
+                if model.voiceState == "recording" { Ripples(reduce:reduceMotion || snapshot).frame(width:600,height:600).position(x:524,y:270).allowsHitTesting(false) }
+                label(model.transcript.isEmpty ? "Say an artist, an album or the kind of music you want" : "“\(model.transcript)”",id:"transcript",x:204,y:144,w:640,h:104,size:model.transcript.isEmpty ? 32 : 44,
+                      alpha:model.transcript.isEmpty ? 0.7 : 1,serif:true,italic:true,lines:2,align:.center)
+                icon(.mic,id:"voice-record",label:model.voiceState == "recording" ? "Stop recording" : "Start recording",x:480,y:264,w:88,h:88,ring:true,accent:true,glyph:42) {
+                    if model.voiceState == "recording" { model.stopVoice() } else { model.startVoice() }
+                }
+                label(model.voiceState == "recording" ? "Tap to stop" : "Tap to speak",id:"voice-hint",x:360,y:356,w:328,h:24,size:18,alpha:0.7,align:.center)
+                button("Type instead",id:"type-instead",x:48,y:392,w:200,border:false) { model.setTyping(true) }
+                if ["recording","stopped"].contains(model.voiceState) {
+                    button("Restart",id:"voice-restart",x:272,y:392,w:160,border:false) { model.startVoice() }
+                    button(model.voiceState == "recording" ? "Stop & search" : "Search",id:"voice-search",x:636,y:392,w:240,enabled:!model.transcript.isEmpty,filled:true) { model.submitVoice() }
+                }
+            }
             if model.fixture { label("Microphone fixture: no audio captured. Search only.",id:"voice-fixture",x:124,y:456,w:800,h:24,size:18,alpha:0.35,align:.center) }
         }
     }

@@ -4,10 +4,12 @@ import XCTest
 @MainActor final class ControllerTests: XCTestCase {
     final class FaultTransport: BridgeTransport {
         let fixture = FixtureTransport()
+        var requests: [String] = []
         var loseMutation = false
         var afterReply: ((BridgeRequest) -> Void)?
         func cancel() {}
         func send(_ request: BridgeRequest) async throws -> BridgeReply {
+            requests.append(request.action)
             let reply = try await fixture.send(request)
             afterReply?(request)
             if loseMutation && request.isMutation { throw BridgeFailure.unavailable }
@@ -100,11 +102,44 @@ import XCTest
         for _ in 0..<7 { m.navigate(.display) }
         XCTAssertEqual(m.history.count,4)
     }
+    func testFindEntryModesAndExplicitSearch() async {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.fixture = false // Exercise the callback with a harmless test closure.
+        var starts = 0
+        m.voiceStart = { starts += 1 }
+        t.requests.removeAll()
+        m.navigate(.ask)
+        XCTAssertEqual(m.voiceState,"idle"); XCTAssertFalse(m.context.typing)
+        XCTAssertEqual(starts,0); XCTAssertFalse(t.requests.contains("search"))
+        m.submitVoice(); XCTAssertEqual(m.context.screen,.ask)
+        m.startVoice(); XCTAssertEqual(starts,1)
+        m.transcript = "discard me"; m.setTyping(true)
+        XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(m.transcript,"")
+        m.startVoice(); XCTAssertEqual(starts,1)
+        m.context.query = "   "; m.submitTypedSearch(); XCTAssertEqual(m.context.screen,.ask)
+        m.context.query = String(repeating:"x",count:257); m.submitTypedSearch(); XCTAssertEqual(m.context.screen,.ask)
+        XCTAssertFalse(t.requests.contains("search"))
+        m.context.query = "  Evening listening  "; m.submitTypedSearch(); await settle()
+        XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"Evening listening")
+        XCTAssertTrue(t.requests.contains("search")); XCTAssertEqual(t.fixture.mutations,[])
+        m.back(); XCTAssertEqual(m.context.screen,.ask); XCTAssertTrue(m.context.typing)
+        XCTAssertEqual(m.context.query,"Evening listening"); XCTAssertEqual(starts,1)
+        m.setTyping(false); XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(starts,1)
+        m.fixture = false
+        m.startVoice(); m.transcript = "quiet piano"; m.submitVoice(); await settle()
+        XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"quiet piano")
+        m.editSearch(); XCTAssertEqual(m.context.screen,.ask); XCTAssertFalse(m.context.typing)
+        XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(starts,2)
+        m.startVoice(); m.back(); XCTAssertEqual(m.context.screen,.find)
+        XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(m.transcript,"")
+        XCTAssertEqual(t.fixture.mutations,[]); m.deactivate()
+    }
     func testVoiceTimeoutAndCancelCannotSubmit() async {
         var time = 100.0
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{time},restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
-        m.navigate(.ask); XCTAssertEqual(m.voiceState,"recording")
+        m.navigate(.ask); XCTAssertEqual(m.voiceState,"idle"); m.startVoice(); XCTAssertEqual(m.voiceState,"recording")
         time += 30; await m.refresh(); m.tick()
         XCTAssertEqual(m.voiceState,"stopped"); XCTAssertEqual(t.mutations,[])
         m.startVoice(); m.back(); XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(m.transcript,"")
@@ -113,7 +148,7 @@ import XCTest
     func testOnDeviceSearchNeverPlays() async {
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
-        m.navigate(.ask); m.transcript = "quiet instrumental"; m.submitVoice(); await settle()
+        m.navigate(.ask); m.startVoice(); m.transcript = "quiet instrumental"; m.submitVoice(); await settle()
         XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"quiet instrumental")
         XCTAssertEqual(t.mutations,[]); m.deactivate()
     }

@@ -6,6 +6,7 @@ enum Rest: String { case waking, still, touched }
 struct BrowseContext {
     var screen: Screen = .now, query = "", kind = "albums", items: [MusicItem] = []
     var cursor: String?, pageCursor: String?, nextOffset: Int?, resultID: String?, scrollID: String?
+    var typing = false
     var selected = MusicItem(), playable = false, membership = "unknown", queueSelection = 1
 }
 struct DisplayPreferences: Codable {
@@ -204,7 +205,6 @@ struct Preview {
         if pendingAction != nil { markUnknown(); pendingAction = nil; flightMutation = false }
         history.append(context); if history.count > 4 { history.removeFirst() }
         context = BrowseContext(screen: screen)
-        if screen == .ask { startVoice() }
         if [.library, .queue].contains(screen) { loadPage() }
     }
     func back(toNow: Bool = false) {
@@ -369,15 +369,33 @@ struct Preview {
         nextQueueArtAttempt = clock() + 0.2
     }
     func startVoice() {
+        guard context.screen == .ask, !context.typing else { return }
         cancelVoice(); voiceState = "recording"; voiceDeadline = clock() + 30; voiceSeconds = 0; noteContact()
         if fixture { transcript = "Find quiet instrumental albums" } else { voiceStart?() }
     }
     func stopVoice() { guard voiceState == "recording" else { return }; voiceCancel?(); voiceState = "stopped" }
     func cancelVoice() { voiceCancel?(); voiceState = "idle"; transcript = ""; voiceSeconds = 0 }
+    func setTyping(_ typing: Bool) {
+        cancelVoice(); context.typing = typing; noteContact()
+    }
+    func editSearch() {
+        let query = context.query, kind = context.kind
+        navigate(.ask); context.query = query; context.kind = kind
+    }
+    func submitTypedSearch() {
+        guard context.screen == .ask, context.typing else { return }
+        submitSearch(context.query)
+    }
     func submitVoice() {
-        stopVoice()
-        let query = transcript
-        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, query.utf8.count <= 256 else { status = "No transcript; try typing"; return }
-        navigate(.find); context.query = query; search() // search only; never resolves or plays
+        guard context.screen == .ask, !context.typing, ["recording","stopped"].contains(voiceState) else { return }
+        stopVoice(); submitSearch(transcript)
+    }
+    private func submitSearch(_ text: String) {
+        let query = text.trimmingCharacters(in:.whitespacesAndNewlines)
+        guard !query.isEmpty, query.utf8.count <= 256 else { status = "Enter 1–256 bytes of search text."; return }
+        let kind = context.kind
+        context.query = query; keyboardVisible = false
+        navigate(.find); context.query = query; context.kind = kind
+        search() // Explicit read only: never resolves or plays.
     }
 }
