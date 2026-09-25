@@ -1,5 +1,7 @@
 # Still Water Brief B — implementation and review report
 
+**D032 remediation available in TestFlight — 25 September 2026:** version **0.1.0 (2.1.0)** was signed and uploaded from `dbd5c379c0c57e58bdab6a360a01e214f80d65bd` in [run 36174233828](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36174233828). All **23 native tests** passed, none failed or skipped; unsigned device archive and signed internal export succeeded. The phone-fit layout, larger type/transport, volume icons, exact artist/album navigation, track likes, album library controls, artist follow controls and row-specific membership actions are implemented. Fixture Library reflects per-item additions/removals. Apple processing completed; the build is assigned to **Naim NDX2 Controller TestFlight** and shows **Testing**. The existing tester can update through TestFlight; group distribution remains manual. Read [the parity checklist](ios-remediation.md). Physical readability and user acceptance of this replacement remain open; it is still a silent fixture preview.
+
 25 September 2026. The user explicitly requested action on the revised `codex-prompt-B.md`, authorizing a native SwiftUI client under D030. The native project has now compiled and run on a private GitHub Mac runner, controlled from Windows. All 17 native tests passed, including the 23-state snapshot matrix and both interaction tests. This is not user or physical acceptance. [Cloud build and Windows review instructions](ios-cloud-build.md) supplement the [local Xcode guide](../ios/README.md).
 
 ## Implemented source
