@@ -275,7 +275,7 @@ struct StillWaterView: View {
                             .font(Design.font(22)).frame(width:140,height:56).audit("more",font:22,tap:true,pill:true,scroll:true).padding(.top,4)
                     }
                     if model.context.items.isEmpty {
-                        Text(model.loading ? "Looking…" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
+                        Text(model.loading ? "Looking…" : model.context.screen == .library ? "Nothing saved here yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
                             .font(Design.font(26,serif:true,italic:true)).opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
                     }
                 }.scrollTargetLayout()

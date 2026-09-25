@@ -25,6 +25,8 @@ import XCTest
         XCTAssertEqual(m.player.current.saved,"unsaved")
         m.toggleCurrentLike(); await settle()
         XCTAssertEqual(m.player.current.saved,"saved")
+        let liked = try await t.send(BridgeRequest("library_page",["kind":.string("tracks")]))
+        XCTAssertTrue(liked.data["items"].values.map(MusicItem.init).contains { $0.reference == track })
         m.details(MusicItem(.object(["reference":.string(album)]))); await settle()
         XCTAssertEqual(m.context.selected.kind,"albums"); XCTAssertEqual(m.membershipAction,"Add to library")
         m.mutate("library_save",["reference":.string(album),"saved":.bool(true)]); await settle()
@@ -41,7 +43,7 @@ import XCTest
         m.toggleCurrentLike(); await settle(); XCTAssertEqual(m.player.current.saved,"unsaved")
         m.deactivate()
     }
-    func testResultMembershipTargetsRowAndPreservesBrowsingContext() async {
+    func testResultMembershipTargetsRowAndPreservesBrowsingContext() async throws {
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
         m.navigate(.find); m.context.query = "quiet"; m.context.kind = "albums"
@@ -53,6 +55,11 @@ import XCTest
         XCTAssertEqual(m.context.items[1].saved,"saved"); XCTAssertEqual(m.context.items[0],other)
         await m.currentMembership()
         XCTAssertEqual(m.player.current.saved,"unsaved")
+        let page = try await t.send(BridgeRequest("library_page",["kind":.string("albums")]))
+        XCTAssertEqual(page.data["items"].values.map(MusicItem.init).first { $0.reference == row.reference }?.saved,"saved")
+        m.mutate("library_save",["reference":.string(row.reference),"saved":.bool(false)]); await settle()
+        let removed = try await t.send(BridgeRequest("library_page",["kind":.string("albums")]))
+        XCTAssertFalse(removed.data["items"].values.map(MusicItem.init).contains { $0.reference == row.reference })
         m.deactivate()
     }
     func testUnknownMembershipCannotWriteAndUnrelatedReadCannotResolveUncertainty() async {

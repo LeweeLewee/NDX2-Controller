@@ -50,6 +50,36 @@ import Foundation
         }
         guard case .object(var r) = sample(name) else { throw BridgeFailure.invalidResponse }
         r["request_id"] = .string(request.request_id)
+        if request.action == "library_page", case .object(var data) = r["data"] {
+            let kind = request.args["kind"]?.text ?? "albums"
+            var catalog = sample("search-"+kind)["data"]["items"].values
+            catalog += sample("search-more")["data"]["items"].values.filter { $0["kind"].text == kind }
+            if kind == "tracks" {
+                for index in 0..<3 {
+                    if case .object(var current) = sample("snapshot-playing")["data"]["current_item"] {
+                        current["reference"] = .string("inputs/tidal/tracks/\(101+index)")
+                        current["title"] = .string(["A Still Morning","Soft Light","Quiet Hours"][index])
+                        catalog.append(.object(current))
+                    }
+                }
+            }
+            let selected = catalog.filter { memberships[$0["reference"].text ?? ""] == "saved" }
+            let offset = request.args["offset"]?.number ?? 0
+            data["items"] = .array(Array(selected.dropFirst(max(0,offset)).prefix(12)))
+            data["next_offset"] = offset + 12 < selected.count ? .int(offset + 12) : .null
+            data["cursor"] = .null
+            r["data"] = .object(data)
+        }
+        if case .object(var data) = r["data"], case .array(let items) = data["items"] {
+            data["items"] = .array(items.map { item in
+                guard case .object(var fields) = item, let ref = fields["reference"]?.text else { return item }
+                // Keep deliberately unknown fixture rows unavailable; known rows reflect per-item writes.
+                if let state = memberships[ref] { fields["saved"] = .string(state) }
+                else if fields["saved"]?.text != "unknown" { fields["saved"] = .string(saved) }
+                return .object(fields)
+            })
+            r["data"] = .object(data)
+        }
         if request.action == "charge?" {
             let fresh = battery.map { clock() >= $0.received && clock() - $0.received < 3600 } ?? false
             let charge = fresh && (battery!.level < 35 || (battery!.level < 75 && battery!.charging))
