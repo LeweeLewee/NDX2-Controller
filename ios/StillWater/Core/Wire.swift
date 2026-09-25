@@ -102,6 +102,8 @@ struct BridgeReply: Codable {
 struct MusicItem: Equatable, Identifiable {
     var reference = "", title = "", artist = "", album = "", kind = "tracks"
     var artwork: String?, artistReference: String?, albumReference: String?
+    var biography: String?
+    var year: Int?, duration: Int?
     var saved = "unknown"
     var id: String { reference }
     init(_ value: JSONValue = .null) {
@@ -110,6 +112,9 @@ struct MusicItem: Equatable, Identifiable {
         artist = value["artist"].text ?? ""
         album = value["album"].text ?? ""
         kind = value["kind"].text ?? "tracks"
+        biography = value["biography"].text.map { String($0.prefix(256)) }
+        year = value["year"].number.flatMap { (1900...2100).contains($0) ? $0 : nil }
+        duration = value["duration"].number.flatMap { $0 > 0 ? $0 : nil }
         artwork = value["artwork"].text
         artistReference = value["artist_reference"].text
         albumReference = value["album_reference"].text

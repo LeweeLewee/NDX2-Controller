@@ -192,8 +192,6 @@ struct StillWaterView: View {
                 icon(.library,id:"library",label:"Library",x:904,y:400,w:96,h:64,glyph:40) { model.navigate(.library) }
                 if model.unknownAction != nil {
                     label("Outcome unknown",id:"unknown",x:48,y:304,w:280,h:24,size:18,alpha:0.7)
-                } else if let position = model.player.position {
-                    label(time(position) + (model.player.duration.map { " / " + time($0) } ?? ""),id:"elapsed",x:48,y:304,w:248,h:24,size:18,alpha:0.7)
                 }
             }
             if !stopped {
@@ -240,17 +238,23 @@ struct StillWaterView: View {
             } else { rows(y:148,height:332) }
         }
     }
-    private func rows(y: CGFloat,height: CGFloat) -> some View {
+    private func rows(y: CGFloat,height: CGFloat, items: [MusicItem]? = nil, tracks: Bool = false, width: CGFloat = 952, left: CGFloat = 48) -> some View {
+        let contents = items ?? model.context.items
+        return
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing:0) {
-                    ForEach(model.context.items) { item in
+                    ForEach(Array(contents.enumerated()),id: \.element.id) { index,item in
                         HStack(spacing:8) {
                             Button { model.details(item) } label: {
-                                VStack(alignment:.leading,spacing:4) {
+                                HStack(spacing:16) {
+                                    if tracks { Text(String(index+1)).font(Design.font(18)).opacity(0.55).frame(width:28) }
+                                    VStack(alignment:.leading,spacing:4) {
                                     Text(item.title).font(Design.font(26,serif:true)).lineLimit(1)
                                         .audit("row-title-"+item.id,font:26,scroll:true,truncates:true)
-                                    Text(item.artist + " / " + item.kind).font(Design.font(22)).lineLimit(1).opacity(0.7)
+                                    if !tracks { Text([item.artist,item.kind].filter { !$0.isEmpty }.joined(separator:" · ")).font(Design.font(22)).lineLimit(1).opacity(0.7) }
+                                    }.frame(maxWidth:.infinity,alignment:.leading)
+                                    if tracks, let duration = item.duration { Text(time(duration)).font(Design.font(18)).opacity(0.55) }
                                 }.frame(maxWidth:.infinity,alignment:.leading).frame(height:72).contentShape(Rectangle())
                             }.buttonStyle(.plain).audit("row-"+item.id,tap:true,scroll:true)
                             Button {
@@ -258,6 +262,7 @@ struct StillWaterView: View {
                             } label: {
                                 OutlineMark(mark:item.saved == "unknown" ? .question : item.kind == "tracks" ? .heart : item.saved == "saved" ? .check : .plus)
                                     .stroke(Design.ink.opacity(item.saved == "saved" ? 1 : 0.7),lineWidth:2)
+                                    .background { if item.kind == "tracks" && item.saved == "saved" { OutlineMark(mark:.heart).fill(Design.ink) } }
                                     .frame(width:32,height:32).frame(width:72,height:64).contentShape(Rectangle())
                             }.buttonStyle(.plain)
                                 .disabled(!model.controlsAvailable || model.unknownAction == "library_save" || !["saved","unsaved"].contains(item.saved))
@@ -270,45 +275,101 @@ struct StillWaterView: View {
                         Button("More") { if model.context.screen == .detail { model.moreChildren() } else { model.loadPage(more:true) } }
                             .font(Design.font(22)).frame(width:140,height:56).audit("more",font:22,tap:true,pill:true,scroll:true).padding(.top,4)
                     }
-                    if model.context.items.isEmpty {
+                    if contents.isEmpty {
                         Text(model.loading ? "Looking…" : model.context.screen == .library ? "Nothing saved here yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
                             .font(Design.font(26,serif:true,italic:true)).opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
                     }
                 }.scrollTargetLayout()
             }.scrollPosition(id:$model.context.scrollID,anchor:.top).scrollTargetBehavior(.viewAligned)
                 .onAppear { if let id = model.context.scrollID { proxy.scrollTo(id,anchor:.top) } }
-        }.frame(width:952,height:height).position(x:524,y:y+height/2)
+        }.frame(width:width,height:height).position(x:left+width/2,y:y+height/2)
     }
     private var detail: some View {
-        let item = model.context.selected, x: CGFloat = item.kind == "artists" ? 48 : 280
+        Group { if model.context.selected.kind == "artists" { artistDetail } else { albumDetail } }
+    }
+    private var membershipEnabled: Bool {
+        model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.context.membership)
+    }
+    private func toggleMembership() {
+        model.mutate("library_save",["reference":.string(model.context.selected.reference),"saved":.bool(model.context.membership != "saved")])
+    }
+    private var albumDetail: some View {
+        let item = model.context.selected
         return ZStack(alignment:.topLeading) {
-            header(item.kind == "artists" ? "Artist" : item.kind == "tracks" ? "Track" : "Album")
-            if item.kind != "artists" { sleeve(x:48,y:96,size:200) }
-            label(item.kind+" · TIDAL",id:"detail-kind",x:x,y:100,w:1000-x,h:20,size:15,alpha:0.55,caps:true)
-            label(item.title,id:"detail-title",x:x,y:122,w:1000-x,h:76,size:32,serif:true,lines:2)
+            header("")
+            sleeve(x:48,y:88,size:184)
+            label(item.title,id:"detail-title",x:264,y:88,w:736,h:84,size:36,serif:true,lines:2)
             if let ref = item.artistReference {
-                button(item.artist,id:"artist-link",x:x,y:206,w:500,border:false) { model.details(MusicItem(.object(["reference":.string(ref)]))) }
-            } else { label(item.artist,id:"detail-artist",x:x,y:202,w:1000-x,h:29,size:22,alpha:0.7) }
-            label(membershipText,id:"membership",x:x,y:270,w:1000-x,h:26,size:18,alpha:0.7)
+                Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
+                    Text(item.artist + " ›").font(Design.font(24)).lineLimit(1).frame(width:576,height:64,alignment:.leading).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityIdentifier("artist-link").audit("artist-link",font:24,tap:true,truncates:true).position(x:552,y:204)
+            }
             if model.context.playable {
-                button("Play",id:"play-detail",x:x,y:300,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
+                button("Play",id:"play-detail",x:264,y:248,w:128,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
             }
-            button(model.membershipAction,id:"membership-write",x:x+152,y:300,w:280,
-                   enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.context.membership)) {
-                model.mutate("library_save",["reference":.string(item.reference),"saved":.bool(model.context.membership != "saved")])
-            }
+            button(model.context.membership == "saved" ? "✓ In library" : "+ Add to library",id:"membership-write",x:408,y:248,w:264,enabled:membershipEnabled,border:false) { toggleMembership() }
+                .accessibilityLabel(model.membershipAction)
             if let albumRef = item.albumReference {
-                button("Album",id:"album-link",x:x+444,y:300,w:120,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
+                button("Album ›",id:"album-link",x:696,y:248,w:144,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
             }
-            rows(y:376,height:104)
+            rows(y:320,height:160,tracks:true)
         }
     }
-    private var membershipText: String {
-        let artist = model.context.selected.kind == "artists"
-        switch model.context.membership {
-        case "saved": return artist ? "Following" : "In your library"
-        case "unsaved": return artist ? "Not following" : "Not in your library"
-        default: return artist ? "Follow status unknown" : "Library status unknown"
+    private var artistDetail: some View {
+        let item = model.context.selected
+        return ZStack(alignment:.topLeading) {
+            header("")
+            ZStack {
+                palette.dark.color
+                if let cover, !model.fixture { Image(uiImage:cover).resizable().scaledToFill() }
+                else {
+                    // Neutral illustration; never a claimed photograph of a real artist.
+                    Circle().fill(Design.ink.opacity(0.18)).frame(width:88,height:88).offset(y:-56)
+                    Ellipse().fill(Design.ink.opacity(0.12)).frame(width:200,height:204).offset(y:92)
+                }
+            }.frame(width:224,height:280).clipped()
+                .mask(LinearGradient(colors:[.black,.black,.clear],startPoint:.top,endPoint:.bottom)).position(x:160,y:228)
+            label(item.title,id:"detail-title",x:304,y:88,w:696,h:48,size:40,serif:true)
+            if let biography = item.biography, !biography.isEmpty {
+                label(biography,id:"artist-summary",x:304,y:144,w:480,h:56,size:22,alpha:0.7,lines:2)
+                button("Read more",id:"artist-read-more",x:808,y:144,w:192,border:false) { model.selectArtistTab("about") }
+            }
+            button(model.context.membership == "saved" ? "✓ Following" : "+ Follow",id:"membership-write",x:48,y:392,w:224,enabled:membershipEnabled,border:false) { toggleMembership() }
+                .accessibilityLabel(model.membershipAction)
+            ForEach(Array(["albums","tracks","about"].enumerated()),id: \.offset) { index,tab in
+                button(tab.capitalized,id:"artist-tab-"+tab,x:304+CGFloat(index)*152,y:208,w:144,border:false,size:24,indicator:model.context.artistTab == tab) { model.selectArtistTab(tab) }
+            }
+            if model.context.artistTab == "albums" {
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal) {
+                        HStack(alignment:.top,spacing:24) {
+                            ForEach(model.context.items.filter { $0.kind == "albums" }) { album in
+                                Button { model.details(album) } label: {
+                                    VStack(alignment:.leading,spacing:4) {
+                                        ZStack {
+                                            palette.dark.color
+                                            if let image = model.queueArtwork[album.reference]?.uiImage { Image(uiImage:image).resizable() }
+                                            else { OutlineMark(mark:.library).stroke(Design.ink.opacity(0.35),lineWidth:1).frame(width:48,height:48) }
+                                        }.frame(width:136,height:124).clipped()
+                                        Text(album.title).font(Design.font(22,serif:true)).lineLimit(1)
+                                        Text(album.year.map { String($0) } ?? "").font(Design.font(16)).opacity(0.55)
+                                    }.frame(width:152,height:188,alignment:.topLeading).contentShape(Rectangle())
+                                }.buttonStyle(.plain).accessibilityIdentifier("artist-album-"+album.id).audit("artist-album-"+album.id,tap:true,scroll:true).id(album.id)
+                            }
+                            if model.context.items.filter({ $0.kind == "albums" }).isEmpty {
+                                Text("No albums available yet").font(Design.font(24,serif:true)).opacity(0.7).frame(width:400,height:64,alignment:.leading)
+                            }
+                        }.scrollTargetLayout()
+                    }.scrollPosition(id:$model.context.scrollID,anchor:.leading)
+                        .onAppear { if let id = model.context.scrollID { proxy.scrollTo(id,anchor:.leading) } }
+                }.frame(width:696,height:192).position(x:652,y:376)
+            } else if model.context.artistTab == "tracks" {
+                rows(y:280,height:200,items:model.context.items.filter { $0.kind == "tracks" },tracks:true,width:696,left:304)
+            } else {
+                ScrollView {
+                    Text(item.biography ?? "Artist information is not available yet.").font(Design.font(24)).foregroundStyle(Design.ink.opacity(0.8)).frame(maxWidth:.infinity,alignment:.leading)
+                }.frame(width:696,height:184).position(x:652,y:376)
+            }
         }
     }
     private var upNext: some View {
@@ -372,20 +433,17 @@ struct StillWaterView: View {
             } else {
                 label(model.voiceState == "recording" ? "LISTENING · 0:\(String(format:"%02d",model.voiceSeconds)) OF 0:30" : model.voiceState == "unavailable" ? "MICROPHONE UNAVAILABLE" : model.voiceState == "idle" ? "VOICE SEARCH" : "RECORDING STOPPED",
                       id:"voice-state",x:204,y:96,w:640,h:24,size:15,alpha:0.7,caps:true,align:.center)
-                if model.voiceState == "recording" { Ripples(reduce:reduceMotion || snapshot).frame(width:600,height:600).position(x:524,y:270).allowsHitTesting(false) }
+                if model.voiceState == "recording" { Ripples(reduce:reduceMotion || snapshot).frame(width:600,height:600).position(x:524,y:308).id(model.voiceSession).allowsHitTesting(false) }
                 label(model.transcript.isEmpty ? "Say an artist, an album or the kind of music you want" : "“\(model.transcript)”",id:"transcript",x:204,y:144,w:640,h:104,size:model.transcript.isEmpty ? 32 : 44,
                       alpha:model.transcript.isEmpty ? 0.7 : 1,serif:true,italic:true,lines:2,align:.center)
-                icon(.mic,id:"voice-record",label:model.voiceState == "recording" ? "Stop recording" : "Start recording",x:480,y:264,w:88,h:88,ring:true,accent:true,glyph:42) {
-                    if model.voiceState == "recording" { model.stopVoice() } else { model.startVoice() }
+                icon(.mic,id:"voice-record",label:model.voiceState == "recording" ? "Restart recording" : "Start recording",x:480,y:264,w:88,h:88,ring:true,accent:true,glyph:42) {
+                    model.startVoice()
                 }
-                label(model.voiceState == "recording" ? "Tap to stop" : "Tap to speak",id:"voice-hint",x:360,y:356,w:328,h:24,size:18,alpha:0.7,align:.center)
-                button("Type instead",id:"type-instead",x:48,y:392,w:200,border:false) { model.setTyping(true) }
                 if ["recording","stopped"].contains(model.voiceState) {
-                    button("Restart",id:"voice-restart",x:272,y:392,w:160,border:false) { model.startVoice() }
-                    button(model.voiceState == "recording" ? "Stop & search" : "Search",id:"voice-search",x:636,y:392,w:240,enabled:!model.transcript.isEmpty,filled:true) { model.submitVoice() }
+                    button("Tap to search",id:"voice-search",x:404,y:360,w:240,enabled:!model.transcript.isEmpty,border:false) { model.submitVoice() }
                 }
+                icon(.keyboard,id:"type-instead",label:"Type a search",x:48,y:392,w:80,h:64,glyph:40) { model.setTyping(true) }
             }
-            if model.fixture { label("Microphone fixture: no audio captured. Search only.",id:"voice-fixture",x:124,y:456,w:800,h:24,size:18,alpha:0.35,align:.center) }
         }
     }
     private var utility: some View {

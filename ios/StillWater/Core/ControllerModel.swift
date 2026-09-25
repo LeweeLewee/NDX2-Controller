@@ -6,6 +6,7 @@ enum Rest: String { case waking, still, touched }
 struct BrowseContext {
     var screen: Screen = .now, query = "", kind = "albums", items: [MusicItem] = []
     var cursor: String?, pageCursor: String?, nextOffset: Int?, resultID: String?, scrollID: String?
+    var artistTab = "albums", artistScroll: [String:String] = [:]
     var typing = false
     var selected = MusicItem(), playable = false, membership = "unknown", queueSelection = 1
 }
@@ -57,6 +58,7 @@ struct Preview {
     private var timer: Task<Void, Never>?, readTask: Task<Void, Never>?, artTask: Task<Void, Never>?
     @Published private(set) var inFlight: UUID?
     private var flightDeadline = 0.0, flightMutation = false
+    @Published var voiceSession = 0
     private var nextPoll = 0.0, lastTouch = 0.0, voiceDeadline = 0.0, nextBattery = 0.0, retry = 1.0
     private var revision = -1
     private var nextArtAttempt = 0.0
@@ -124,6 +126,7 @@ struct Preview {
         if rest == .waking && now - lastTouch >= 0.4 { rest = .still }
         if context.screen == .now && rest == .touched && now - lastTouch >= 8 { rest = .still }
         if voiceState == "recording" {
+            if fixture { updateFixtureTranscript(now:now) }
             voiceSeconds = min(30, max(0, Int(30 - (voiceDeadline - now))))
             if now >= voiceDeadline { stopVoice() }
         }
@@ -140,7 +143,7 @@ struct Preview {
         } else if artwork == nil && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
-        } else if context.screen == .queue && artTask == nil && online && now >= nextQueueArtAttempt {
+        } else if (context.screen == .queue || (context.screen == .detail && context.selected.kind == "artists")) && artTask == nil && online && now >= nextQueueArtAttempt {
             nextQueueArtAttempt = now + 5
             artTask = Task { await self.loadQueueArtwork(); self.artTask = nil }
         }
@@ -268,6 +271,11 @@ struct Preview {
             await self.membership()
         }
     }
+    func selectArtistTab(_ tab: String) {
+        guard context.selected.kind == "artists", ["albums","tracks","about"].contains(tab) else { return }
+        if let scroll = context.scrollID { context.artistScroll[context.artistTab] = scroll }
+        context.artistTab = tab; context.scrollID = context.artistScroll[tab]; noteContact()
+    }
     func moreChildren() {
         guard let offset = context.nextOffset else { return }
         guard cancelReadForInteraction() else { return }
@@ -349,8 +357,9 @@ struct Preview {
     }
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
-        let candidates = Array(items.prefix(7))
-        guard context.screen == .queue, let item = candidates.first(where:{ queueArtwork[$0.reference] == nil }) else { return }
+        let candidates = Array((context.screen == .detail ? items.filter { $0.kind == "albums" } : items).prefix(context.screen == .detail ? 4 : 7))
+        let screen = context.screen
+        guard [.queue,.detail].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil }) else { return }
         let gen = generation
         // Queue artwork is registered by a native read, never fetched as an arbitrary URL.
         guard let detail = await perform(BridgeRequest("browse",["reference":.string(item.reference)])),
@@ -362,7 +371,7 @@ struct Preview {
         guard let reply = await perform(BridgeRequest("artwork",["reference":.string(ref)])), generation == gen else { return }
         var image = ArtworkAssembly(reference:ref,side:80)
         do { try image.append(reply,started:start,now:clock()) } catch { return }
-        guard image.complete, online, clock() < freshUntil, context.screen == .queue else { return }
+        guard image.complete, online, clock() < freshUntil, context.screen == screen else { return }
         let currentRefs = Set(candidates.map(\.reference))
         queueArtwork = queueArtwork.filter { currentRefs.contains($0.key) }
         queueArtwork[item.reference] = Preview(reference:ref,pixels:image.bytes,side:80,deadline:image.deadline)
@@ -370,8 +379,14 @@ struct Preview {
     }
     func startVoice() {
         guard context.screen == .ask, !context.typing else { return }
-        cancelVoice(); voiceState = "recording"; voiceDeadline = clock() + 30; voiceSeconds = 0; noteContact()
-        if fixture { transcript = "Find quiet instrumental albums" } else { voiceStart?() }
+        cancelVoice(); voiceSession += 1; voiceState = "recording"; voiceDeadline = clock() + 30; voiceSeconds = 0; noteContact()
+        if !fixture { voiceStart?() }
+    }
+    private func updateFixtureTranscript(now: Double) {
+        let words = ["Find", "quiet", "instrumental", "albums"]
+        let elapsed = max(0,now - (voiceDeadline - 30))
+        let count = min(words.count,Int(elapsed / 0.65))
+        transcript = words.prefix(count).joined(separator:" ")
     }
     func stopVoice() { guard voiceState == "recording" else { return }; voiceCancel?(); voiceState = "stopped" }
     func cancelVoice() { voiceCancel?(); voiceState = "idle"; transcript = ""; voiceSeconds = 0 }

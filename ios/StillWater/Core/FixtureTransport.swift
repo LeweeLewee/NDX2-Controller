@@ -63,12 +63,39 @@ import Foundation
                     }
                 }
             }
+            let known = Set(catalog.compactMap { $0["reference"].text })
+            for ref in memberships.keys.sorted() where memberships[ref] == "saved" && !known.contains(ref) && ref.contains("/"+kind+"/") {
+                let detail = try await send(BridgeRequest("browse",["reference":.string(ref)]))
+                catalog.append(detail.data["item"])
+            }
             let selected = catalog.filter { memberships[$0["reference"].text ?? ""] == "saved" }
             let offset = request.args["offset"]?.number ?? 0
             data["items"] = .array(Array(selected.dropFirst(max(0,offset)).prefix(12)))
             data["next_offset"] = offset + 12 < selected.count ? .int(offset + 12) : .null
             data["cursor"] = .null
             r["data"] = .object(data)
+        }
+        if request.action == "browse", case .object(var data) = r["data"], let ref = request.args["reference"]?.text {
+            let kind = ref.split(separator:"/").dropFirst(2).first.map(String.init) ?? "albums"
+            let index = Int(ref.split(separator:"/").last ?? "1") ?? 1
+            let titles = ["Listening Studies", "Water & Light", "Late Afternoon", "Quiet Hours"]
+            let art = sample("browse-albums")["data"]["item"]["artwork"]
+            func album(_ number: Int) -> JSONValue {
+                .object(["reference":.string("inputs/tidal/albums/\(number)"),"title":.string(titles[(number-1)%4]),"artist":.string("River Stone Ensemble"),"kind":.string("albums"),"artwork":art,"year":.int(2026-number+1),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1")])
+            }
+            func trackItem(_ number: Int, albumID: Int) -> JSONValue {
+                .object(["reference":.string("inputs/tidal/tracks/\(number)"),"title":.string(["A Still Morning","Soft Light","Quiet Hours","On the Water","After Rain","Evening Study"][(number-101)%6]),"artist":.string("River Stone Ensemble"),"album":.string(titles[(albumID-1)%4]),"kind":.string("tracks"),"artwork":art,"duration":.int(210000+(number-101)%6*24000),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1"),"album_reference":.string("inputs/tidal/albums/\(albumID)")])
+            }
+            if kind == "artists" {
+                data["item"] = .object(["reference":.string(ref),"title":.string("River Stone Ensemble"),"kind":.string("artists"),"biography":.string("A fictional ensemble for this silent preview. Piano, strings and soft electronic textures trace the changing light of a quiet room. Explore four imagined albums and six tracks.")])
+                data["items"] = .array((1...4).map(album) + (101...106).map { trackItem($0,albumID:1) })
+                data["playable"] = .bool(false)
+            } else if kind == "albums" {
+                data["item"] = album(max(1,index)); data["items"] = .array((101...106).map { trackItem($0,albumID:max(1,index)) })
+            } else if kind == "tracks" {
+                data["item"] = trackItem(max(101,index),albumID:1); data["items"] = .array([])
+            }
+            data["next_offset"] = .null; r["data"] = .object(data)
         }
         if case .object(var data) = r["data"], case .array(let items) = data["items"] {
             data["items"] = .array(items.map { item in

@@ -151,7 +151,7 @@ struct DesignText: UIViewRepresentable {
     }
 }
 
-enum Mark { case play, pause, previous, next, mic, search, plus, minus, back, check, question, heart, volumeDown, volumeUp, settings, library }
+enum Mark { case play, pause, previous, next, mic, search, plus, minus, back, check, question, heart, volumeDown, volumeUp, settings, library, keyboard }
 struct OutlineMark: Shape {
     var mark: Mark
     func path(in rect: CGRect) -> Path {
@@ -181,6 +181,10 @@ struct OutlineMark: Shape {
                 let a = Double(i) * .pi / 4
                 line([(12 + CGFloat(cos(a))*9,12 + CGFloat(sin(a))*9),(12 + CGFloat(cos(a))*12,12 + CGFloat(sin(a))*12)])
             }
+        case .keyboard:
+            p.addRoundedRect(in:CGRect(x:1,y:4,width:22,height:16),cornerSize:CGSize(width:2,height:2))
+            for y in [8,12] { for x in [5,9,13,17] { line([(CGFloat(x),CGFloat(y)),(CGFloat(x+1),CGFloat(y))]) } }
+            line([(7,16),(17,16)])
         case .library:
             line([(4,3),(4,21)]); line([(10,3),(10,21)]); line([(16,4),(21,20)])
         case .plus: line([(5,12),(19,12)]); line([(12,5),(12,19)])

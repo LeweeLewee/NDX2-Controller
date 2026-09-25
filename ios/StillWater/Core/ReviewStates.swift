@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -32,19 +32,26 @@ import Foundation
             let fixture = FixtureTransport()
             model.context.items = fixture.sample("search-albums")["data"]["items"].values.map(MusicItem.init)
             if state == "detail" {
-                let d = fixture.sample("browse-albums")["data"]
+                let d = (try? await fixture.send(BridgeRequest("browse",["reference":.string("inputs/tidal/albums/1")]))).map(\.data) ?? .null
                 model.context.screen = .detail; model.context.selected = MusicItem(d["item"])
                 model.context.items = d["items"].values.map(MusicItem.init); model.context.playable = true
+                model.context.selected.title = "An exceptionally long album title for seated reading and layout trials"; model.context.membership = "unsaved"
             } else { model.context.screen = state == "library" ? .library : .find }
             model.context.query = "Evening listening"
             if state == "keyboard" { model.context.screen = .ask; model.context.typing = true; model.keyboardVisible = true }
-        case "artist-following","track-liked","album-saved":
+        case "artist-following","artist-tracks","artist-about","artist-missing","track-liked","album-saved":
             let fixture = FixtureTransport()
-            let kind = state == "artist-following" ? "artists" : state == "track-liked" ? "tracks" : "albums"
-            let d = fixture.sample("browse-"+kind)["data"]
+            let kind = state.hasPrefix("artist-") ? "artists" : state == "track-liked" ? "tracks" : "albums"
+            let d = (try? await fixture.send(BridgeRequest("browse",["reference":.string("inputs/tidal/"+kind+"/1")]))).map(\.data) ?? .null
             model.context.screen = .detail; model.context.selected = MusicItem(d["item"])
             model.context.items = d["items"].values.map(MusicItem.init)
             model.context.playable = d["playable"].flag == true; model.context.membership = "saved"
+            if kind == "artists" {
+                model.artwork = nil
+                model.context.artistTab = state == "artist-tracks" ? "tracks" : state == "artist-about" ? "about" : "albums"
+                if state == "artist-missing" { model.context.selected.biography = nil; model.context.items = [] }
+                for _ in 0..<4 { await model.loadQueueArtwork() }
+            }
         case "ask-idle","ask-typing","ask-unavailable":
             model.context.screen = .ask; model.context.typing = state == "ask-typing"
             model.voiceState = state == "ask-unavailable" ? "unavailable" : "idle"

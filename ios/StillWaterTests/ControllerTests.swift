@@ -135,6 +135,29 @@ import XCTest
         XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(m.transcript,"")
         XCTAssertEqual(t.fixture.mutations,[]); m.deactivate()
     }
+    func testFixtureTranscriptProgressRestartAndArtistHistory() async throws {
+        var time = 100.0
+        let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{time},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.navigate(.ask); m.startVoice(); XCTAssertEqual(m.transcript,"")
+        time += 0.7; m.tick(); XCTAssertEqual(m.transcript,"Find")
+        time += 0.7; m.tick(); XCTAssertEqual(m.transcript,"Find quiet")
+        m.startVoice(); XCTAssertEqual(m.transcript,""); XCTAssertEqual(m.voiceSession,2)
+        time += 2.7; await m.refresh(); m.tick(); XCTAssertEqual(m.transcript,"Find quiet instrumental albums")
+        XCTAssertEqual(m.context.screen,.ask); XCTAssertTrue(t.mutations.isEmpty)
+        m.submitVoice(); await settle(); XCTAssertEqual(m.context.screen,.find)
+        m.details(MusicItem(.object(["reference":.string("inputs/tidal/artists/1")]))); await settle()
+        XCTAssertEqual(m.context.items.filter { $0.kind == "albums" }.count,4)
+        XCTAssertNotNil(m.context.selected.biography)
+        m.selectArtistTab("tracks")
+        let track = try XCTUnwrap(m.context.items.first { $0.kind == "tracks" })
+        XCTAssertNotNil(track.duration)
+        m.context.scrollID = track.id; m.selectArtistTab("albums"); m.selectArtistTab("tracks")
+        XCTAssertEqual(m.context.scrollID,track.id)
+        m.details(track); await settle(); m.back()
+        XCTAssertEqual(m.context.artistTab,"tracks"); XCTAssertEqual(m.context.scrollID,track.id)
+        XCTAssertTrue(t.mutations.isEmpty); m.deactivate()
+    }
     func testVoiceTimeoutAndCancelCannotSubmit() async {
         var time = 100.0
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{time},restore:false)
