@@ -361,7 +361,7 @@ struct Preview {
         let screen = context.screen
         guard [.queue,.detail].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil }) else { return }
         let gen = generation
-        // Queue artwork is registered by a native read, never fetched as an arbitrary URL.
+        // Queue/card artwork is registered by a native read, never fetched as an arbitrary URL.
         guard let detail = await perform(BridgeRequest("browse",["reference":.string(item.reference)])),
               detail.outcome == "observed", detail.data["item"]["reference"].text == item.reference,
               let ref = detail.data["item"]["artwork"].text,

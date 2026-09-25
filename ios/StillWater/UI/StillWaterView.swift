@@ -276,7 +276,7 @@ struct StillWaterView: View {
                             .font(Design.font(22)).frame(width:140,height:56).audit("more",font:22,tap:true,pill:true,scroll:true).padding(.top,4)
                     }
                     if contents.isEmpty {
-                        Text(model.loading ? "Looking…" : model.context.screen == .library ? "Nothing saved here yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
+                        Text(model.loading ? "Looking…" : model.context.screen == .library ? "Nothing saved here yet" : model.context.screen == .detail && tracks ? "No tracks available yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
                             .font(Design.font(26,serif:true,italic:true)).opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
                     }
                 }.scrollTargetLayout()
@@ -307,12 +307,16 @@ struct StillWaterView: View {
             if model.context.playable {
                 button("Play",id:"play-detail",x:264,y:248,w:128,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
             }
-            button(model.context.membership == "saved" ? "✓ In library" : "+ Add to library",id:"membership-write",x:408,y:248,w:264,enabled:membershipEnabled,border:false) { toggleMembership() }
-                .accessibilityLabel(model.membershipAction)
+            if item.kind == "tracks" {
+                icon(.heart,id:"membership-write",label:model.membershipAction,x:408,y:248,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }
+            } else {
+                button(model.context.membership == "saved" ? "✓ In library" : "+ Add to library",id:"membership-write",x:408,y:248,w:264,enabled:membershipEnabled,border:false) { toggleMembership() }
+                    .accessibilityLabel(model.membershipAction)
+            }
             if let albumRef = item.albumReference {
                 button("Album ›",id:"album-link",x:696,y:248,w:144,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
             }
-            rows(y:320,height:160,tracks:true)
+            if item.kind != "tracks" { rows(y:320,height:160,tracks:true) }
         }
     }
     private var artistDetail: some View {
@@ -350,11 +354,15 @@ struct StillWaterView: View {
                                             palette.dark.color
                                             if let image = model.queueArtwork[album.reference]?.uiImage { Image(uiImage:image).resizable() }
                                             else { OutlineMark(mark:.library).stroke(Design.ink.opacity(0.35),lineWidth:1).frame(width:48,height:48) }
-                                        }.frame(width:136,height:124).clipped()
+                                        }.frame(width:124,height:124).clipped()
                                         Text(album.title).font(Design.font(22,serif:true)).lineLimit(1)
                                         Text(album.year.map { String($0) } ?? "").font(Design.font(16)).opacity(0.55)
                                     }.frame(width:152,height:188,alignment:.topLeading).contentShape(Rectangle())
                                 }.buttonStyle(.plain).accessibilityIdentifier("artist-album-"+album.id).audit("artist-album-"+album.id,tap:true,scroll:true).id(album.id)
+                            }
+                            if model.context.nextOffset != nil {
+                                Button("More albums") { model.moreChildren() }.font(Design.font(22)).frame(width:152,height:64)
+                                    .audit("artist-more",font:22,tap:true,scroll:true)
                             }
                             if model.context.items.filter({ $0.kind == "albums" }).isEmpty {
                                 Text("No albums available yet").font(Design.font(24,serif:true)).opacity(0.7).frame(width:400,height:64,alignment:.leading)

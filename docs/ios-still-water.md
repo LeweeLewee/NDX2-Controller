@@ -94,3 +94,7 @@ The final documentation/gallery-helper commit does not change the tested app, te
 ## TestFlight preparation follow-up
 
 After the user confirmed paid developer membership/admin access, the [silent preview preparation](ios-testflight.md#validation-checkpoint) passed 19 native tests and an unsigned iOS-device Release archive using Xcode 26.3 / iOS 26.2 SDK. Its two additional native tests verify compiled/bundled preview identity and rejection of live transport, enrollment, trust replacement and Keychain operations. The original normal build route is retained; the internal preview cannot activate it. The current preview is unsigned, has not been uploaded and is awaiting the Apple team/bundle identifiers and protected signing inputs. The prior 17-test evidence above remains the earlier implementation checkpoint.
+
+## D034 UI amendment
+
+Album and artist now have separate layouts, with optional bounded metadata (`biography`, `year`, `duration`) and graceful absence. The bridge contract is unchanged; the silent client fixture supplies fictional artist content for design review. Artist album artwork reuses registered authenticated browse/artwork reads and the existing expiring cache, limited to four cards. Artist tabs and list positions live in bounded Back contexts. Find provides progressive fixture transcript feedback, explicit Tap to search and clear/restart on every microphone tap. No actual microphone capture occurs in the internal preview. Presence is not part of this sprint.

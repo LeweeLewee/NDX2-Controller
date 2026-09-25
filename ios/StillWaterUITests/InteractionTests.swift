@@ -79,8 +79,10 @@ final class InteractionTests: XCTestCase {
         XCTAssertEqual(app.statusBars.count,0)
     }
     func testVoiceStartsOnlyOnTapAndUsesSharedResults() {
-        let app = XCUIApplication(); app.launchArguments = ["--fixture","--review-state","ask-idle"]
+        let app = XCUIApplication(); app.launchArguments = ["--fixture"]
         XCUIDevice.shared.orientation = .landscapeLeft; app.launch()
+        XCTAssertTrue(app.buttons["wake-contact"].waitForExistence(timeout:5)); app.buttons["wake-contact"].tap()
+        XCTAssertTrue(app.buttons["find"].waitForExistence(timeout:5)); app.buttons["find"].tap()
         let record = app.buttons["voice-record"]
         XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Start recording")
         record.tap(); expectLabel(record,"Restart recording")

@@ -30,3 +30,14 @@ Phone review: install the replacement, confirm the border and notch clearance, r
 **D032 remediation available in TestFlight — 25 September 2026:** version **0.1.0 (2.1.0)** was signed and uploaded from `dbd5c379c0c57e58bdab6a360a01e214f80d65bd` in [run 36174233828](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36174233828). All **23 native tests** passed, none failed or skipped; unsigned device archive and signed internal export succeeded. The phone-fit layout, larger type/transport, volume icons, exact artist/album navigation, track likes, album library controls, artist follow controls and row-specific membership actions are implemented. Fixture Library reflects per-item additions/removals. Apple processing completed; the build is assigned to **Naim NDX2 Controller TestFlight** and shows **Testing**. The existing tester can update through TestFlight; group distribution remains manual. Read [the parity checklist](ios-remediation.md). Physical readability and user acceptance of this replacement remain open; it is still a silent fixture preview.
 
 The result-list membership indicators are actionable and reference-specific. Library fixtures are rebuilt from saved membership; no production bridge mutation was needed. The 31-image review gallery is retained under ignored `local/ios/review-remediation/`.
+
+## D034 amendment review
+
+- NOW removes elapsed/total time and retains the progress line.
+- Album groups artwork, title, artist navigation and Play/library actions above numbered tracks. Known durations appear at the right; membership hearts stay warm ivory.
+- Artist uses a portrait area with neutral fallback illustration, name and Follow/Following. Albums/Tracks/About and Read more preserve navigation history. Missing biography collapses; unavailable collections show an empty state. Native browse pagination remains bounded.
+- Find opens idle. The keyboard icon selects typing. The microphone starts or clears/restarts capture; the animation shares its center. Progressive fixture text replaces the example. Tap to search explicitly submits; it never plays music. Redundant hints, restart/search pills and developer footer are removed.
+- Preview artist biography, album years and track durations are fictional local data. Artist imagery is a neutral illustration when a registered image is absent; no photograph or live biography integration is claimed. Real audio remains disabled in TestFlight.
+- Presence is excluded by explicit user direction. Locked landscape safe-area layout, settings, collection controls, transport and route boundaries are preserved.
+
+Native validation and delivery evidence are recorded separately; these changes do not establish mounted-phone acceptance.
