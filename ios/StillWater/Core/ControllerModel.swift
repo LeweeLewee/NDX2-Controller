@@ -392,7 +392,7 @@ struct Preview {
     }
     private func submitSearch(_ text: String) {
         let query = text.trimmingCharacters(in:.whitespacesAndNewlines)
-        guard !query.isEmpty, query.utf8.count <= 256 else { status = "Enter 1–256 bytes of search text."; return }
+        guard !query.isEmpty, query.utf8.count <= 256 else { status = "Enter a shorter search, with at least one word."; return }
         let kind = context.kind
         context.query = query; keyboardVisible = false
         navigate(.find); context.query = query; context.kind = kind

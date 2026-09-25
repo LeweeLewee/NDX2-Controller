@@ -184,3 +184,5 @@ D032 delivery: the internal silent remediation build **0.1.0 (2.1.0)** passed 23
 ## D033 — One voice-first Find entry with explicit recording
 
 **Explicit user direction, 25 September 2026:** enlarge NOW's heart and remove its visible label; use icons for Find and Library. Find opens the voice input screen idle, never recording automatically, with Type instead as a secondary input. Remove the redundant NOW microphone shortcut and the former dedicated text-entry Find page. Typed and spoken submissions share the existing bounded results/filter/detail flow. Results can reopen Find, while Back preserves browsing history and always cancels recording. Keep accessible icon labels, observed membership state, the locked safe-area layout and the silent preview boundary. Search never initiates playback. Native validation and TestFlight delivery pending.
+
+**D033 heart clarification:** the user explicitly rejects the red liked heart. Use the existing warm ivory ink for both states: outlined when unsaved and filled when saved, never an emoji/system-red glyph. Include a saved NOW-state capture in native review.

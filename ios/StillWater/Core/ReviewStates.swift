@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -14,8 +14,9 @@ import Foundation
         guard all.contains(state) else { return }
         await model.refresh(); model.consumeContact = false
         if !["still-fallback","noart","stopped"].contains(state) { await model.loadArtwork() }
-        model.rest = ["touched","paused","offline","pending","unknown"].contains(state) ? .touched : .still
+        model.rest = ["touched","now-liked","paused","offline","pending","unknown"].contains(state) ? .touched : .still
         switch state {
+        case "now-liked": model.player.current.saved = "saved"
         case "paused": model.player.state = "paused"
         case "stopped": model.player.state = "stopped"; model.player.title = ""; model.artwork = nil
         case "longtitle": model.player.title = "An Exceptionally Long Track Title for the Seated Listening Trial"
