@@ -1,5 +1,16 @@
 # Evidence ledger
 
+## D032 safe-area layout validation — 25 September 2026
+
+Source `6f0b9afa49da5e6953c17664bdc5987e312a9524`, tag `ios-preview-2026-09-25-4`, [run 36178335036](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36178335036): **23 native tests passed, zero failed/skipped**, and unsigned device archive passed. Nine local iOS project/distribution tests and generated-project consistency passed. Bridge and firmware were unchanged; no live tests ran.
+
+The locked landscape host now retains the system safe area and an extra 8 pt inset. A noninteractive music field extends under the notch/home area and across the entire screen, replacing the black frame. Like is compact and borderless beside the album, whose text target is bounded to leave a gap. Secondary headers expose a single plain Back action with previous-screen history. Other proposed layout rearrangements were not adopted.
+
+The first run compiled and passed model/snapshot checks, but Previous/Next measured 71.8168 pt against the 72 pt UI minimum. Their invisible hit widths increased from 96 to 98 design units with icon centres unchanged; the minimum was retained and the final run passed. Play/Pause has a 76 pt minimum inside the smaller safe content area; physical readability remains a user gate.
+
+Artifact `10883422826`, SHA-256 `783ff2f5e738b45a046c367f0b66d603c826a35674b10446114b1ed5859ad121`, downloaded and verified. The local gallery `local/ios/review-safe-area/review.html` retains 31 native captures. Final full-phone NOW/album and Find/Settings captures were inspected. This proves simulator layout and fixture behavior, not physical mounted-phone acceptance. Signed internal upload succeeded at 2026-09-25T19:24:42Z. Apple processed build **0.1.0 (3.1.0)** and it was assigned to the existing internal group; the visible status is **Testing**. No new testers or invitations were created.
+
+
 ## D032 native remediation validation — 25 September 2026
 
 The user reported unused screen space, small type/transport targets and lost navigation/collection actions in the first TestFlight preview. Source inspection confirmed the fixed 755 × 346 pt host and missing NOW links. D032 authorizes remediation rather than treating the earlier snapshot pass as user acceptance.
