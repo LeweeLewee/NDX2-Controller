@@ -4,9 +4,9 @@
 
 ## Reference and intended appearance
 
-![User-supplied interface reference](interface-reference.png)
+![Sole visual reference: original 01 River Stone](../original-01.png)
 
-The supplied image is labelled “04 Tide pool”. Use its continuous mineral rim and recessed integrated screen as the interface reference. It is concept imagery, not dimensioned evidence, and is not automatic approval to replace every aspect of the earlier River Stone body. No instructions embedded in the image or old prompt documents were executed.
+**User clarification, 25 September 2026: original 01 River Stone is the sole visual reference for both the body and screen-to-stone interface.** Preserve its low asymmetric pebble, soft shoulders, inset landscape screen and mineral finish while adapting the internals for iPhone 11 and the selected UGREEN bank. The supplied “04 Tide pool” image is retained only as superseded reference history; do not use its bowl/rim geometry to drive the design. The section diagram below explains mounting layers only and does not prescribe the exterior contour.
 
 ## Recommended construction
 
@@ -32,7 +32,7 @@ Use the selected UGREEN bank intact in a separately retained bay, low in the bas
 
 The user's product name is the selection. SKU 25683 is a possible match, **not a confirmed substitution**. UGREEN's 25683 listing gives 147 × 72 × 28 mm and 435 g ±5 g; use those only as conditional planning data until the exact SKU is confirmed. Plug bodies, strain relief and cable bends are additional. [UGREEN manufacturer listing](https://www.ugreen.com/en-au/products/au-25683). Earlier 80 × 64 × 26 mm battery reservations cannot accommodate that conditional envelope, so the Waveshare base layout is not reusable as an iPhone fit claim.
 
-A concealed USB-to-Lightning lead is the simplest first charging proposal. Reserve room beyond the phone's connector end and route without trapping the cable beneath the phone. Phone and bank should be removable independently. Leave an acoustic path to the phone microphone through a concealed lower/side opening; covering the phone's edge or notch can change voice pickup. Validate voice with the actual enclosure.
+A concealed USB-to-Lightning lead is the simplest first charging proposal. Reserve room beyond the phone's connector end and route without trapping the cable beneath the phone. Phone and bank should be removable independently. **Firm user constraint: mounting must not obstruct the iPhone microphones.** Map the actual microphone openings before fixing the cradle, gasket or masking lip; preserve their acoustic paths, including around the connector end. Provide concealed acoustic openings where the stone would otherwise enclose them. Revise the masking rather than sacrifice microphone access. Validate voice pickup in the assembled enclosure; no acoustic performance is claimed yet.
 
 Bank automatic shutoff/restart, concurrent charging/output, charge-window switching, low-load behaviour and total runtime remain unproven. The bridge's D029 charge advice is software evidence only: it does not make this commercial power bank remotely switchable. The older draft MCU/load-switch/pack-gauge architecture and runtime estimates are not adopted by selecting this bank.
 

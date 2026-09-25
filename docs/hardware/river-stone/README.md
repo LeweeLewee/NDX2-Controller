@@ -1,5 +1,7 @@
 # Original 01 River Stone: stationary enclosure
 
+> **Visual reference confirmed: original 01 River Stone only**, for both body and screen interface. Concealed iPhone mounting must preserve microphone acoustic paths.
+
 > **25 September 2026: active hardware is iPhone 11 + selected UGREEN Nexode 20000mAh PD 20W QC Power Bank.** Start with the [concealed mounting proposal](iphone-mount/README.md). Everything below describing the Waveshare packaging, CAD and slicing is [parked fallback history](fallback-waveshare.md); its dimensions and print next steps do not govern the iPhone build.
 
 Status: dimensioned packaging study, 20 September 2026. Original visual concept selected by the user; stays on the coffee table. Dimensions and construction details below are engineering proposals, not user-approved measurements or manufacturing release.

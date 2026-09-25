@@ -258,3 +258,7 @@ Fresh requested validation passed: `python -m unittest discover -s tests -v` (13
 User explicitly selected iPhone 11 plus UGREEN Nexode 20000mAh PD 20W QC Power Bank and asked to park the Waveshare base. D030 records selection and physical-design scope; selection is not a test result. Fast-forwarded the clean CAD checkout through the 25 newer shared commits before editing; preserved newer bridge/Still Water work and prior hardware purchase records. Waveshare geometry, slices and reports remain unchanged, now marked fallback.
 
 The supplied “04 Tide pool” image was read after correcting the Windows path and retained as an interface reference. Published a rear-loaded cradle/masking proposal and schematic, not new fit CAD. Apple's nominal iPhone body dimensions inform the envelope; Still Water's 118 × 54 mm aperture remains unverified. UGREEN SKU 25683 dimensions are conditional manufacturer reference only, pending exact selected variant. No new physical fit, sensor, voice, charging, runtime, slicing, UI or live-device validation occurred.
+
+## River Stone reference clarification — 25 September 2026
+
+User clarified original 01 River Stone is the design basis; it now governs both the body and screen/stone interface. Tide pool is retained solely as superseded history. The user also requires that mounting not obstruct the iPhone microphones. Updated the mounting proposal, D030 and continuation records. These are requirements, not evidence of physical fit or acoustic performance; no CAD, printing or device tests occurred.
