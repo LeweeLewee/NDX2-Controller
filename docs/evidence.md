@@ -1,5 +1,16 @@
 # Evidence ledger
 
+## D033 voice-first Find and icon review — 25 September 2026
+
+Final source `1fddc6ac877e36c8e072acf2acba311bebd17459`, tag `ios-preview-2026-09-25-5`, [run 36186308393](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36186308393): **25 native tests passed, zero failed/skipped**, and unsigned device archive passed. Nine local project/distribution checks and generated-project consistency passed. No bridge/firmware changes or live NDX/speech tests occurred.
+
+Find now opens idle voice input; recording requires a microphone tap. Type instead opens a text entry mode; Use voice returns idle. Explicit typed or spoken submissions share Results, filters, row membership, details and bounded Back history. Mode changes and Back cancel recording; invalid/oversized input does not search. Model/UI tests verify these transitions and no playback mutations. NOW uses a 48-unit palette-coloured heart (outline/filled), 40-unit Find/Library icons with accessible labels, and no duplicate microphone entry. Resting artwork grows 272 to 296 units with its vertical centre retained; metadata shifts right by 24 units and preserves the right edge.
+
+The first run at `34ca2e4` passed 24/25 tests: XCTest failed to terminate the prior app instance before the existing phone-layout test could launch. New model, snapshot, voice and keyboard tests passed. A fresh final runner passed the complete suite without weakening that test.
+
+Artifact `10886282209` SHA-256 `fb18c46f4ec50deb52420aafece4bee722e4025275017e338594c2ae13bbe032` was downloaded and verified. `local/ios/review-find/review.html` retains 36 original native captures. Reviewed the ivory filled heart, resting artwork, long title, idle Find, typing and recording screens. The system-keyboard capture includes the iOS typing tutorial; the text field, mode switch and search remain above it, and the typed-submit tests passed. OS keyboard UI and physical mounted-phone acceptance remain separate from fixture validation. Signed upload succeeded at 2026-09-25T20:41:52Z. Apple processed **0.1.0 (4.1.0)** and the build was assigned to the existing internal group; **Testing** was visibly verified. No new tester/invitation or public release was created.
+
+
 ## D032 safe-area layout validation — 25 September 2026
 
 Source `6f0b9afa49da5e6953c17664bdc5987e312a9524`, tag `ios-preview-2026-09-25-4`, [run 36178335036](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36178335036): **23 native tests passed, zero failed/skipped**, and unsigned device archive passed. Nine local iOS project/distribution tests and generated-project consistency passed. Bridge and firmware were unchanged; no live tests ran.

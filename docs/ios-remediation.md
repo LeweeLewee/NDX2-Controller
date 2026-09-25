@@ -1,5 +1,7 @@
 # iPhone functional parity remediation
 
+**D033 available in TestFlight — 25 September 2026:** **0.1.0 (4.1.0)** is assigned to the existing Naim NDX2 Controller TestFlight group and Apple shows **Testing**. Source `1fddc6ac877e36c8e072acf2acba311bebd17459`, [run 36186308393](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36186308393), passed all **25 native tests**, unsigned archive and signed upload. NOW has a larger icon-only heart, warm ivory outlined/filled states, Find and Library icons, and one Find entry. Find opens idle voice input with explicit recording and secondary typing; both search paths share Results. Still artwork is about 9% larger, with metadata shifted right. The safe-area layout and locked orientation remain. Gallery: `local/ios/review-find/review.html` (36 captures). This remains a silent fixture preview; mounted-phone/user acceptance is open.
+
 **D032 safe-area update available — 25 September 2026:** internal TestFlight **0.1.0 (3.1.0)** is assigned to the existing Naim NDX2 Controller TestFlight group and Apple shows **Testing**. Source `6f0b9afa49da5e6953c17664bdc5987e312a9524`, [run 36178335036](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36178335036), passed all 23 native tests and archive/sign/upload checks. The background fills the screen, content respects the system safe area plus an 8 pt inactive inset in the existing locked orientation, Like is compact beside the album, and secondary screens have one plain Back control. Other review suggestions were not adopted. Gallery: `local/ios/review-safe-area/review.html`. Mounted-phone/user acceptance remains open; this is still a silent preview.
 
 25 September 2026, D032. The user reported usability and function gaps in internal build 0.1.0 (1.2.0). The prior automated pass did not establish full functional parity or seated readability.
@@ -14,9 +16,9 @@
 | Track Like/Unlike | NOW button and track detail use observed membership; unknown state cannot write. Refresh after writes. |
 | Album library | Add to library / Remove from library reflect observed state on detail. |
 | Artist follow | Follow / Unfollow reflect observed state on artist detail. |
-| Back and browsing | Preserve bounded history, query/filter/scroll, Find, Library, detail children and More; explicit Back to now retained. |
+| Back and browsing | Preserve bounded history, query/filter/scroll, Find, Library, detail children and More; one plain Back returns to the previous screen. |
 | Queue and progress | Read-only Up next, upcoming title, elapsed/duration and playback progress retained. |
-| Settings and Ask | Settings gets a separate button; Ask remains synthetic in the distributed preview. |
+| Settings and Find | Settings retains its own button. Find is voice-first and idle on entry, with Type instead and shared results; capture remains synthetic in the distributed preview. |
 | Unknown and pending actions | No replay or optimistic success. An unrelated membership read cannot clear an uncertain write. |
 
 The offline fixture stores membership separately for each reference. Native model tests cover track, album and artist state isolation and both directions of each action; a full-phone UI test follows the public navigation and toggles the controls. Existing native geometry, contrast, keyboard, lifecycle and no-replay tests remain gates. Native results and reviewed captures must be recorded after the run; Windows source checks alone do not prove compilation.
