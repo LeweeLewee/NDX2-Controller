@@ -182,6 +182,6 @@ if __name__ == '__main__':
         if args.action == 'upload':
             upload()
         else:
-            archive('com.riverstone.StillWater', ['CODE_SIGNING_ALLOWED=NO'])
+            archive('com.ndx2.controller', ['CODE_SIGNING_ALLOWED=NO'])
     except (ValueError, RuntimeError) as error:
         raise SystemExit(str(error)) from None

@@ -53,7 +53,7 @@ def generate(check=False):
         products.append(product_ref)
         configurations = []
         for config in ('Debug', 'Release'):
-            settings = {'PRODUCT_NAME': '$(TARGET_NAME)', 'PRODUCT_BUNDLE_IDENTIFIER': 'com.riverstone.'+name,
+            settings = {'PRODUCT_NAME': '$(TARGET_NAME)', 'PRODUCT_BUNDLE_IDENTIFIER': 'com.ndx2.controller' + ('' if name == 'StillWater' else '.' + name),
                         'IPHONEOS_DEPLOYMENT_TARGET': '17.0', 'SWIFT_VERSION': '5.0', 'TARGETED_DEVICE_FAMILY': '1',
                         'SDKROOT': 'iphoneos', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator', 'CODE_SIGN_STYLE': 'Automatic',
                         'SWIFT_OPTIMIZATION_LEVEL': '-Onone' if config == 'Debug' else '-O',
@@ -118,7 +118,7 @@ def generate(check=False):
             'UILaunchScreen':{},'UIApplicationSceneManifest':{'UIApplicationSupportsMultipleScenes':False},
             'UISupportedInterfaceOrientations':['UIInterfaceOrientationLandscapeRight'], 'UIRequiresFullScreen':True,
             'UIStatusBarHidden':True,'UIViewControllerBasedStatusBarAppearance':True,
-            'UIBackgroundModes':['processing'],'BGTaskSchedulerPermittedIdentifiers':['com.riverstone.StillWater.battery-report'],
+            'UIBackgroundModes':['processing'],'BGTaskSchedulerPermittedIdentifiers':['com.ndx2.controller.battery-report'],
             'NSMicrophoneUsageDescription':'Capture an explicit music search. Cancel discards audio; nothing plays automatically.',
             'NSSpeechRecognitionUsageDescription':'Transcribe music searches on this phone. Audio is not sent to a speech server.',
             'NSLocalNetworkUsageDescription':'Connect to your provisioned authenticated music-control bridge.',

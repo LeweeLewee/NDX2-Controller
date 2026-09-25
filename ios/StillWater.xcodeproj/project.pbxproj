@@ -251,7 +251,7 @@
 "name" = "Debug";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWater";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";
@@ -276,7 +276,7 @@
 "name" = "Release";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWater";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";
@@ -388,7 +388,7 @@
 "name" = "Debug";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWaterTests";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller.StillWaterTests";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";
@@ -413,7 +413,7 @@
 "name" = "Release";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWaterTests";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller.StillWaterTests";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";
@@ -507,7 +507,7 @@
 "name" = "Debug";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWaterUITests";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller.StillWaterUITests";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";
@@ -531,7 +531,7 @@
 "name" = "Release";
 "buildSettings" = {
 "PRODUCT_NAME" = "$(TARGET_NAME)";
-"PRODUCT_BUNDLE_IDENTIFIER" = "com.riverstone.StillWaterUITests";
+"PRODUCT_BUNDLE_IDENTIFIER" = "com.ndx2.controller.StillWaterUITests";
 "IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
 "SWIFT_VERSION" = "5.0";
 "TARGETED_DEVICE_FAMILY" = "1";

@@ -2,7 +2,7 @@ import UIKit
 import BackgroundTasks
 
 @MainActor enum BatteryReports {
-    static let identifier = "com.riverstone.StillWater.battery-report"
+    static let identifier = "com.ndx2.controller.battery-report"
     static func request(clientID: String) -> BridgeRequest? {
         UIDevice.current.isBatteryMonitoringEnabled = true
         let phone = UIDevice.current

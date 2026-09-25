@@ -41,7 +41,7 @@
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.riverstone.StillWater.battery-report</string>
+		<string>com.ndx2.controller.battery-report</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Capture an explicit music search. Cancel discards audio; nothing plays automatically.</string>
