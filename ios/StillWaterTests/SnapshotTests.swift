@@ -49,7 +49,7 @@ import UIKit
                 XCTAssertFalse(taps[i].frame.insetBy(dx:-3.75,dy:-3.75).intersects(taps[j].frame.insetBy(dx:-3.75,dy:-3.75)),"Less than 8-unit target gap \(state): \(taps[i].id) / \(taps[j].id)")
             } }
             if state == "touched" {
-                for (id,rect) in [("previous",CGRect(x:460,y:282,width:72,height:64)),("play-pause",CGRect(x:552,y:274,width:80,height:80)),("next",CGRect(x:640,y:282,width:72,height:64)),("amp-down",CGRect(x:848,y:282,width:72,height:64)),("amp-up",CGRect(x:928,y:282,width:72,height:64))] {
+                for (id,rect) in [("previous",CGRect(x:356,y:296,width:96,height:96)),("play-pause",CGRect(x:464,y:288,width:104,height:104)),("next",CGRect(x:580,y:296,width:96,height:96)),("amp-down",CGRect(x:816,y:304,width:80,height:80)),("amp-up",CGRect(x:920,y:304,width:80,height:80))] {
                     let actual = try XCTUnwrap(visible.first { $0.id == id }?.frame)
                     XCTAssertEqual(actual.minX,rect.minX,accuracy:4); XCTAssertEqual(actual.minY,rect.minY,accuracy:4)
                     XCTAssertEqual(actual.width,rect.width,accuracy:4); XCTAssertEqual(actual.height,rect.height,accuracy:4)

@@ -113,10 +113,10 @@ struct StillWaterView: View {
             .position(x:x+w/2,y:y+h/2)
     }
     private func icon(_ mark: Mark, id: String, label: String, x: CGFloat, y: CGFloat, w: CGFloat = 72, h: CGFloat = 64,
-                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, action: @escaping () -> Void) -> some View {
+                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 36, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             OutlineMark(mark: mark).stroke(accent ? Design.accent : Design.ink, style: StrokeStyle(lineWidth:ring ? 2.2 : 1.6,lineCap:.round,lineJoin:.round))
-                .frame(width:30,height:30).frame(width:w,height:h)
+                .frame(width:glyph,height:glyph).frame(width:w,height:h)
                 .background((accent ? Design.accent : Design.ink).opacity(ring ? 0.12 : 0),in:Circle())
                 .overlay(Circle().stroke((accent ? Design.accent : Design.ink).opacity(ring ? 0.7 : 0),lineWidth:1.5))
                 .overlay { if model.pendingAction != nil && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
@@ -145,48 +145,54 @@ struct StillWaterView: View {
             (model.player.state == "paused" ? "PAUSED · " : "") + model.player.artist
         return ZStack(alignment:.topLeading) {
             sleeve(x:48,y:touched ? 56 : 72,size:touched ? 248 : 272,hidden:stopped)
-            VStack(alignment:.leading,spacing:14) {
-                Text(artist.uppercased()).font(Design.font(15,caps:true)).tracking(2.7).lineLimit(1)
-                    .opacity(model.online ? 0.55 : 0.7)
-                    .overlay(alignment:.bottom) { if pressingSettings { Rectangle().frame(height:1) } }
-                    .audit("artist",font:15,opacity:0.55,truncates:true,text:artist.uppercased(),fontName:Design.name(caps:true),tracking:2.7)
-                    .overlay(alignment:.topLeading) {
-                        Color.clear.frame(width:width,height:64).contentShape(Rectangle())
-                            .onLongPressGesture(minimumDuration:0.7,pressing:{ pressingSettings = $0 },perform:{ model.navigate(.settings) })
-                            .accessibilityIdentifier("settings-hold").audit("settings-hold",tap:true)
-                    }
-                DesignText(value:title,units:stopped ? 32 : size,serif:true,lines:2)
-                    .opacity(model.online && !stopped ? 1 : 0.7).audit("track-title",font:stopped ? 32 : size,opacity:model.online && !stopped ? 1 : 0.7,truncates:true,text:title,fontName:Design.name(serif:true),lines:2)
+            VStack(alignment:.leading,spacing:8) {
+                if touched, let ref = model.player.current.artistReference, !ref.isEmpty {
+                    Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
+                        Text(artist).font(Design.font(26)).lineLimit(1).frame(width:width,height:64,alignment:.leading).contentShape(Rectangle())
+                    }.buttonStyle(.plain).accessibilityIdentifier("now-artist").audit("now-artist",font:26,tap:true,truncates:true)
+                } else {
+                    Text(artist.uppercased()).font(Design.font(24,caps:true)).tracking(2).lineLimit(1)
+                        .opacity(0.7).frame(height:64).audit("artist",font:24,opacity:0.7,truncates:true)
+                }
+                DesignText(value:title,units:stopped ? 36 : size,serif:true,lines:2)
+                    .frame(width:width,height:100,alignment:.leading)
+                    .audit("track-title",font:stopped ? 36 : size,truncates:true,text:title,fontName:Design.name(serif:true),lines:2)
                 if !stopped {
-                    DesignText(value:model.player.album,units:26,serif:true,italic:true).opacity(0.7)
-                        .audit("album",font:26,opacity:0.7,truncates:true,text:model.player.album,fontName:Design.name(serif:true,italic:true))
+                    if touched, let ref = model.player.current.albumReference, !ref.isEmpty {
+                        Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
+                            Text(model.player.album).font(Design.font(28,serif:true,italic:true)).lineLimit(1)
+                                .frame(width:width,height:64,alignment:.leading).contentShape(Rectangle())
+                        }.buttonStyle(.plain).accessibilityIdentifier("now-album").audit("now-album",font:28,tap:true,truncates:true)
+                    } else {
+                        DesignText(value:model.player.album,units:28,serif:true,italic:true).opacity(0.7)
+                            .frame(height:64).audit("album",font:28,opacity:0.7,truncates:true)
+                    }
                 }
-            }.frame(width:width,height:touched ? 190 : 272,alignment:touched ? .topLeading : .leading)
-                .audit("now-text-block")
-                .position(x:x+width/2,y:touched ? 151 : 208)
+            }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
+                .position(x:x+width/2,y:touched ? 154 : 208)
             if touched {
-                icon(.previous,id:"previous",label:"Previous track",x:460,y:282,enabled:model.controlsAvailable) { model.mutate("transport",["command":.string("prev")],target:"previous") }
-                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:552,y:274,w:80,h:80,ring:true,enabled:model.controlsAvailable) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
-                icon(.next,id:"next",label:"Next track",x:640,y:282,enabled:model.controlsAvailable) { model.mutate("transport",["command":.string("next")],target:"next") }
-                label("AMP",id:"amp-label",x:848,y:256,w:152,h:20,size:15,alpha:0.55,caps:true,align:.center)
-                Capsule().stroke(Design.ink.opacity(0.18),style:StrokeStyle(lineWidth:1,dash:model.unknownAction == "amplifier" ? [3,3] : []))
-                    .frame(width:152,height:64).position(x:924,y:314).allowsHitTesting(false)
-                icon(.minus,id:"amp-down",label:"Amplifier down",x:848,y:282,enabled:model.controlsAvailable && model.unknownAction != "amplifier") { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
-                icon(.plus,id:"amp-up",label:"Amplifier up",x:928,y:282,enabled:model.controlsAvailable && model.unknownAction != "amplifier") { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
-                if model.unknownAction != nil {
-                    label(model.unknownAction == "amplifier" ? "Volume outcome unknown" : "Command outcome unknown",id:"unknown",x:740,y:351,w:260,h:35,size:18,alpha:0.7,lines:2)
-                }
+                button(model.player.current.saved == "saved" ? "♥  Liked" : "♡  Like",id:"now-like",x:48,y:328,w:248,h:64,
+                       enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.player.current.saved),size:26) { model.toggleCurrentLike() }
+                icon(.previous,id:"previous",label:"Previous track",x:356,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
+                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:288,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
+                icon(.next,id:"next",label:"Next track",x:580,y:296,w:96,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
+                icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:304,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
+                icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:304,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
                 Button { model.navigate(.queue) } label: {
-                    VStack(alignment:.leading,spacing:3) {
-                        Text("UP NEXT").font(Design.font(15,caps:true)).tracking(2.7).opacity(0.55)
-                        Text(model.queue.dropFirst().first?.title ?? "Up next").font(Design.font(26,serif:true)).lineLimit(1)
-                    }.frame(width:260,height:56,alignment:.leading).contentShape(Rectangle())
-                }.buttonStyle(.plain).audit("up-next",tap:true,pill:true).position(x:178,y:416)
-                icon(.mic,id:"ask",label:"Ask for music",x:488,y:376,w:72,h:72,ring:true,accent:true) { model.navigate(.ask) }
-                button("Find",id:"find",x:800,y:392,w:96,border:false) { model.navigate(.find) }
-                button("Library",id:"library",x:904,y:392,w:96,border:false) { model.navigate(.library) }
-                if let p = model.player.position { label(time(p),id:"elapsed",x:48,y:444,w:100,h:24,size:18,alpha:0.7) }
-                if let d = model.player.duration, let p = model.player.position { label("−"+time(max(0,d-p)),id:"remaining",x:900,y:444,w:100,h:24,size:18,alpha:0.7,align:.trailing) }
+                    VStack(alignment:.leading,spacing:2) {
+                        Text("Up next").font(Design.font(20))
+                        Text(model.queue.dropFirst().first?.title ?? "Queue").font(Design.font(24,serif:true)).lineLimit(1)
+                    }.frame(width:248,height:64,alignment:.leading).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityIdentifier("up-next").audit("up-next",font:26,tap:true).position(x:172,y:432)
+                icon(.mic,id:"ask",label:"Ask for music",x:488,y:400,w:72,h:64,accent:true) { model.navigate(.ask) }
+                icon(.settings,id:"settings",label:"Settings",x:704,y:400,w:72,h:64) { model.navigate(.settings) }
+                button("Find",id:"find",x:800,y:400,w:96,h:64,border:false,size:26) { model.navigate(.find) }
+                button("Library",id:"library",x:904,y:400,w:96,h:64,border:false,size:26) { model.navigate(.library) }
+                if model.unknownAction != nil {
+                    label("Outcome unknown",id:"unknown",x:48,y:304,w:280,h:24,size:18,alpha:0.7)
+                } else if let position = model.player.position {
+                    label(time(position) + (model.player.duration.map { " / " + time($0) } ?? ""),id:"elapsed",x:48,y:304,w:248,h:24,size:18,alpha:0.7)
+                }
             }
             if !stopped {
                 Rectangle().fill(Design.ink.opacity(0.18)).frame(width:1048,height:1).audit("waterline").position(x:524,y:472.5)
@@ -212,7 +218,7 @@ struct StillWaterView: View {
     }
     private func filters(y: CGFloat) -> some View {
         ForEach(Array(["albums","tracks","artists","playlists"].enumerated()),id:\.offset) { i,kind in
-            button(kind.capitalized,id:"filter-"+kind,x:48+CGFloat(i)*128,y:y,w:120,border:false,size:18,indicator:model.context.kind == kind) { model.filter(kind) }
+            button(kind.capitalized,id:"filter-"+kind,x:48+CGFloat(i)*128,y:y,w:120,border:false,size:24,indicator:model.context.kind == kind) { model.filter(kind) }
                 .opacity(model.context.kind == kind ? 1 : 0.55)
         }
     }
@@ -248,7 +254,7 @@ struct StillWaterView: View {
                                 VStack(alignment:.leading,spacing:4) {
                                     Text(item.title).font(Design.font(26,serif:true)).lineLimit(1)
                                         .audit("row-title-"+item.id,font:26,scroll:true,truncates:true)
-                                    Text(item.artist + " / " + item.kind).font(Design.font(18)).lineLimit(1).opacity(0.7)
+                                    Text(item.artist + " / " + item.kind).font(Design.font(22)).lineLimit(1).opacity(0.7)
                                 }.frame(maxWidth:.infinity,minHeight:64,alignment:.leading).contentShape(Rectangle())
                             }.buttonStyle(.plain).audit("row-"+item.id,tap:true,scroll:true)
                             OutlineMark(mark:item.saved == "saved" ? .check : item.saved == "unsaved" ? .plus : .question)
@@ -283,12 +289,12 @@ struct StillWaterView: View {
             if model.context.playable {
                 button("Play",id:"play-detail",x:x,y:300,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
             }
-            button(model.pendingAction == "library_save" ? "Saving…" : item.kind == "artists" ? "Follow" : "Library",id:"membership-write",x:x+152,y:300,w:150,
-                   enabled:model.controlsAvailable && model.context.membership != "unknown") {
+            button(model.membershipAction,id:"membership-write",x:x+152,y:300,w:280,
+                   enabled:model.controlsAvailable && model.unknownAction != "library_save" && ["saved","unsaved"].contains(model.context.membership)) {
                 model.mutate("library_save",["reference":.string(item.reference),"saved":.bool(model.context.membership != "saved")])
             }
             if let albumRef = item.albumReference {
-                button("Album",id:"album-link",x:x+314,y:300,w:120,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
+                button("Album",id:"album-link",x:x+444,y:300,w:120,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
             }
             rows(y:376,height:104)
         }

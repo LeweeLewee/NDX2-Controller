@@ -2,7 +2,8 @@ import Foundation
 
 @MainActor final class FixtureTransport: BridgeTransport {
     private var samples: [String: JSONValue] = [:]
-    var state = "playing", saved = "unknown", track = 0
+    var state = "playing", saved = "unsaved", track = 0
+    private var memberships: [String:String] = [:]
     var mutations: [String] = []
     var fail = false
     var clock: () -> Double = { ProcessInfo.processInfo.systemUptime }
@@ -22,7 +23,7 @@ import Foundation
         case "library_page": name = "library-" + (request.args["kind"]?.text ?? "albums")
         case "browse": name = "browse-" + ((request.args["reference"]?.text ?? "").split(separator:"/").dropFirst(2).first.map(String.init) ?? "albums")
         case "queue": name = "queue"
-        case "library_state": name = "membership-" + saved
+        case "library_state": name = "membership-" + (memberships[request.args["reference"]?.text ?? ""] ?? saved)
         case "artwork": name = request.args["side"]?.number == 320 ? "artwork-" + String(request.args["pixel_offset"]?.number ?? 0) : "artwork-80"
         case "voice_review": name = "voice"
         case "battery_report":
@@ -32,7 +33,7 @@ import Foundation
         case "charge?": name = "charge-none"
         case "transport", "play", "amplifier", "library_save":
             mutations.append(request.action)
-            if request.action == "library_save" { saved = request.args["saved"]?.flag == true ? "saved" : "unsaved" }
+            if request.action == "library_save", let ref = request.args["reference"]?.text { memberships[ref] = request.args["saved"]?.flag == true ? "saved" : "unsaved" }
             if request.action == "play" { state = "playing" }
             if request.action == "transport" {
                 switch request.args["command"]?.text {

@@ -196,6 +196,7 @@ struct Preview {
         if p.artwork != player.artwork { artwork = nil; colorPreview = nil; nextArtAttempt = 0 }
         player = p; queue = r.data["queue"].values.map(MusicItem.init)
         account = r.data["account"].text ?? "disconnected"
+        if context.screen == .now { await currentMembership() }
     }
     func navigate(_ screen: Screen) {
         noteContact(); cancelVoice(); generation += 1; transport.cancel(); inFlight = nil
@@ -280,7 +281,27 @@ struct Preview {
         let ref = context.selected.reference, gen = generation
         guard let r = await perform(BridgeRequest("library_state", ["reference": .string(ref)])), r.outcome == "observed", gen == generation else { return }
         context.membership = r.data["saved_state"].text ?? "unknown"
-        if unknownAction == "library_save" { acknowledgeUnknown() }
+        // An unrelated membership read cannot resolve an uncertain write.
+    }
+    func currentMembership() async {
+        let ref = player.current.reference, gen = generation
+        guard !ref.isEmpty else { return }
+        guard let r = await perform(BridgeRequest("library_state", ["reference":.string(ref)])),
+              r.outcome == "observed", gen == generation, ref == player.current.reference else { return }
+        player.current.saved = r.data["saved_state"].text ?? "unknown"
+    }
+    func toggleCurrentLike() {
+        guard !player.current.reference.isEmpty, ["saved","unsaved"].contains(player.current.saved) else { return }
+        mutate("library_save", ["reference":.string(player.current.reference),"saved":.bool(player.current.saved != "saved")], target:"now-like")
+    }
+    var membershipAction: String {
+        if pendingAction == "library_save" { return "Saving…" }
+        let saved = context.membership == "saved"
+        switch context.selected.kind {
+        case "artists": return saved ? "Unfollow" : "Follow"
+        case "tracks": return saved ? "Unlike" : "Like"
+        default: return saved ? "Remove from library" : "Add to library"
+        }
     }
     func mutate(_ action: String, _ args: [String: JSONValue], target: String? = nil) {
         guard controlsAvailable, inFlight == nil, unknownAction != action else { return }
@@ -289,7 +310,7 @@ struct Preview {
             guard let r = await self.perform(BridgeRequest(action, args)) else { return }
             if r.outcome == "submitted" { self.status = "Request sent; checking player" }
             await self.refresh()
-            if action == "library_save" { await self.membership() }
+            if action == "library_save", self.context.screen == .detail { await self.membership() }
         }
     }
     func loadArtwork() async {

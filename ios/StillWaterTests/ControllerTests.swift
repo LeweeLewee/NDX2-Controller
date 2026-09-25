@@ -15,6 +15,42 @@ import XCTest
         }
     }
     func settle() async { for _ in 0..<30 { await Task.yield() } }
+    func testNowRelationshipsLikeAndIndependentAlbumArtistMembership() async throws {
+        let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        let track = m.player.current.reference
+        let album = try XCTUnwrap(m.player.current.albumReference)
+        let artist = try XCTUnwrap(m.player.current.artistReference)
+        XCTAssertFalse(track.isEmpty)
+        XCTAssertEqual(m.player.current.saved,"unsaved")
+        m.toggleCurrentLike(); await settle()
+        XCTAssertEqual(m.player.current.saved,"saved")
+        m.details(MusicItem(.object(["reference":.string(album)]))); await settle()
+        XCTAssertEqual(m.context.selected.kind,"albums"); XCTAssertEqual(m.membershipAction,"Add to library")
+        m.mutate("library_save",["reference":.string(album),"saved":.bool(true)]); await settle()
+        XCTAssertEqual(m.membershipAction,"Remove from library")
+        m.details(MusicItem(.object(["reference":.string(artist)]))); await settle()
+        XCTAssertEqual(m.context.selected.kind,"artists"); XCTAssertEqual(m.membershipAction,"Follow")
+        m.mutate("library_save",["reference":.string(artist),"saved":.bool(true)]); await settle()
+        XCTAssertEqual(m.membershipAction,"Unfollow")
+        m.mutate("library_save",["reference":.string(artist),"saved":.bool(false)]); await settle()
+        XCTAssertEqual(m.membershipAction,"Follow")
+        m.back(); XCTAssertEqual(m.context.selected.reference,album)
+        m.back(toNow:true); await m.refresh()
+        XCTAssertEqual(m.player.current.saved,"saved")
+        m.toggleCurrentLike(); await settle(); XCTAssertEqual(m.player.current.saved,"unsaved")
+        m.deactivate()
+    }
+    func testUnknownMembershipCannotWriteAndUnrelatedReadCannotResolveUncertainty() async {
+        let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        t.saved = "unknown"
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.toggleCurrentLike(); await settle(); XCTAssertTrue(t.mutations.isEmpty)
+        m.unknownAction = "library_save"
+        m.details(MusicItem(.object(["reference":.string("inputs/tidal/artists/1")]))); await settle()
+        XCTAssertEqual(m.unknownAction,"library_save")
+        m.deactivate(); m.acknowledgeUnknown()
+    }
     func testWakeConsumesTouchAndSnapshotExpires() async {
         var time = 100.0
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{time},restore:false)

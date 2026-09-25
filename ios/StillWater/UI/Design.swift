@@ -81,6 +81,10 @@ struct FieldPalette: Equatable {
 enum Design {
     static let width: CGFloat = 1048, height: CGFloat = 480, scale: CGFloat = 0.7206
     static let windowWidth: CGFloat = 755, windowHeight: CGFloat = 346
+    // The decorative border receives no input; interior margins clear the landscape notch.
+    static func fit(_ size: CGSize) -> CGFloat {
+        min(max(0,size.width - 16)/width, max(0,size.height - 16)/height)
+    }
     static let ink = RGB(0xF1EBDF).color, accent = RGB(0xF1C98D).color
     static func name(serif: Bool = false, italic: Bool = false, caps: Bool = false) -> String {
         serif ? (italic ? "InstrumentSerif-Italic" : "InstrumentSerif-Regular") : (caps ? "Geist-Medium" : "Geist-Regular")
@@ -147,7 +151,7 @@ struct DesignText: UIViewRepresentable {
     }
 }
 
-enum Mark { case play, pause, previous, next, mic, search, plus, minus, back, check, question, heart }
+enum Mark { case play, pause, previous, next, mic, search, plus, minus, back, check, question, heart, volumeDown, volumeUp, settings }
 struct OutlineMark: Shape {
     var mark: Mark
     func path(in rect: CGRect) -> Path {
@@ -166,6 +170,17 @@ struct OutlineMark: Shape {
             p.move(to: CGPoint(x:5,y:10)); p.addCurve(to: CGPoint(x:19,y:10), control1: CGPoint(x:5,y:23), control2: CGPoint(x:19,y:23))
             line([(12,19),(12,23)])
         case .search: p.addEllipse(in: CGRect(x:3,y:3,width:13,height:13)); line([(15,15),(22,22)])
+        case .volumeDown, .volumeUp:
+            line([(2,9),(6,9),(11,5),(11,19),(6,15),(2,15),(2,9)])
+            line([(15,12),(23,12)])
+            if mark == .volumeUp { line([(19,8),(19,16)]) }
+        case .settings:
+            p.addEllipse(in:CGRect(x:3,y:3,width:18,height:18))
+            p.addEllipse(in:CGRect(x:9,y:9,width:6,height:6))
+            for i in 0..<8 {
+                let a = Double(i) * .pi / 4
+                line([(12 + CGFloat(cos(a))*9,12 + CGFloat(sin(a))*9),(12 + CGFloat(cos(a))*12,12 + CGFloat(sin(a))*12)])
+            }
         case .plus: line([(5,12),(19,12)]); line([(12,5),(12,19)])
         case .minus: line([(5,12),(19,12)])
         case .back: line([(15,5),(8,12),(15,19)])

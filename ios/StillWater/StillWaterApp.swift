@@ -63,9 +63,9 @@ struct KioskHost: View {
             ZStack {
                 Color.black
                 StillWaterView(model:model)
-                    .scaleEffect(Design.scale).frame(width:Design.windowWidth,height:Design.windowHeight)
+                    .scaleEffect(Design.fit(proxy.size)).frame(width:Design.width * Design.fit(proxy.size),height:Design.height * Design.fit(proxy.size))
                     .clipped().position(x:proxy.size.width/2,y:proxy.size.height/2)
             }
-        }.ignoresSafeArea(.keyboard).background(.black)
+        }.ignoresSafeArea().background(.black)
     }
 }
