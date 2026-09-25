@@ -15,7 +15,11 @@ final class InteractionTests: XCTestCase {
         let search = app.buttons.matching(NSPredicate(format:"identifier == %@","search")).element
         XCTAssertTrue(search.exists)
         search.tap()
-        XCTAssertFalse(app.keyboards.firstMatch.exists)
+        assertKeyboardDismissed(app)
+        XCTAssertTrue(app.buttons["filter-albums"].exists)
+        field.tap(); field.typeText("\n")
+        assertKeyboardDismissed(app)
+        let result = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); result.name = "Find-after-search"; result.lifetime = .keepAlways; add(result)
         XCTAssertEqual(app.statusBars.count,0)
     }
     func testFirstContactRevealsWithoutTransportCommand() {
@@ -29,5 +33,11 @@ final class InteractionTests: XCTestCase {
         XCTAssertEqual(app.buttons["play-pause"].label,"Pause")
         XCTAssertGreaterThan(app.windows.firstMatch.frame.width,app.windows.firstMatch.frame.height)
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "First-contact-touched"; image.lifetime = .keepAlways; add(image)
+        app.buttons["find"].tap()
+        XCTAssertTrue(app.textFields.firstMatch.waitForExistence(timeout:5))
+    }
+    private func assertKeyboardDismissed(_ app: XCUIApplication) {
+        let hidden = XCTNSPredicateExpectation(predicate:NSPredicate(format:"exists == false"),object:app.keyboards.firstMatch)
+        XCTAssertEqual(XCTWaiter.wait(for:[hidden],timeout:5),.completed)
     }
 }

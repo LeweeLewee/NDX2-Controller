@@ -60,7 +60,10 @@ struct StillWaterView: View {
         .frame(width: 1048, height: 480).coordinateSpace(name: "canvas").clipped()
         .foregroundStyle(Design.ink).preferredColorScheme(.dark)
         .onPreferenceChange(AuditKey.self) { auditSink?($0) }
-        .simultaneousGesture(DragGesture(minimumDistance: 0).onChanged { _ in model.noteContact() })
+        // A zero-distance drag at the page level cancels native Button taps.
+        // Observe taps separately; real drags still refresh the idle timer.
+        .simultaneousGesture(TapGesture().onEnded { model.noteContact() })
+        .simultaneousGesture(DragGesture(minimumDistance: 10).onChanged { _ in model.noteContact() })
         .onAppear { updateArt(); animateWake() }
         .onChange(of: model.rest) { _, value in if value == .waking { animateWake() } }
         .onChange(of: model.artwork?.deadline) { _, _ in updateArt() }
