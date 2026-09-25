@@ -139,6 +139,10 @@ struct ArtworkAssembly {
     private(set) var offset = 0, bytes = Data()
     private(set) var deadline = Double.infinity
     private var imageID: String?, bootID: String?
+    init(reference: String, side: Int) {
+        self.reference = reference
+        self.side = side
+    }
     var complete: Bool { offset == side * side }
     mutating func append(_ reply: BridgeReply, started: Double, now: Double) throws {
         let d = reply.data
