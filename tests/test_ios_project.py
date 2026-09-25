@@ -51,7 +51,8 @@ class IOSProjectTests(unittest.TestCase):
                 built = [objects[objects[i]['fileRef']]['path'] for p in phases for i in p['files']]
                 expected = {p.relative_to(ROOT / 'ios').as_posix()
                             for p in (ROOT / 'ios' / target['name']).rglob('*')
-                            if p.is_file() and p.suffix in ('.swift', '.json', '.ttf', '.txt')}
+                            if (p.suffix == '.xcassets' or (p.is_file() and p.suffix in ('.swift', '.json', '.ttf', '.txt', '.xcprivacy')))
+                            and not any(parent.suffix == '.xcassets' for parent in p.parents)}
                 self.assertEqual(set(built), expected)
                 self.assertEqual(len(built), len(set(built)))
                 if target['name'] != 'StillWater':

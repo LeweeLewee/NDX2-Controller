@@ -69,6 +69,8 @@ struct Preview {
     var touched: Bool { rest == .touched }
     var artworkReference: String? { context.screen == .detail ? context.selected.artwork : player.artwork }
     func replaceTransport(_ value: BridgeTransport) {
+        // A distributed design preview cannot switch to saved or newly entered live trust.
+        if RuntimeMode.demoOnly && value is BridgeClient { return }
         deactivate(); transport = value; fixture = value is FixtureTransport; player = Player(); queue = []; boot = nil; revision = -1
         activate()
     }

@@ -1,0 +1,40 @@
+name: Still Water internal TestFlight preview
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['ios-preview-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: still-water-testflight
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/ios-simulator.yml
+  upload:
+    needs: validate
+    runs-on: macos-15
+    timeout-minutes: 25
+    environment: apple-testflight
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - name: Check out validated source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Archive and upload silent internal preview
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          APPLE_BUNDLE_ID: ${{ vars.APPLE_BUNDLE_ID }}
+          APPLE_CERTIFICATE_P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_PROFILE_BASE64: ${{ secrets.APPLE_PROFILE_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: python3 tools/ios_testflight.py upload

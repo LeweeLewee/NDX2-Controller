@@ -11,6 +11,7 @@ import BackgroundTasks
             "charging":.bool(phone.batteryState == .charging || phone.batteryState == .full),"client_id":.string(clientID)])
     }
     static func register() {
+        guard !RuntimeMode.demoOnly else { return }
         BGTaskScheduler.shared.register(forTaskWithIdentifier:identifier,using:nil) { task in
             Task { @MainActor in
                 guard let processing = task as? BGProcessingTask else { task.setTaskCompleted(success:false); return }
@@ -31,6 +32,7 @@ import BackgroundTasks
         }
     }
     static func schedule() {
+        guard !RuntimeMode.demoOnly else { return }
         BGTaskScheduler.shared.cancel(taskRequestWithIdentifier:identifier)
         let request = BGProcessingTaskRequest(identifier:identifier)
         request.requiresExternalPower = true; request.requiresNetworkConnectivity = true

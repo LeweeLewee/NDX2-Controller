@@ -36,6 +36,7 @@ enum SecureEnrollment {
     private static let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
         kSecAttrService as String: "StillWater.bridge", kSecAttrAccount as String: "enrollment-v1"]
     static func load() throws -> Enrollment? {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         var q = query; q[kSecReturnData as String] = true
         var item: CFTypeRef?
         let status = SecItemCopyMatching(q as CFDictionary, &item)
@@ -49,6 +50,7 @@ enum SecureEnrollment {
         return record
     }
     static func save(_ value: Enrollment) throws {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         let data = try JSONEncoder().encode(value)
         let attrs: [String: Any] = [kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
@@ -59,6 +61,7 @@ enum SecureEnrollment {
         } else if status != errSecSuccess { throw BridgeFailure.notConfigured }
     }
     static func forget() throws {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw BridgeFailure.notConfigured }
     }
@@ -104,6 +107,7 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
     func cancel() { operation?.task.cancel(); operation = nil }
     func post(_ path: String, body: Data, authenticated: Bool) async throws -> Data {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         guard operation == nil else { throw BridgeFailure.busy }
         guard body.count <= 8192, ["v1/request", "v1/pair"].contains(path) else { throw BridgeFailure.oversized }
         if authenticated {
@@ -144,6 +148,7 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
         return try BridgeReply.decode(raw, for: request)
     }
     static func pair(origin: String, certificate: Data, code: String) async throws -> Enrollment {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         guard try SecureEnrollment.load() == nil, !code.isEmpty, code.utf8.count <= 256 else { throw BridgeFailure.notConfigured }
         var pending = Enrollment(origin: try Enrollment.origin(origin), anchors: try Enrollment.certificates(certificate), state: "pending")
         try SecureEnrollment.save(pending) // durable before the one-use code is sent; never automatically re-pair
@@ -158,6 +163,7 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
         return pending
     }
     static func replaceTrust(_ certificate: Data) async throws -> Enrollment {
+        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         guard var candidate = try SecureEnrollment.load(), candidate.state == "paired" else { throw BridgeFailure.notConfigured }
         candidate.anchors = try Enrollment.certificates(certificate)
         let probe = BridgeClient(candidate, persistRevocation: false), started = ProcessInfo.processInfo.systemUptime

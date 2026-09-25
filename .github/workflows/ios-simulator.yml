@@ -6,9 +6,11 @@ on:
     paths:
       - 'ios/**'
       - 'tools/ios_ci.py'
+      - 'tools/ios_testflight.py'
       - 'tools/generate_ios_project.py'
       - '.github/workflows/ios-simulator.yml'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -22,7 +24,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 25
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       STILL_WATER_FIXTURE: '1'
     steps:
       - name: Check out source
@@ -43,8 +45,10 @@ jobs:
             -parallel-testing-enabled NO \
             -derivedDataPath local/ios-ci/DerivedData \
             -resultBundlePath local/ios-ci/StillWater.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_ALLOWED=NO STILL_WATER_MODE=STILL_WATER_PREVIEW \
             | tee local/ios-ci/xcodebuild.log
+      - name: Check unsigned iOS device archive
+        run: python3 tools/ios_testflight.py archive-check
       - name: Export results and screenshots for Windows
         if: always()
         run: python3 tools/ios_ci.py export
@@ -59,5 +63,6 @@ jobs:
             local/ios-ci/test-summary.json
             local/ios-ci/screenshots/
             local/ios-ci/StillWater.xcresult/
+            local/ios-release/archive-check.json
           retention-days: 7
           if-no-files-found: warn

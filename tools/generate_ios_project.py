@@ -32,9 +32,12 @@ def generate(check=False):
                                         ('StillWaterUITests', 'StillWaterUITests', 'StillWaterUITests.xctest', 'com.apple.product-type.bundle.ui-testing')]:
         source_build, resource_build, files = [], [], []
         for path in sorted((ROOT / folder).rglob('*')):
-            if not path.is_file() or path.name == 'Info.plist': continue
+            if path.name == 'Info.plist' or any(parent.suffix == '.xcassets' for parent in path.parents): continue
+            if not path.is_file() and path.suffix != '.xcassets': continue
             relative = path.relative_to(ROOT).as_posix()
-            if path.suffix == '.swift': filetype = 'sourcecode.swift'
+            if path.suffix == '.xcassets': filetype = 'folder.assetcatalog'
+            elif path.suffix == '.xcprivacy': filetype = 'text.xml'
+            elif path.suffix == '.swift': filetype = 'sourcecode.swift'
             elif path.suffix in ('.ttf', '.otf'): filetype = 'file'
             elif path.suffix in ('.txt', '.json'): filetype = 'text'
             else: continue
@@ -54,11 +57,14 @@ def generate(check=False):
                         'IPHONEOS_DEPLOYMENT_TARGET': '17.0', 'SWIFT_VERSION': '5.0', 'TARGETED_DEVICE_FAMILY': '1',
                         'SDKROOT': 'iphoneos', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator', 'CODE_SIGN_STYLE': 'Automatic',
                         'SWIFT_OPTIMIZATION_LEVEL': '-Onone' if config == 'Debug' else '-O',
-                        'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'DEBUG' if config == 'Debug' else '',
+                        'SWIFT_ACTIVE_COMPILATION_CONDITIONS': ('DEBUG ' if config == 'Debug' else '') + '$(STILL_WATER_MODE)',
+                        'STILL_WATER_MODE': '', 'CURRENT_PROJECT_VERSION': '1', 'MARKETING_VERSION': '0.1.0',
                         'ENABLE_TESTABILITY': 'YES' if config == 'Debug' else 'NO', 'CLANG_ENABLE_MODULES': 'YES',
                         'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/Frameworks', '@loader_path/Frameworks']}
             if name == 'StillWater':
                 settings['INFOPLIST_FILE'] = 'StillWater/Info.plist'
+                settings['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
+                settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf' if config == 'Debug' else 'dwarf-with-dsym'
             else:
                 settings['GENERATE_INFOPLIST_FILE'] = 'YES'
                 if name == 'StillWaterTests':
@@ -107,7 +113,8 @@ def generate(check=False):
 </Scheme>
 ''')
     info = {'CFBundleDisplayName':'Still Water','CFBundleName':'StillWater','CFBundleIdentifier':'$(PRODUCT_BUNDLE_IDENTIFIER)',
-            'CFBundleExecutable':'$(EXECUTABLE_NAME)','CFBundlePackageType':'APPL','CFBundleShortVersionString':'0.1.0','CFBundleVersion':'1',
+            'CFBundleExecutable':'$(EXECUTABLE_NAME)','CFBundlePackageType':'APPL','CFBundleShortVersionString':'$(MARKETING_VERSION)','CFBundleVersion':'$(CURRENT_PROJECT_VERSION)',
+            'StillWaterBuildMode':'$(STILL_WATER_MODE)',
             'UILaunchScreen':{},'UIApplicationSceneManifest':{'UIApplicationSupportsMultipleScenes':False},
             'UISupportedInterfaceOrientations':['UIInterfaceOrientationLandscapeRight'], 'UIRequiresFullScreen':True,
             'UIStatusBarHidden':True,'UIViewControllerBasedStatusBarAppearance':True,

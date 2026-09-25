@@ -1,7 +1,12 @@
 import SwiftUI
 
 enum RuntimeMode {
-    static let fixture = ProcessInfo.processInfo.arguments.contains("--fixture") || ProcessInfo.processInfo.environment["STILL_WATER_FIXTURE"] == "1"
+    #if STILL_WATER_PREVIEW
+    static let demoOnly = true
+    #else
+    static let demoOnly = false
+    #endif
+    static let fixture = demoOnly || ProcessInfo.processInfo.arguments.contains("--fixture") || ProcessInfo.processInfo.environment["STILL_WATER_FIXTURE"] == "1"
 }
 
 @MainActor final class AppDelegate: NSObject, UIApplicationDelegate {

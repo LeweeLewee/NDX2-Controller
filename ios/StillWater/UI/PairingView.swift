@@ -12,7 +12,7 @@ struct PairingView: View {
     @State private var forget = false
     @State private var replace = false
     @State private var working = false
-    @State private var message = "Import independently verified bridge trust before pairing."
+    @State private var message = RuntimeMode.demoOnly ? "Silent preview: bridge pairing is unavailable in this build." : "Import independently verified bridge trust before pairing."
     var body: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:12) {
@@ -28,7 +28,7 @@ struct PairingView: View {
                     Button("Approve & pair once") { confirm = true }.disabled(certificate == nil || code.isEmpty || working)
                     Button("Replace trust") { replace = true }.disabled(certificate == nil || working)
                     Button("Forget locally") { forget = true }.disabled(working)
-                }.font(Design.font(22)).frame(height:56)
+                }.font(Design.font(22)).frame(height:56).disabled(RuntimeMode.demoOnly)
                 HStack(spacing:16) {
                     Button("Silent demo") { model.replaceTransport(FixtureTransport()); message = "Silent demo: no device commands or microphone capture." }
                     Button("Use saved pairing") {
@@ -36,7 +36,7 @@ struct PairingView: View {
                             guard let record = try SecureEnrollment.load(), record.state == "paired" else { throw BridgeFailure.notConfigured }
                             model.replaceTransport(BridgeClient(record)); message = "Using saved pairing."
                         } catch { message = "Pairing requires local recovery; no request was sent." }
-                    }
+                    }.disabled(RuntimeMode.demoOnly)
                 }.font(Design.font(22)).frame(height:56)
                 Text("If pairing is uncertain, inspect and revoke the orphan at the bridge before forgetting locally. Forgetting is not revocation.")
                     .font(Design.font(18)).foregroundStyle(Design.ink.opacity(0.7))
