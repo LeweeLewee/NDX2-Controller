@@ -19,4 +19,9 @@ Real speech remains disabled for this first control trial; use the keyboard for 
 5. Test amplifier volume separately using the D011 bounded one-press/four-held-frame sequence only. No arbitrary numeric level or inference from digital volume; audible confirmation requires the user.
 6. Test reconnect/background/foreground and uncertain outcomes without replay. Never stop the bridge midway through an unverified mutation merely to test recovery.
 
-Local project/distribution checks pass (10). Native build, signed distribution, host provisioning and all new live observations remain pending. This document does not claim a completed live trial.
+Local project/distribution checks pass (11), including crossed-mode archive rejection. A sandbox temp-directory permission failure was resolved by running the same test under normal Windows permissions; protections were not weakened. Native source `1fec99157969db2f94c116ccbb994365a54a31ac` passed all 31 tests and the live-mode unsigned device archive in run 36251163829. Artifact 10908933076 SHA-256 verified: `1e42aef3af7fca96e0781dc30f58a86dc121805f40072515906cb32ae99a26bc`. Gallery: `local/ios/review-live-beta/review.html`, 50 captures; four changed captures inspected, 46 pixel-identical to the reviewed 8.1.0 gallery. The captures remain fixtures; they do not prove phone TLS or NDX compatibility. Tag `ios-preview-live-2026-09-26` selects this source for signed release. Host provisioning and all new live observations remain pending. This document does not claim a completed live trial.
+
+
+## Signed internal release
+
+[Release run 36252070759](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36252070759) repeated all 31 native tests and the live archive gate, then signed and uploaded **0.1.0 (9.1.0)** with `STILL_WATER_LIVE_BETA`. Apple processing completed; **0.1.0 (9.1.0)** is assigned to the existing Naim NDX2 Controller TestFlight group with status **Testing**. No credentials or private addresses are compiled into this app. Trial host/address input is still outstanding, so no new live NDX reads, playback, volume or collection mutations have occurred.
