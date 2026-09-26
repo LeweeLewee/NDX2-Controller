@@ -48,7 +48,7 @@ struct StillWaterView: View {
             }
             if model.fixture {
                 label("Silent demo", id: "fixture", x: 48, y: model.context.screen == .now ? 24 : 6,
-                      w: 220, h: 18, size: 15, alpha: 0.35, caps: true)
+                      w: 220, h: 22, size: 15, alpha: 0.35, caps: true)
             }
             if !snapshot && (model.consumeContact || (model.context.screen == .now && model.rest != .touched)) {
                 Color.clear.contentShape(Rectangle()).frame(width:1048,height:480)
@@ -362,9 +362,9 @@ struct StillWaterView: View {
                 }
             }
             if !model.context.biographyExpanded && model.context.artistTab != "about" {
-                button(detailMembershipLabel,id:"membership-write",x:left,y:item.biography == nil ? max(148,84+nameHeight+12) : 270,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
-                if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:48,y:320,w:120,border:false,size:18,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
-                if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:184,y:320,w:120,border:false,size:18,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
+                button(detailMembershipLabel,id:"membership-write",x:hasPortrait ? left : 816,y:item.biography == nil ? max(148,84+nameHeight+12) : 270,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
+                if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:48,y:312,w:120,border:false,size:18,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
+                if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:184,y:312,w:120,border:false,size:18,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
                 if model.context.artistTab == "tracks" { rows(y:384,height:88,items:tracks,tracks:true) }
                 else if !albums.isEmpty {
                     ScrollView(.horizontal) {
