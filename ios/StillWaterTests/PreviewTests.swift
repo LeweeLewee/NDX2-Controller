@@ -10,6 +10,20 @@ import XCTest
     func testLiveBetaDoesNotEnableSpeechCapture() {
         XCTAssertFalse(RuntimeMode.speechEnabled)
     }
+    func testPairingDiagnosticsIdentifyStageWithoutLeakingErrorData() {
+        let secret = "secret-code-and-credential"
+        let error = URLError(.cannotConnectToHost,userInfo:[NSLocalizedDescriptionKey:secret,
+            NSURLErrorFailingURLStringErrorKey:"https://" + secret])
+        let failure = PairingFailure(stage:.connect,cause:error)
+        XCTAssertTrue(failure.message.contains("Connect to bridge"))
+        XCTAssertTrue(failure.message.contains("could not be reached"))
+        XCTAssertFalse(failure.message.contains(secret))
+        XCTAssertTrue(failure.message.contains("before forgetting or retrying"))
+        XCTAssertTrue(PairingFailure(stage:.savePending,cause:KeychainFailure(status:-34018)).message.contains("-34018"))
+        XCTAssertTrue(PairingFailure(stage:.connect,cause:URLError(.serverCertificateUntrusted)).message.contains("TLS"))
+        XCTAssertTrue(PairingFailure(stage:.connect,cause:BridgeFailure.unauthenticated).message.contains("rejected the code"))
+        XCTAssertTrue(PairingFailure(stage:.existingEnrollment,cause:BridgeFailure.notConfigured).message.contains("already exists"))
+    }
     #if STILL_WATER_LIVE_BETA
     func testLiveTransportRequiresEnrollmentBeforeNetwork() async {
         XCTAssertFalse(RuntimeMode.demoOnly)

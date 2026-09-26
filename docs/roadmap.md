@@ -203,3 +203,6 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 ### Brief A.1 follow-up — D029 amendment
 
 `charge?` now reports `reason: "window"` for all fresh yes/no decisions, `"stale"` for expired reports and `"none"` for no report since boot. Stale and none remain no. Fresh validation: 137 Python tests, five JavaScript navigation tests and all six silent TLS demo stages passed. Boundary tests distinguish window/no from stale/no at exactly one hour, verify invalid reports cannot refresh expiry and confirm restart returns none. Brief A/A.1 and the unchanged 39-file Still Water source package form one coherent repository checkpoint. No new decision ID, UI, firmware, route or live-device operation.
+
+
+**Live pairing diagnostic follow-up:** Windows authenticated live reads succeeded; physical iPhone pairing remains blocked. Stage-specific, secret-free enrollment diagnostics are prepared on the live-beta branch; native validation/distribution pending. Browser reachability is confirmed and does not prove app enrollment. No live mutations. See [trial report](ios-live-beta.md).

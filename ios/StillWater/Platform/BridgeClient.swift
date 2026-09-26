@@ -2,6 +2,51 @@ import Foundation
 import Security
 import CryptoKit
 
+struct KeychainFailure: Error {
+    let status: OSStatus
+}
+
+struct PairingFailure: Error {
+    enum Stage: String {
+        case savedEnrollment = "Read saved enrollment"
+        case existingEnrollment = "Existing enrollment"
+        case input = "Check address and trust"
+        case savePending = "Save pending enrollment"
+        case connect = "Connect to bridge"
+        case response = "Validate bridge reply"
+        case savePaired = "Save paired enrollment"
+    }
+    let stage: Stage
+    let cause: Error
+    var message: String {
+        let detail: String
+        if let error = cause as? KeychainFailure {
+            detail = "Keychain status \(error.status)."
+        } else if let error = cause as? URLError {
+            switch error.code {
+            case .timedOut: detail = "Connection timed out."
+            case .cannotConnectToHost, .cannotFindHost: detail = "Bridge address could not be reached."
+            case .notConnectedToInternet: detail = "Network unavailable; check Wi-Fi and Local Network permission."
+            case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot,
+                 .serverCertificateNotYetValid, .secureConnectionFailed:
+                detail = "Certificate or TLS verification failed."
+            case .appTransportSecurityRequiresSecureConnection: detail = "iOS transport policy rejected the connection."
+            default: detail = "Network error \(error.code.rawValue)."
+            }
+        } else if stage == .existingEnrollment {
+            detail = "A saved or pending enrollment already exists."
+        } else if let error = cause as? BridgeFailure, error == .unauthenticated {
+            detail = "Bridge rejected the code; it may be incorrect or expired."
+        } else {
+            detail = "Could not complete this step."
+        }
+        // Never include localizedDescription/userInfo: these can contain URLs or secrets.
+        return "\(stage.rawValue): \(detail)" +
+            ([.savePending, .connect, .response, .savePaired, .existingEnrollment].contains(stage)
+             ? " Check bridge enrollment before forgetting or retrying." : "")
+    }
+}
+
 struct Enrollment: Codable {
     var origin: URL
     var anchors: [Data]
@@ -41,7 +86,8 @@ enum SecureEnrollment {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(q as CFDictionary, &item)
         if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess, let data = item as? Data, data.count <= 100000 else { throw BridgeFailure.notConfigured }
+        guard status == errSecSuccess else { throw KeychainFailure(status:status) }
+        guard let data = item as? Data, data.count <= 100000 else { throw BridgeFailure.notConfigured }
         let record = try JSONDecoder().decode(Enrollment.self, from: data)
         guard try Enrollment.origin(record.origin.absoluteString).host == record.origin.host,
               !record.anchors.isEmpty, record.anchors.count <= 8,
@@ -57,13 +103,14 @@ enum SecureEnrollment {
         let status = SecItemUpdate(query as CFDictionary, attrs as CFDictionary)
         if status == errSecItemNotFound {
             var q = query; attrs.forEach { q[$0.key] = $0.value }
-            guard SecItemAdd(q as CFDictionary, nil) == errSecSuccess else { throw BridgeFailure.notConfigured }
-        } else if status != errSecSuccess { throw BridgeFailure.notConfigured }
+            let added = SecItemAdd(q as CFDictionary, nil)
+            guard added == errSecSuccess else { throw KeychainFailure(status:added) }
+        } else if status != errSecSuccess { throw KeychainFailure(status:status) }
     }
     static func forget() throws {
         guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
         let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else { throw BridgeFailure.notConfigured }
+        guard status == errSecSuccess || status == errSecItemNotFound else { throw KeychainFailure(status:status) }
     }
 }
 
@@ -149,18 +196,29 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
     static func pair(origin: String, certificate: Data, code: String) async throws -> Enrollment {
         guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
-        guard try SecureEnrollment.load() == nil, !code.isEmpty, code.utf8.count <= 256 else { throw BridgeFailure.notConfigured }
-        var pending = Enrollment(origin: try Enrollment.origin(origin), anchors: try Enrollment.certificates(certificate), state: "pending")
-        try SecureEnrollment.save(pending) // durable before the one-use code is sent; never automatically re-pair
-        let client = BridgeClient(pending)
-        let raw = try await client.post("v1/pair", body: JSONEncoder().encode(["code": code]), authenticated: false)
-        struct Paired: Decodable { let device: String; let credential: String }
-        let reply = try JSONDecoder().decode(Paired.self, from: raw)
-        guard reply.device.range(of: "^[0-9a-f]{24}$", options: .regularExpression) != nil,
-              reply.credential.range(of: "^[A-Za-z0-9_-]{32,128}$", options: .regularExpression) != nil else { throw BridgeFailure.invalidResponse }
-        pending.state = "paired"; pending.device = reply.device; pending.credential = reply.credential
-        try SecureEnrollment.save(pending)
-        return pending
+        var stage = PairingFailure.Stage.savedEnrollment
+        do {
+            let saved = try SecureEnrollment.load()
+            stage = .existingEnrollment
+            guard saved == nil else { throw BridgeFailure.notConfigured }
+            stage = .input
+            guard !code.isEmpty, code.utf8.count <= 256 else { throw BridgeFailure.notConfigured }
+            var pending = Enrollment(origin: try Enrollment.origin(origin), anchors: try Enrollment.certificates(certificate), state: "pending")
+            stage = .savePending
+            try SecureEnrollment.save(pending) // durable before the one-use code is sent; never automatically re-pair
+            let client = BridgeClient(pending)
+            stage = .connect
+            let raw = try await client.post("v1/pair", body: JSONEncoder().encode(["code": code]), authenticated: false)
+            stage = .response
+            struct Paired: Decodable { let device: String; let credential: String }
+            let reply = try JSONDecoder().decode(Paired.self, from: raw)
+            guard reply.device.range(of: "^[0-9a-f]{24}$", options: .regularExpression) != nil,
+                  reply.credential.range(of: "^[A-Za-z0-9_-]{32,128}$", options: .regularExpression) != nil else { throw BridgeFailure.invalidResponse }
+            pending.state = "paired"; pending.device = reply.device; pending.credential = reply.credential
+            stage = .savePaired
+            try SecureEnrollment.save(pending)
+            return pending
+        } catch { throw PairingFailure(stage:stage,cause:error) }
     }
     static func replaceTrust(_ certificate: Data) async throws -> Enrollment {
         guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }

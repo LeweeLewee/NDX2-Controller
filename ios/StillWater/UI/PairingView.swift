@@ -16,12 +16,15 @@ struct PairingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment:.leading,spacing:12) {
-                Text(message).font(Design.font(18)).foregroundStyle(Design.ink.opacity(0.7))
+                Text("Setup status: " + message).font(Design.font(18)).foregroundStyle(Design.ink)
+                    .fixedSize(horizontal:false,vertical:true).accessibilityIdentifier("pairing-status")
+                Text("Bridge address (include https:// and port)").font(Design.font(15)).foregroundStyle(Design.ink.opacity(0.7))
                 TextField("Bridge address",text:$origin,prompt:Text("https://bridge-host:8991").foregroundStyle(Design.ink.opacity(0.55))).textInputAutocapitalization(.never).autocorrectionDisabled()
                     .font(Design.font(22)).frame(height:56)
                 HStack(spacing:12) {
                     Button("Import trust") { showImporter = true }.frame(width:200,height:56)
-                    SecureField("One-use pairing code",text:$code).textInputAutocapitalization(.never).autocorrectionDisabled().frame(height:56)
+                    SecureField("One-use pairing code",text:$code).textInputAutocapitalization(.never).autocorrectionDisabled()
+                        .keyboardType(.asciiCapable).textContentType(.oneTimeCode).frame(height:56)
                 }.font(Design.font(22))
                 if !fingerprint.isEmpty { Text("SHA-256: " + fingerprint).font(Design.font(18)).textSelection(.enabled) }
                 HStack(spacing:16) {
@@ -57,13 +60,15 @@ struct PairingView: View {
         .confirmationDialog("Approve this bridge and trust?",isPresented:$confirm,titleVisibility:.visible) {
             Button("Pair once") {
                 guard let certificate else { return }; working = true
+                message = "Pairing in progress…"
                 let submittedCode = code; code = ""
                 Task {
                     defer { working = false }
                     do {
                         let record = try await BridgeClient.pair(origin:origin,certificate:certificate,code:submittedCode)
                         model.replaceTransport(BridgeClient(record)); message = "Paired. Verifying an authoritative snapshot."
-                    } catch { message = "Pairing incomplete; inspect local enrollment before trying again." }
+                    } catch let failure as PairingFailure { message = failure.message }
+                    catch { message = "Pairing unavailable in this build or configuration." }
                 }
             }
         } message: { Text(origin + "\nSHA-256: " + fingerprint) }
@@ -80,6 +85,7 @@ struct PairingView: View {
         .confirmationDialog("Forget only this phone's pairing?",isPresented:$forget,titleVisibility:.visible) {
             Button("Forget locally",role:.destructive) {
                 do { model.deactivate(); try SecureEnrollment.forget(); model.replaceTransport(UnconfiguredTransport()); message = "Local pairing removed. Bridge revocation is separate." }
+                catch let failure as KeychainFailure { message = "Could not clear enrollment: Keychain status \(failure.status)." }
                 catch { message = "Protected storage could not be updated." }
             }
         }

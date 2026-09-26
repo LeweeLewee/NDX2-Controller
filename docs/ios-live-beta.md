@@ -25,3 +25,10 @@ Local project/distribution checks pass (11), including crossed-mode archive reje
 ## Signed internal release
 
 [Release run 36252070759](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36252070759) repeated all 31 native tests and the live archive gate, then signed and uploaded **0.1.0 (9.1.0)** with `STILL_WATER_LIVE_BETA`. Apple processing completed; **0.1.0 (9.1.0)** is assigned to the existing Naim NDX2 Controller TestFlight group with status **Testing**. No credentials or private addresses are compiled into this app. Trial host/address input is still outstanding, so no new live NDX reads, playback, volume or collection mutations have occurred.
+
+
+## Pairing diagnostics follow-up — 26 September 2026
+
+The Windows host is provisioned and authenticated desktop snapshot/queue reads succeed against the live NDX. The phone reaches the host in Safari after correcting a browser-only port typo, but app pairing still fails and no phone enrollment exists at the bridge. Do not claim the browser typo explains the app failure. Private host details and readback remain in ignored local files. No playback, volume or collection mutations have occurred.
+
+A diagnostic beta now identifies the failing enrollment stage and displays sanitized Keychain status or network/TLS error categories. It keeps the pending-before-request and no-automatic-retry behavior, existing HTTPS trust verification, and full-strength device credentials. Pairing status wraps visibly and the address has an explicit label. This diagnoses the unresolved failure; it is not yet a proven pairing fix. Native validation and distribution are pending.
