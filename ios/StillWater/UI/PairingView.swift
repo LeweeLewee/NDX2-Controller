@@ -40,7 +40,7 @@ struct PairingView: View {
                 }.font(Design.font(22)).frame(height:56)
                 Text("If pairing is uncertain, inspect and revoke the orphan at the bridge before forgetting locally. Forgetting is not revocation.")
                     .font(Design.font(18)).foregroundStyle(Design.ink.opacity(0.7))
-            }.buttonStyle(.bordered).tint(Design.ink).padding(.bottom,16)
+            }.buttonStyle(QuietButtonStyle()).tint(Design.ink).padding(.bottom,16)
         }
         .fileImporter(isPresented:$showImporter,allowedContentTypes:[.data]) { result in
             do {

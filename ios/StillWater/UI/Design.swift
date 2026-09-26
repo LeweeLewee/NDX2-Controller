@@ -122,6 +122,7 @@ struct DesignText: UIViewRepresentable {
     var serif = false, italic = false, caps = false
     var lines = 1
     var alignment: NSTextAlignment = .left
+    var accent = false
     static func attributes(units: CGFloat, serif: Bool, italic: Bool, caps: Bool,
                            alignment: NSTextAlignment = .left) -> [NSAttributedString.Key:Any] {
         let size = (units * Design.scale * 2).rounded() / (2 * Design.scale)
@@ -145,8 +146,9 @@ struct DesignText: UIViewRepresentable {
     }
     func updateUIView(_ view: UILabel,context: Context) {
         view.numberOfLines = lines
-        view.attributedText = NSAttributedString(string:caps ? value.uppercased() : value,
-            attributes:Self.attributes(units:units,serif:serif,italic:italic,caps:caps,alignment:alignment))
+        var style = Self.attributes(units:units,serif:serif,italic:italic,caps:caps,alignment:alignment)
+        if accent { style[.foregroundColor] = UIColor(red:241/255,green:201/255,blue:141/255,alpha:1) }
+        view.attributedText = NSAttributedString(string:caps ? value.uppercased() : value,attributes:style)
         view.accessibilityLabel = value
     }
     func sizeThatFits(_ proposal: ProposedViewSize,uiView: UILabel,context: Context) -> CGSize? {
@@ -225,5 +227,47 @@ extension Preview {
             bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), provider: provider,
             decode: nil, shouldInterpolate: true, intent: .defaultIntent) else { return nil }
         return UIImage(cgImage: image)
+    }
+}
+
+
+// Keep the native slider interaction/accessibility, with the reference hairline and 20-unit knob.
+struct HairlineSlider: UIViewRepresentable {
+    @Binding var value: Double
+    final class Slider: UISlider {
+        override func trackRect(forBounds bounds: CGRect) -> CGRect {
+            let native = super.trackRect(forBounds:bounds)
+            return CGRect(x:native.minX,y:bounds.midY-0.5,width:native.width,height:1)
+        }
+    }
+    final class Coordinator: NSObject {
+        var owner: HairlineSlider
+        init(_ owner: HairlineSlider) { self.owner = owner }
+        @objc func changed(_ sender: UISlider) { owner.value = Double(sender.value) }
+    }
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    func makeUIView(context: Context) -> UISlider {
+        let slider = Slider(); slider.minimumValue = 0.1; slider.maximumValue = 1
+        let ink = UIColor(red:241/255,green:235/255,blue:223/255,alpha:1)
+        slider.minimumTrackTintColor = ink.withAlphaComponent(0.7); slider.maximumTrackTintColor = ink.withAlphaComponent(0.18)
+        let thumb = UIGraphicsImageRenderer(size:CGSize(width:20,height:20)).image { ctx in
+            ink.setFill(); ctx.cgContext.fillEllipse(in:CGRect(x:0,y:0,width:20,height:20))
+        }
+        slider.setThumbImage(thumb,for:.normal); slider.setThumbImage(thumb,for:.highlighted)
+        slider.accessibilityLabel = "Brightness"
+        slider.addTarget(context.coordinator,action:#selector(Coordinator.changed(_:)),for:.valueChanged)
+        return slider
+    }
+    func updateUIView(_ slider: UISlider,context: Context) {
+        context.coordinator.owner = self; slider.value = Float(value)
+    }
+}
+
+struct QuietButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.lineLimit(1).padding(.horizontal,20).frame(minHeight:56)
+            .foregroundStyle(Design.ink).overlay(Capsule().stroke(Design.ink.opacity(0.25),lineWidth:1))
+            .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.35)
     }
 }

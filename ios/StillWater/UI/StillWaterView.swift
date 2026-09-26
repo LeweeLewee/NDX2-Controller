@@ -90,9 +90,9 @@ struct StillWaterView: View {
     }
     private func label(_ value: String, id: String, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
                        size: CGFloat, alpha: Double = 1, serif: Bool = false, italic: Bool = false,
-                       caps: Bool = false, lines: Int = 1, align: Alignment = .leading) -> some View {
+                       caps: Bool = false, lines: Int = 1, accent: Bool = false, align: Alignment = .leading) -> some View {
         DesignText(value:value,units:size,serif:serif,italic:italic,caps:caps,lines:lines,
-                   alignment:align == .center ? .center : align == .trailing ? .right : .left)
+                   alignment:align == .center ? .center : align == .trailing ? .right : .left,accent:accent)
             .frame(width:w,height:h,alignment:Alignment(horizontal:align.horizontal,vertical:.top)).opacity(alpha)
             .audit(id,font:size,opacity:alpha,truncates:lines > 1,text:caps ? value.uppercased() : value,
                    fontName:Design.name(serif:serif,italic:italic,caps:caps),lines:lines,tracking:caps ? size*0.18 : 0)
@@ -114,13 +114,13 @@ struct StillWaterView: View {
             .position(x:x+w/2,y:y+h/2)
     }
     private func icon(_ mark: Mark, id: String, label: String, x: CGFloat, y: CGFloat, w: CGFloat = 72, h: CGFloat = 64,
-                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 30, selected: Bool = false, action: @escaping () -> Void) -> some View {
+                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 30, selected: Bool = false, ringSize: CGFloat? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             OutlineMark(mark: mark).stroke(accent ? Design.accent : Design.ink, style: StrokeStyle(lineWidth:ring ? 2.2 : 1.6,lineCap:.round,lineJoin:.round))
-                .background { if selected { OutlineMark(mark:mark).fill(Design.ink) } }
+                .background { if selected || mark == .stop { OutlineMark(mark:mark).fill(mark == .stop ? Design.accent : Design.ink) } }
                 .frame(width:glyph,height:glyph).frame(width:w,height:h)
-                .background((accent ? Design.accent : Design.ink).opacity(ring && !accent ? 0.12 : 0),in:Circle())
-                .overlay(Circle().stroke((accent ? Design.accent : Design.ink).opacity(ring ? 0.7 : 0),lineWidth:1.5))
+                .background { if ring { Circle().fill((accent ? Design.accent : Design.ink).opacity(accent && mark == .mic ? 0 : 0.12)).frame(width:ringSize ?? min(w,h),height:ringSize ?? min(w,h)) } }
+                .overlay { if ring { Circle().stroke((accent ? Design.accent : Design.ink).opacity(0.7),lineWidth:1.5).frame(width:ringSize ?? min(w,h),height:ringSize ?? min(w,h)) } }
                 .overlay { if model.pendingAction != nil && model.pendingAction != "amplifier" && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
                 .contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(!enabled)
@@ -430,7 +430,7 @@ struct StillWaterView: View {
         return ZStack(alignment:.topLeading) {
             header(recording || ready ? "" : "Find")
             if recording || ready || model.voiceState == "unavailable" {
-                label(recording ? "LISTENING · \(seconds) OF 0:30" : ready ? (model.transcript.isEmpty ? "NOTHING HEARD" : "STOPPED · \(seconds)") : "MICROPHONE UNAVAILABLE",id:"voice-state",x:204,y:40,w:632,h:24,size:15,alpha:0.7,caps:true,align:.center)
+                label(recording ? "LISTENING · \(seconds) OF 0:30" : ready ? (model.transcript.isEmpty ? "NOTHING HEARD" : "STOPPED · \(seconds)") : "MICROPHONE UNAVAILABLE",id:"voice-state",x:204,y:40,w:632,h:24,size:15,alpha:0.7,caps:true,accent:true,align:.center)
             }
             if recording { Ripples(reduce:reduceMotion || snapshot).frame(width:520,height:520).position(x:524,y:336).id(model.voiceSession).allowsHitTesting(false) }
             if !queryFocused && ((!recording && !ready) || !model.transcript.isEmpty) {
@@ -441,7 +441,7 @@ struct StillWaterView: View {
                 if recording { model.stopVoice() } else if ready { model.submitVoice() } else { model.startVoice() }
             }
             }
-            if ready { icon(.reset,id:"voice-reset",label:"Discard and record again",x:376,y:304,w:72,h:64,ring:true,glyph:30) { model.startVoice() } }
+            if ready { icon(.reset,id:"voice-reset",label:"Discard and record again",x:376,y:304,w:72,h:64,ring:true,glyph:26,ringSize:56) { model.startVoice() } }
             if !recording && !ready {
                 TextField("Or type here",text:$model.context.query).font(Design.font(26,serif:true,italic:true)).focused($queryFocused).submitLabel(.search).autocorrectionDisabled()
                     .accessibilityIdentifier("typed-query").onSubmit { queryFocused = false; model.submitTypedSearch() }
@@ -468,7 +468,7 @@ struct StillWaterView: View {
                         .opacity(model.preferences.palette == name ? 1 : 0.55)
                 }
                 label("Brightness",id:"brightness-label",x:48,y:210,w:300,h:28,size:22)
-                Slider(value:$model.preferences.brightness,in:0.1...1).tint(Design.ink)
+                HairlineSlider(value:$model.preferences.brightness)
                     .onChange(of:model.preferences.brightness) { _,v in UIScreen.main.brightness = v; model.preferences.save() }
                     .frame(width:952,height:64).audit("brightness",tap:true).position(x:524,y:266)
                 label("Turn screen off after",id:"timeout-label",x:48,y:320,w:500,h:30,size:22)
