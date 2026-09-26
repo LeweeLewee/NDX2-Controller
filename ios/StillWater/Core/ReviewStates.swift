@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -41,7 +41,7 @@ import Foundation
             } else { model.context.screen = state == "library" ? .library : .find }
             model.context.query = "Evening listening"
             if state == "keyboard" { model.context.screen = .ask; model.context.typing = true; model.keyboardVisible = true }
-        case "artist-following","artist-tracks","artist-about","artist-missing","track-liked","album-saved":
+        case "artist-following","artist-tracks","artist-about","artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name","track-liked","album-saved":
             let fixture = FixtureTransport()
             let kind = state.hasPrefix("artist-") ? "artists" : state == "track-liked" ? "tracks" : "albums"
             let d = (try? await fixture.send(BridgeRequest("browse",["reference":.string("inputs/tidal/"+kind+"/1")]))).map(\.data) ?? .null
@@ -53,6 +53,10 @@ import Foundation
                 if state != "artist-missing" { await model.loadArtwork() }
                 model.context.artistTab = state == "artist-tracks" ? "tracks" : state == "artist-about" ? "about" : "albums"
                 if state == "artist-missing" { model.context.selected.biography = nil; model.context.selected.artwork = nil; model.context.items = [] }
+                if state == "artist-no-bio" { model.context.selected.biography = nil }
+                if state == "artist-no-portrait" { model.artwork = nil; model.context.selected.artwork = nil }
+                if state == "artist-no-albums" { model.context.items = [] }
+                if state == "artist-long-name" { model.context.selected.title = "An Exceptionally Long Artist Ensemble Name" }
                 for _ in 0..<4 { await model.loadQueueArtwork() }
             }
         case "ask-idle","ask-typing","ask-unavailable":

@@ -163,7 +163,7 @@ struct StillWaterView: View {
                         .opacity(0.7).frame(height:64).audit("artist",font:24,opacity:0.7,truncates:true)
                 }
                 DesignText(value:title,units:stopped ? 36 : size,serif:true,lines:2)
-                    .frame(width:width,height:touched ? 80 : 100,alignment:.leading)
+                    .frame(width:width,height:100,alignment:.leading)
                     .audit("track-title",font:stopped ? 36 : size,truncates:true,text:title,fontName:Design.name(serif:true),lines:2)
                 if !stopped {
                     if touched, let ref = model.player.current.albumReference, !ref.isEmpty {
@@ -176,8 +176,8 @@ struct StillWaterView: View {
                             .frame(height:64).audit("album",font:28,opacity:0.7,truncates:true)
                     }
                 }
-            }.frame(width:width,height:touched ? 224 : 244,alignment:.topLeading).audit("now-text-block")
-                .position(x:x+width/2,y:touched ? 144 : 208)
+            }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
+                .position(x:x+width/2,y:touched ? 130 : 208)
             if touched {
                 icon(.previous,id:"previous",label:"Previous track",x:355,y:272,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
                 icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:264,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
@@ -311,7 +311,7 @@ struct StillWaterView: View {
     }
     private var albumDetail: some View {
         let item = model.context.selected
-        let facts = ([item.kind == "albums" ? "Album" : item.kind == "tracks" ? "Track" : "Playlist"] + [item.year.map(String.init), item.duration.map { time($0) }].compactMap { $0 }).joined(separator:" · ")
+        let facts = ([item.kind == "albums" ? "Album" : item.kind == "tracks" ? "Track" : "Playlist"] + [item.year.map(String.init), item.trackCount.map { "\($0) tracks" }, item.duration.map { "\($0/60000) min" }].compactMap { $0 }).joined(separator:" · ")
         return ZStack(alignment:.topLeading) {
             header(""); sleeve(x:48,y:56,size:248)
             if let ref = item.artistReference {
@@ -349,8 +349,8 @@ struct StillWaterView: View {
                     .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.7),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
                     .position(x:160,y:240).allowsHitTesting(false)
             }
-            label("ARTIST · TIDAL",id:"artist-kind",x:left,y:44,w:488,h:24,size:15,alpha:0.55,caps:true)
-            label(item.title,id:"detail-title",x:left,y:76,w:width,h:64,size:44,serif:true,lines:1)
+            label("ARTIST · TIDAL",id:"artist-kind",x:left,y:28,w:488,h:24,size:15,alpha:0.55,caps:true)
+            label(item.title,id:"detail-title",x:left,y:56,w:hasPortrait ? 488 : 776,h:92,size:44,serif:true,lines:2)
             if let biography = item.biography, !biography.isEmpty {
                 if model.context.biographyExpanded || model.context.artistTab == "about" {
                     ScrollView { Text(biography).font(Design.font(22)).lineSpacing(5).frame(maxWidth:.infinity,alignment:.leading) }

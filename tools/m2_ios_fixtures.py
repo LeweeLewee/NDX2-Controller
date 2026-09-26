@@ -56,6 +56,7 @@ def vectors():
         record('library-' + kind, 'library_page', {'kind': kind})
         record('browse-' + kind, 'browse', {'reference': f'inputs/tidal/{kind}/1'})
     portrait = record('artist-bio', 'artist_bio', {'reference': 'inputs/tidal/artists/1'})['data']['artwork']
+    record('portrait-80', 'artwork', {'reference': portrait})
     for offset in range(0, 320 * 320, 6400):
         record('portrait-' + str(offset), 'artwork', {'reference': portrait, 'side': 320, 'pixel_offset': offset})
     record('search-more', 'search', {'query': 'quiet', 'kind': 'albums', 'offset': 12})

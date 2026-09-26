@@ -26,7 +26,7 @@ import Foundation
         case "library_state": name = "membership-" + (memberships[request.args["reference"]?.text ?? ""] ?? saved)
         case "artwork":
             let portrait = request.args["reference"]?.text == sample("artist-bio")["data"]["artwork"].text
-            name = request.args["side"]?.number == 320 ? (portrait ? "portrait-" : "artwork-") + String(request.args["pixel_offset"]?.number ?? 0) : "artwork-80"
+            name = request.args["side"]?.number == 320 ? (portrait ? "portrait-" : "artwork-") + String(request.args["pixel_offset"]?.number ?? 0) : (portrait ? "portrait-80" : "artwork-80")
         case "artist_bio": name = "artist-bio"
         case "voice_review": name = "voice"
         case "battery_report":
@@ -84,7 +84,7 @@ import Foundation
             let titles = ["Listening Studies", "Water & Light", "Late Afternoon", "Quiet Hours"]
             let art = sample("browse-albums")["data"]["item"]["artwork"]
             func album(_ number: Int) -> JSONValue {
-                .object(["reference":.string("inputs/tidal/albums/\(number)"),"title":.string(titles[(number-1)%4]),"artist":.string("River Stone Ensemble"),"kind":.string("albums"),"artwork":art,"year":.int(2026-number+1),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1")])
+                .object(["reference":.string("inputs/tidal/albums/\(number)"),"title":.string(titles[(number-1)%4]),"artist":.string("River Stone Ensemble"),"kind":.string("albums"),"artwork":art,"year":.int(2026-number+1),"track_count":.int(6),"duration":.int(1620000),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1")])
             }
             func trackItem(_ number: Int, albumID: Int) -> JSONValue {
                 .object(["reference":.string("inputs/tidal/tracks/\(number)"),"title":.string(["A Still Morning","Soft Light","Quiet Hours","On the Water","After Rain","Evening Study"][(number-101)%6]),"artist":.string("River Stone Ensemble"),"album":.string(titles[(albumID-1)%4]),"kind":.string("tracks"),"artwork":art,"duration":.int(210000+(number-101)%6*24000),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1"),"album_reference":.string("inputs/tidal/albums/\(albumID)")])

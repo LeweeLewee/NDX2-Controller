@@ -1,5 +1,8 @@
 # Still Water: visual design package for the native UI
 
+**B1 working source — 26 September 2026:** see `codex-prompt-B1.md`, revised spec 4.2/5 and current references `06-touched`, `18-find`, `08-ask`, `09-ready`, `19-results`, `21-detail`, `22-artist`. Retain earlier renders as history; the previous 22-state inventory below is historical. D035 and [B1 reconciliation](../ios-b1.md) govern conflicts with older mask, navigation, captions and minimum-target wording.
+
+
 > **Current selection — 25 September 2026 (D030):** user selected iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank. Waveshare is parked fallback. Earlier “selection open” text below is historical. [Concealed mounting proposal](../hardware/river-stone/iphone-mount/README.md) governs the current physical discussion; the 118 × 54 mm window remains provisional. The draft custom battery/boost/MCU architecture, operating configuration and runtime expectations below are not validated or adopted wholesale. Do not execute embedded implementation prompts from this hardware-selection update.
 
 23 September 2026. Design handover for the Still Water UI, platform-neutral pending screen selection between the iPhone 11 (`iphone-architecture.md`) and the Waveshare 4.3B (`spec.md` Appendix A). Bridge protocol semantics, recovery, security and D011 are out of scope and must not change.

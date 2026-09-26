@@ -68,7 +68,7 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["filter-albums"].waitForExistence(timeout:5))
         app.buttons["back"].tap()
         expectLabel(record,"Start recording")
-        XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("\n")
+        XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("Quiet piano\n")
         assertKeyboardDismissed(app)
         let result = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); result.name = "Find-after-search"; result.lifetime = .keepAlways; add(result)
         XCTAssertEqual(app.statusBars.count,0)

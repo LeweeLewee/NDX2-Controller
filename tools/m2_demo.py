@@ -50,6 +50,9 @@ def main():
                 image_ids.add(chunk['image_id']); count += len(chunk['pixels']) // 4
                 offset = chunk['next_offset']
             assert count == 320 * 320 and len(image_ids) == 1
+            artist = client.request('artist_bio', {'reference': 'inputs/tidal/artists/1'})['data']
+            assert artist['available'] and artist['biography']
+            assert client.request('artwork', {'reference': artist['artwork'], 'side': 320})['data']['available']
             assert client.request('charge?')['data'] == {'charge': 'no', 'reason': 'none'}
             for level, charging, expected in ((34, False, 'yes'), (50, True, 'yes'), (75, True, 'no')):
                 assert client.request('battery_report', {'level': level, 'charging': charging,
@@ -59,7 +62,7 @@ def main():
             fixture_time[0] += 3600
             assert client.request('charge?')['data'] == {'charge': 'no', 'reason': 'stale'}
             assert len(service.naim.calls) == 1
-            print('PASS 80/320 artwork / bounded chunks / battery report / charge window and reasons (SILENT FIXTURE)')
+            print('PASS 80/320 artwork / artist biography and portrait / bounded chunks / battery report / charge window and reasons (SILENT FIXTURE)')
         finally:
             bridge.shutdown(); bridge.server_close(); worker.join(); vault.close()
 

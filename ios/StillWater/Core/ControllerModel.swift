@@ -132,7 +132,7 @@ struct Preview {
         if voiceState == "recording" {
             if fixture { updateFixtureTranscript(now:now) }
             voiceSeconds = min(30, max(0, Int(30 - (voiceDeadline - now))))
-            if now >= voiceDeadline || (stopOnSilence && lastSpeechAt.map { now - $0 >= 2 } == true) { stopVoice() }
+            if now >= voiceDeadline || (stopOnSilence && !transcript.isEmpty && lastSpeechAt.map { now - $0 >= 2 } == true) { stopVoice() }
         }
         // iOS owns actual lock. Releasing the idle timer cannot force a hardware sleep deadline.
         let idleHold = now - lastTouch < Double(preferences.timeout) && (rest == .touched || (context.screen == .ask && voiceState == "recording"))

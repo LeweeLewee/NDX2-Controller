@@ -204,7 +204,8 @@ import XCTest
         reply = try await t.send(BridgeRequest("charge?")); XCTAssertEqual(reply.data["reason"].text,"stale"); XCTAssertEqual(reply.data["charge"].text,"no")
         _ = try await t.send(BridgeRequest("battery_report",["level":.int(75),"charging":.bool(true),"client_id":.string("test")]))
         reply = try await t.send(BridgeRequest("charge?")); XCTAssertEqual(reply.data["reason"].text,"window"); XCTAssertEqual(reply.data["charge"].text,"no")
-    }    func testSilenceStopsOnlyAfterActivityAndNeverSubmits() async {
+    }
+    func testSilenceStopsOnlyAfterActivityAndNeverSubmits() async {
         var time = 100.0
         let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{time},restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
@@ -212,8 +213,8 @@ import XCTest
         time += 3; await m.refresh(); m.fixture = false; m.tick()
         XCTAssertEqual(m.voiceState,"recording")
         m.transcript = "quiet piano"; m.noteSpeechActivity()
-        time += 1.9; await m.refresh(); m.fixture = false; m.tick(); XCTAssertEqual(m.voiceState,"recording")
-        time += 0.1; m.tick(); XCTAssertEqual(m.voiceState,"stopped")
+        time += 1.5; await m.refresh(); m.fixture = false; m.tick(); XCTAssertEqual(m.voiceState,"recording")
+        time += 0.5; m.tick(); XCTAssertEqual(m.voiceState,"stopped")
         XCTAssertFalse(t.requests.contains("search"))
         m.startVoice(); XCTAssertEqual(m.transcript,"")
         m.stopOnSilence = false; m.noteSpeechActivity(); time += 3

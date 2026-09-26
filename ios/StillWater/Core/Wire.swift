@@ -103,7 +103,7 @@ struct MusicItem: Equatable, Identifiable {
     var reference = "", title = "", artist = "", album = "", kind = "tracks"
     var artwork: String?, artistReference: String?, albumReference: String?
     var biography: String?
-    var year: Int?, duration: Int?
+    var year: Int?, duration: Int?, trackCount: Int?
     var saved = "unknown"
     var id: String { reference }
     init(_ value: JSONValue = .null) {
@@ -112,8 +112,9 @@ struct MusicItem: Equatable, Identifiable {
         artist = value["artist"].text ?? ""
         album = value["album"].text ?? ""
         kind = value["kind"].text ?? "tracks"
-        biography = value["biography"].text.map { String($0.unicodeScalars.prefix(2000)) }
+        biography = value["biography"].text.map { String(String.UnicodeScalarView($0.unicodeScalars.prefix(2000))) }
         year = value["year"].number.flatMap { (1900...2100).contains($0) ? $0 : nil }
+        trackCount = value["track_count"].number.flatMap { (1...10000).contains($0) ? $0 : nil }
         duration = value["duration"].number.flatMap { $0 > 0 ? $0 : nil }
         artwork = value["artwork"].text
         artistReference = value["artist_reference"].text
@@ -135,6 +136,7 @@ struct Player: Equatable {
         state = ["playing","paused","stopped"].contains(observed) ? observed : "unknown"
         source = value["sourceDetail"].text ?? ""; artwork = value["artwork"].text
         position = value["transportPosition"].number.flatMap { $0 >= 0 ? $0 : nil }
+        trackCount = value["track_count"].number.flatMap { (1...10000).contains($0) ? $0 : nil }
         duration = value["duration"].number.flatMap { $0 > 0 ? $0 : nil }
     }
 }
