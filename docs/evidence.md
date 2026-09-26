@@ -350,3 +350,14 @@ The user rejected the prior visual result. Functional success at `85628f2` remai
 [Run 36232443600](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232443600), source `a73fe4e`, was cancelled by the replacement push during native tests. Its tiny export artifact is not validation evidence. [Run 36232563391](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232563391), source `3a0312a`, failed before any runner or steps started. Check annotation: “The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings”. This is an external build blocker, not a compilation result. No billing settings were changed.
 
 Native compilation, geometry tests, fresh screenshot comparison and an updated internal release remain pending. TestFlight 0.1.0 (6.1.0) remains unchanged. See [visual audit](ios-visual-audit.md).
+
+
+## D035 visual correction retry — 26 September 2026
+
+GitHub billing ceased blocking the user-requested retry. Native run 36233599779 compiled but found caption/artist target geometry failures; direct review exposed incorrect wrapped title height. These were corrected without weakening the gates. At `5e78b5f722bd16a80c44aa831c072b407c8f8f7d`, [run 36234432936](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36234432936) passed 28/28 native tests and unsigned device archive. Artifact10904305394 was verified against SHA-256 `4fbc064fb1934bd241f99836289c00147fd3cb0e2e37b39f132dcd710956aba7`. All 43 first-run captures were inspected, then the ten changed/new final captures; the other 36 final captures are pixel-identical. Gallery: `local/ios/review-b1-visual/review.html`.
+
+[Signed release run 36235235938](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36235235938), tag `ios-preview-2026-09-26-b1-visual`, repeated 28 passing tests and archive validation, signed and uploaded 0.1.0 (7.1.0). Apple processing was observed; group availability is recorded separately. No live NDX, volume, playback, speech, firmware or route mutation occurred.
+
+User feedback during upload identified a missed shared-header inconsistency. The latest source still places Silent Demo at y24 on NOW versus y6 elsewhere; this refactor remains open. Safe-area fitting and canvas centering were compared with the earlier B1 source and are unchanged. The visual review therefore does not constitute user acceptance; [audit](ios-visual-audit.md) records the affected screens and retained limitations.
+
+Release completion: Apple processed build **0.1.0 (7.1.0)**; assignment to the existing **Naim NDX2 Controller TestFlight** group is verified with status **Testing**. Release artifact `10904386131` SHA-256 verified: `9c2f040628353880234e2d80d710d806bacbd51d7998fc4d0966cb340b4d910b`. Shared-boundary correction remains open.

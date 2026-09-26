@@ -27,9 +27,9 @@ Typography: screenshot serif appears to be the browser's broader Times fallback,
 
 Fixture art is procedural and fictional, transcribed from the supplied HTML compositions. iOS fixture vectors still pass through the real Contract artwork normalization/chunking. No external photos or provider claims are introduced.
 
-## Validation
+## Initial validation state (historical)
 
-Pending fresh native build, screenshot-by-screenshot review and final internal release. Do not infer visual acceptance from geometry tests alone.
+At the first checkpoint, a fresh native build, screenshot-by-screenshot review and final internal release were pending. Do not infer visual acceptance from geometry tests alone.
 
 ## Visual correction follow-up — 26 September 2026
 
@@ -47,3 +47,28 @@ GitHub's billing blocker cleared on the user's requested retry. Run 36233599779 
 Visual inspection additionally exposed overlap for the long track title and long artist name. The measurement paragraph used truncation and therefore underestimated wrapped height; wrapping must be measured before the visible line limit. The test measurement now uses wrapping too. Caption height and artist target spacing were corrected without weakening minimum targets or gaps. Missing-portrait Follow is separated from the album/track selector; missing biography retains the simple left-aligned action. The pairing address prompt uses the theme ink explicitly.
 
 Observed limitations retained: RGB565 artwork has visible colour banding and the 80-pixel queue sleeves are softer than browser art; these remain within the existing bridge format. Fixture text/data are fictional and may differ from reference titles. Native keyboard chrome, safe perimeter, larger transport targets, track hearts and plain Back are deliberate differences. Full-phone captures include the perimeter, so only inlay captures provide equal-content-height comparison. A passing rerun and fresh review remain required.
+
+
+## Passing native rerun
+
+[Run 36234432936](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36234432936), source `5e78b5f722bd16a80c44aa831c072b407c8f8f7d`, passed all 28 native tests (24 unit/snapshot/wire and four full-phone interaction tests) with zero failures, followed by a successful unsigned iOS-device archive. The intervening `fa2be86` run was cancelled when the visually discovered wrapping fix superseded it; it is not a pass. Fresh rendered review and release are tracked below.
+
+The gallery now fits comparison columns at the native/reference width ratio, with aligned image tops and a full-pixel option. Browser automation's URL policy prevented opening the new local gallery; inspection uses the native PNG files directly, not a browser-rendered substitute.
+
+
+## Final simulator visual review
+
+Successful artifact `10904305394` (`still-water-ios-21`, 65,455,673 bytes) was verified against SHA-256 `4fbc064fb1934bd241f99836289c00147fd3cb0e2e37b39f132dcd710956aba7`. The gallery is `local/ios/review-b1-visual/review.html`, retaining all 46 original native captures and the exact source identity. Its ten changed/new captures were inspected directly: long track title, long artist name, artist following/no-bio/no-portrait/tracks, full-phone artist tracks, full-phone album actions, full-phone NOW and keyboard. The other 36 images are pixel-identical to the already inspected first-run captures. Text overlaps are resolved, album sleeves clear the edge, retained controls are separated, and full-phone background/safe areas remain intact.
+
+This is a completed engineering visual review for the internal trial, not user design acceptance or exact pixel identity with an 800-wide browser reference. The screenshot-first Times/Arial assumption remains explicit. The native pairing address still renders system-blue despite its explicit prompt styling; this utility has no supplied reference, and its trust/recovery behavior is retained. Artwork banding/soft queue previews, native keyboard chrome and fixture-content differences remain documented limits. No live playback, volume, NDX, speech, bridge routes or firmware were changed or tested.
+
+Tag `ios-preview-2026-09-26-b1-visual` points to the tested source. [Internal release run 36235235938](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36235235938) completed successfully: repeated native validation, signing and upload passed. Apple processing completed and **0.1.0 (7.1.0)** is assigned to the existing Naim NDX2 Controller TestFlight group, with status **Testing**. Release artifact `10904386131` (65,410,557 bytes) was downloaded and verified against SHA-256 `9c2f040628353880234e2d80d710d806bacbd51d7998fc4d0966cb340b4d910b`.
+
+
+## User follow-up: shared outer boundary (open)
+
+During the upload, the user identified an inconsistent boundary across secondary pages, using Now Playing's Silent Demo label as the anchor. Confirmed in the latest tested source: the marker is at x48/y24 on NOW and x48/y6 everywhere else. The shared header title is at y30, so simply moving the marker would collide with it; the secondary header/content band needs refactoring together. This was missed in the earlier visual review and is not fixed in build 7.1.0.
+
+Affected: Up next; Find Idle/Listening/Ready/Results and typing header; Library; album/track details; all artist variants; Settings, Display, Connection, Device, Wi-Fi and Pairing. Artist portrait decoration needs boundary review too. NOW supplies the reference boundary and should remain the layout anchor.
+
+Verified: the latest work did not alter KioskHost positioning, Design.fit, system safe-area handling, the extra 8-point inset or the x48 primary text anchor. The entire design has not been shifted left into the iPhone 11 notch area. Only the colour field ignores the device safe area. The requested follow-up is confirmation and affected-screen identification; this record does not claim a new alignment implementation or another release. Preserve the left exclusion zone in any subsequent shared-header refactor.
