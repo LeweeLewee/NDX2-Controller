@@ -1,13 +1,15 @@
 """Offline distribution gates; no signing credential or Apple request is used."""
 from datetime import datetime, timedelta
 import os
+import plistlib
+import tempfile
 from pathlib import Path
 import sys
 import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from ios_testflight import build_mode, build_number, export_options, profile_identity, value
+from ios_testflight import build_mode, inspect_archive, build_number, export_options, profile_identity, value
 
 
 class TestFlightGates(unittest.TestCase):
@@ -16,6 +18,27 @@ class TestFlightGates(unittest.TestCase):
         self.assertEqual(build_mode('live'), 'STILL_WATER_LIVE_BETA')
         for mode in ['', None, 'production', 'live;command']:
             with self.assertRaises(ValueError): build_mode(mode)
+
+    def test_archive_must_match_selected_mode_and_remain_internal_identity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            app = root / 'Products/Applications/StillWater.app'
+            app.mkdir(parents=True)
+            (app / 'Assets.car').write_bytes(b'synthetic')
+            (app / 'StillWater').write_bytes(b'synthetic executable')
+            privacy = Path(__file__).resolve().parents[1] / 'ios/StillWater/Resources/PrivacyInfo.xcprivacy'
+            (app / 'PrivacyInfo.xcprivacy').write_bytes(privacy.read_bytes())
+            info = {'CFBundleIdentifier':'com.example.test', 'CFBundleShortVersionString':'0.1.0',
+                    'CFBundleVersion':'9.1.0', 'CFBundleSupportedPlatforms':['iPhoneOS'],
+                    'DTXcode':'2630', 'DTSDKName':'iphoneos26.2', 'MinimumOSVersion':'17.0',
+                    'CFBundleIcons':{'CFBundlePrimaryIcon':{'CFBundleIconName':'AppIcon'}}}
+            with patch('ios_testflight.OUTPUT', root):
+                for mode, other in [('preview','live'), ('live','preview')]:
+                    info['StillWaterBuildMode'] = build_mode(mode)
+                    (app / 'Info.plist').write_bytes(plistlib.dumps(info))
+                    self.assertEqual(inspect_archive(root,'com.example.test',mode), app)
+                    with self.assertRaises(ValueError): inspect_archive(root,'com.example.test',other)
+                    with self.assertRaises(ValueError): inspect_archive(root,'com.example.other',mode)
 
     def profile(self):
         return {'UUID': '11111111-2222-3333-4444-555555555555',
