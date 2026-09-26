@@ -8,7 +8,7 @@
 
 **User clarification, 25 September 2026: original 01 River Stone is the sole visual reference for both the body and screen-to-stone interface.** Preserve its low asymmetric pebble, soft shoulders, inset landscape screen and mineral finish while adapting the internals for iPhone 11 and the selected UGREEN bank. The supplied “04 Tide pool” image is retained only as superseded reference history; do not use its bowl/rim geometry to drive the design. The section diagram below explains mounting layers only and does not prescribe the exterior contour.
 
-## First mounting layout — 25 September 2026
+## Mounting layout — revised 26 September 2026
 
 ![Front, section, underside and acoustic reservations](mounting-layout.svg)
 
@@ -21,7 +21,7 @@ The user repeated the selected bank name, UGREEN Nexode 20000mAh PD 20W QC Power
 | Overall planning bounds | 240 W × 170 D × 105 H mm |
 | Phone angle | 50 degrees from the table |
 | Lower phone glass edge | 36 mm above underside datum |
-| Visible aperture | 118 × 54 mm, provisional |
+| Visible aperture | 137.9 × 62.7 mm nominal rectangle; 6.5 mm inset from every outer phone edge |
 | Local glass recess | 1.2 mm trial target |
 | Bank bay | 151 × 76 × 32 mm, around the 147 × 72 × 28 envelope |
 | Rear-of-phone reserve | 6 mm beyond nominal phone body, not a measured camera dimension |
@@ -41,7 +41,7 @@ Print the paper template at 100% and verify its 50 mm scale. Cut the window and 
 
 Mount the intact, case-free phone from inside/underneath the stone in a removable cradle. Keep the phone's battery and housing intact. Locate it on padded chassis/perimeter supports with clearance for buttons and the rear camera bump; do not load the camera lenses, active display or battery area. Rear keeper screws close against cradle hard stops, rather than squeezing the phone tighter as they turn. The cradle attaches to internal bosses and can be removed after opening the underside cover.
 
-An opaque stone lip masks the phone perimeter, rounded screen corners and notch. A thin, replaceable black closed-cell gasket under that lip controls light leaks and the visible joint; it is not the structural clamp. Keep pad contact on verified non-display perimeter regions. The exposed touch surface is the phone's own glass: no added glass/acrylic overlay, external phone frame or adhesive bonding to the phone. A separate hidden mask insert remains available if printing the stone lip cleanly proves difficult; it is not an extra required visible trim.
+An opaque stone lip conceals the phone perimeter; notch and corner concealment must be checked with the enlarged opening. A thin, replaceable black closed-cell gasket under that lip controls light leaks and the visible joint; it is not the structural clamp. Keep pad contact on verified non-display perimeter regions. The exposed touch surface is the phone's own glass: no added glass/acrylic overlay, external phone frame or adhesive bonding to the phone. A separate hidden mask insert remains available if printing the stone lip cleanly proves difficult; it is not an extra required visible trim.
 
 Use a shallow local glass recess, initially around 1–1.5 mm for a physical mock-up, with a gently relieved stone edge. That is a proposal, not a print tolerance. The surrounding pebble surface follows original 01 River Stone; the immediate aperture edge must allow a fingertip to reach controls. Avoid a deep vertical tunnel. Keep interface controls away from the lip and verify at seated viewing angles; app layout must match the physical aperture rather than squeezing the entire iPhone interface into view.
 
@@ -49,7 +49,9 @@ Use a shallow local glass recess, initially around 1–1.5 mm for a physical moc
 
 Apple specifies the iPhone 11 body as **150.9 × 75.7 × 8.3 mm**, 194 g, with a 1792 × 828 LCD. These are nominal product dimensions, not a mounting drawing: measure the actual phone, camera projection, buttons and cable plug before fit CAD. [Apple specifications](https://support.apple.com/en-gb/111865).
 
-The existing Still Water proposal exposes **118 × 54 mm** in landscape. Retain that as the first mask trial, not an agreed final size. Centred on the nominal body, it leaves 16.45 mm hidden at each short end and 10.85 mm at each long side. That arithmetic does not prove notch concealment: register the active display and notch on the real phone, check corner geometry and oblique sightlines, then adjust window position/size and UI mapping together. The old 755 × 346 pt/1048 × 480 design-unit mapping remains provisional until registration is checked.
+**26 September revision:** the user rejected the 118 × 54 mm opening as too small and proposed **6.5 mm overlap measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 13) × (75.7 − 13) = **137.9 × 62.7 mm**, centred on the phone body. This is approximately **35.7% more rectangular opening area**, not a claim about active pixel area. Rounded corners and any local microphone relief remain to be measured.
+
+Maximise display exposure within this baseline. A uniform overlap does not prove that the notch is hidden or that the front microphone is clear. Check registration on the actual phone; use local lip relief and an interrupted gasket wherever needed to leave the inlet and a short, broad path to room air open. Do not shrink the whole aperture again merely to hide the notch. Exact relief dimensions await microphone mapping; the rectangular paper template is a visual registration aid only. The earlier 755 × 346 pt/1048 × 480 design-unit mapping is superseded for this aperture and must be recalculated from actual screen registration before UI work.
 
 Propose notch left and Lightning connector right when viewed from the front. The notch is at a short end in landscape; the home indicator is along the bottom long edge, not the opposite short end. A physically masked display cannot rely on normal edge gestures for everyday controls. Preserve underside service access for unlocking, exiting the app, restarting and reconnecting; hiding sensors may prevent Face ID and alter automatic brightness. These operating choices need a real phone trial, not assumptions from the concept image.
 
@@ -67,4 +69,4 @@ Bank automatic shutoff/restart, concurrent charging/output, charge-window switch
 
 Recommended agreement: **rear-loaded intact phone; serviceable padded cradle; opaque stone lip; hidden black light seal; original phone glass exposed; shallow local recess.** The user suggested rear/inside mounting; this is the developed proposal for review, not a recorded final approval of its dimensions.
 
-Before detailed CAD: verify the UGREEN variant; register a removable 118 × 54 mm paper/card mask over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.
+Before detailed CAD: verify the UGREEN variant; register a removable 137.9 × 62.7 mm paper/card mask with 6.5 mm overlap on each edge over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.

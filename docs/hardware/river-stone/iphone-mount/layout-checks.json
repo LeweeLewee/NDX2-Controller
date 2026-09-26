@@ -11,9 +11,10 @@
     36
   ],
   "window_mm": [
-    118,
-    54
+    137.9,
+    62.7
   ],
+  "per_edge_overlap_mm": 6.5,
   "nominal_glass_recess_mm": 1.2,
   "bank_working_envelope_mm": [
     147,

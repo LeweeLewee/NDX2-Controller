@@ -2,6 +2,8 @@
 import json,math
 from pathlib import Path
 out=Path(__file__).resolve().parents[1]/'docs/hardware/river-stone/iphone-mount';out.mkdir(exist_ok=True)
+overlap=6.5
+window=[round(d-2*overlap,1) for d in (150.9,75.7)]
 a=math.radians(50);c,s=math.cos(a),math.sin(a)
 def point(v,t):return (-55+v*c-t*s,36+v*s+t*c)
 phone=[point(v,t) for v,t in [(0,0),(75.7,0),(75.7,-8.3),(0,-8.3)]]
@@ -12,7 +14,7 @@ bay={'x':[-75.5,75.5],'y':[-22,54],'z':[6,38]}
 # Rear inclined plane lies above the entire bay; its lowest value over bay is at ymin.
 z_rear=36+(bay['y'][0]+55)*math.tan(a)-14.3/c
 clear=z_rear-bay['z'][1];assert clear>0
-r={'status':'provisional layout only; no shell, insertion, connector or acoustic clearance certification','phone_body_mm':[150.9,75.7,8.3],'phone_angle_deg':50,'phone_lower_front_yz_mm':[-55,36],'window_mm':[118,54],'nominal_glass_recess_mm':1.2,'bank_working_envelope_mm':[147,72,28],'bank_model_mapping':'user product name retained; manufacturer 25683 envelope used provisionally','bank_bay_mm':[151,76,32],'bank_bounds_xyz_mm':bank,'bay_bounds_xyz_mm':bay,'rear_extra_allowance_mm':6,'phone_side_corners_yz_mm':phone,'minimum_infinite_rear_plane_to_bay_vertical_gap_mm':clear,'planning_body_bounds_mm':[240,170,105],'phone_connector_reservation_mm':25,'bank_port_service_reservation_mm':25,'limits':['Overall silhouette and angle are proposals, not measured from the concept image','Rear allowance is not measured camera/cradle geometry','Plane versus box check only; curved shell and acoustic paths are not solids','No full insertion sweep, fastener positions, thermal test or print release']}
+r={'status':'provisional layout only; no shell, insertion, connector or acoustic clearance certification','phone_body_mm':[150.9,75.7,8.3],'phone_angle_deg':50,'phone_lower_front_yz_mm':[-55,36],'window_mm':window,'per_edge_overlap_mm':overlap,'nominal_glass_recess_mm':1.2,'bank_working_envelope_mm':[147,72,28],'bank_model_mapping':'user product name retained; manufacturer 25683 envelope used provisionally','bank_bay_mm':[151,76,32],'bank_bounds_xyz_mm':bank,'bay_bounds_xyz_mm':bay,'rear_extra_allowance_mm':6,'phone_side_corners_yz_mm':phone,'minimum_infinite_rear_plane_to_bay_vertical_gap_mm':clear,'planning_body_bounds_mm':[240,170,105],'phone_connector_reservation_mm':25,'bank_port_service_reservation_mm':25,'limits':['Overall silhouette and angle are proposals, not measured from the concept image','Rear allowance is not measured camera/cradle geometry','Plane versus box check only; curved shell and acoustic paths are not solids','No full insertion sweep, fastener positions, thermal test or print release']}
 (out/'layout-checks.json').write_text(json.dumps(r,indent=2)+'\n')
 parts=['<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1060" viewBox="0 0 1400 1060"><rect width="1400" height="1060" fill="#f4f1e9"/><g font-family="Segoe UI,Arial" fill="#283a3b">']
 def text(x,y,t,size=18):parts.append(f'<text x="{x}" y="{y}" font-size="{size}">{t}</text>')
@@ -23,8 +25,8 @@ def poly(points,fill,stroke='#526564'):
 text(40,43,'01 RIVER STONE / concealed iPhone mounting layout',30);text(40,76,'Original 01 only • proposed envelopes and service paths • dimensions in mm • not fit CAD',18)
 text(40,122,'1  FRONT / viewed normal to screen',22)
 parts.append('<path d="M55 325 C45 200 115 144 250 144 C455 136 569 170 606 313 C625 385 551 404 350 402 L170 402 C93 400 54 382 55 325Z" fill="#c4bba5" stroke="#968b73"/>')
-rect(139,208,377.25,189.25,'none','#617273','6 5');rect(180.125,235.125,295,135,'#2c4547');text(225,310,'118 × 54 window',20)
-text(60,436,'Dashed: hidden 150.9 × 75.7 phone body');text(60,466,'Notch left / Lightning right; edge seal interrupted at mic paths',16)
+rect(139,208,377.25,189.25,'none','#617273','6 5');rect(139+overlap*2.5,208+overlap*2.5,window[0]*2.5,window[1]*2.5,'#2c4547');text(210,310,'137.9 × 62.7 window',20)
+text(60,436,'Dashed: hidden 150.9 × 75.7 phone body');text(60,466,'Notch left / Lightning right; 6.5 overlap; mic paths open',16)
 text(730,122,'2  SECTION / proposed 50° tilt',22)
 # Each axis 2.5 px per mm, y rearwards right, z upwards.
 def side(y,z):return (760+(y+85)*2.5,425-z*2.5)
