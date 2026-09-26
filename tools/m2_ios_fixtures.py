@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 from m2_bridge import Contract, FixtureService
+from ios_fixture_art import sleeve, portrait
 
 
 class MemoryVault:
@@ -18,6 +19,14 @@ class IOSFixtureService(FixtureService):
     def __init__(self):
         super().__init__()
         self.screen_state = 'playing'
+        original = list(self.fixture_images)
+        self.fixture_images[original[0]] = sleeve(0)
+        self.fixture_images[original[1]] = sleeve(1)
+        self.fixture_images[original[2]] = portrait()
+        self.sleeves = [original[0], original[1]]
+        for index in range(2,6):
+            ref = self.cover(f'https://resources.tidal.com/images/fixture/sleeve-{index}.jpg')
+            self.fixture_images[ref] = sleeve(index); self.sleeves.append(ref)
 
     def request(self, action, args):
         data = super().request(action, args)
@@ -67,6 +76,11 @@ def vectors():
     record('artwork-80', 'artwork', {'reference': reference})
     for offset in range(0, 320 * 320, 6400):
         record('artwork-' + str(offset), 'artwork', {'reference': reference, 'side': 320, 'pixel_offset': offset})
+    for index, ref in enumerate(service.sleeves):
+        contract.artwork.register(ref)
+        record(f'sleeve-{index}-80', 'artwork', {'reference': ref})
+        for offset in range(0,320*320,6400):
+            record(f'sleeve-{index}-{offset}', 'artwork', {'reference':ref,'side':320,'pixel_offset':offset})
     record('voice', 'voice_review', {'fixture': 'silent'})
     record('charge-none', 'charge?')
     record('battery', 'battery_report', {'level': 34, 'charging': False, 'client_id': 'silent-display'})

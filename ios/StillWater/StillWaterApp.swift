@@ -78,7 +78,7 @@ struct ControllerField: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var palette = FieldPalette.fallback("sage")
     private var utility: Bool { [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) }
-    private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : [.find,.library,.detail].contains(model.context.screen) ? 0.35 : 1 }
+    private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : model.context.screen == .detail ? 0.5 : [.find,.library].contains(model.context.screen) ? 0.35 : [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) ? 0.6 : 1 }
     private var paletteKey: String { (model.colorPreview?.reference ?? "fallback") + ":" + model.preferences.palette }
     var body: some View {
         MusicField(palette:utility ? .fallback(model.preferences.palette) : palette,intensity:intensity)

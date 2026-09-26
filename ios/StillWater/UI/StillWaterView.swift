@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 struct AuditElement: Equatable {
     var id: String, frame: CGRect, fontSize: CGFloat, opacity: Double, tap: Bool, pill: Bool
     var scrollClipped = false, truncates = false
-    var text = "", fontName = "Geist-Regular", maxLines = 1, tracking: CGFloat = 0
+    var text = "", fontName = "ArialMT", maxLines = 1, tracking: CGFloat = 0
 }
 struct AuditKey: PreferenceKey {
     static var defaultValue: [AuditElement] = []
@@ -13,7 +13,7 @@ struct AuditKey: PreferenceKey {
 extension View {
     func audit(_ id: String, font: CGFloat = 0, opacity: Double = 1, tap: Bool = false,
                pill: Bool = false, scroll: Bool = false, truncates: Bool = false,
-               text: String = "", fontName: String = "Geist-Regular", lines: Int = 1, tracking: CGFloat = 0) -> some View {
+               text: String = "", fontName: String = "ArialMT", lines: Int = 1, tracking: CGFloat = 0) -> some View {
         background(GeometryReader { g in
             Color.clear.preference(key: AuditKey.self, value: [AuditElement(id: id, frame: g.frame(in: .named("canvas")),
                 fontSize: font, opacity: opacity, tap: tap, pill: pill, scrollClipped: scroll, truncates: truncates,
@@ -74,7 +74,7 @@ struct StillWaterView: View {
         .onChange(of: queryFocused) { _, v in model.keyboardVisible = v }
     }
     private var isUtility: Bool { [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) }
-    private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : [.find,.library,.detail].contains(model.context.screen) ? 0.35 : 1 }
+    private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : model.context.screen == .detail ? 0.5 : [.find,.library].contains(model.context.screen) ? 0.35 : [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) ? 0.6 : 1 }
     private func animateWake() {
         wakeMask = 1
         guard model.rest == .waking, !snapshot else { return }
@@ -93,7 +93,7 @@ struct StillWaterView: View {
                        caps: Bool = false, lines: Int = 1, align: Alignment = .leading) -> some View {
         DesignText(value:value,units:size,serif:serif,italic:italic,caps:caps,lines:lines,
                    alignment:align == .center ? .center : align == .trailing ? .right : .left)
-            .frame(width:w,height:h,alignment:align).opacity(alpha)
+            .frame(width:w,height:h,alignment:Alignment(horizontal:align.horizontal,vertical:.top)).opacity(alpha)
             .audit(id,font:size,opacity:alpha,truncates:lines > 1,text:caps ? value.uppercased() : value,
                    fontName:Design.name(serif:serif,italic:italic,caps:caps),lines:lines,tracking:caps ? size*0.18 : 0)
             .position(x:x+w/2,y:y+h/2)
@@ -114,12 +114,12 @@ struct StillWaterView: View {
             .position(x:x+w/2,y:y+h/2)
     }
     private func icon(_ mark: Mark, id: String, label: String, x: CGFloat, y: CGFloat, w: CGFloat = 72, h: CGFloat = 64,
-                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 36, selected: Bool = false, action: @escaping () -> Void) -> some View {
+                      ring: Bool = false, accent: Bool = false, enabled: Bool = true, glyph: CGFloat = 30, selected: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             OutlineMark(mark: mark).stroke(accent ? Design.accent : Design.ink, style: StrokeStyle(lineWidth:ring ? 2.2 : 1.6,lineCap:.round,lineJoin:.round))
                 .background { if selected { OutlineMark(mark:mark).fill(Design.ink) } }
                 .frame(width:glyph,height:glyph).frame(width:w,height:h)
-                .background((accent ? Design.accent : Design.ink).opacity(ring ? 0.12 : 0),in:Circle())
+                .background((accent ? Design.accent : Design.ink).opacity(ring && !accent ? 0.12 : 0),in:Circle())
                 .overlay(Circle().stroke((accent ? Design.accent : Design.ink).opacity(ring ? 0.7 : 0),lineWidth:1.5))
                 .overlay { if model.pendingAction != nil && model.pendingAction != "amplifier" && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
                 .contentShape(Rectangle())
@@ -153,48 +153,42 @@ struct StillWaterView: View {
                     .accessibilityAction(named:Text("Settings")) { model.navigate(.settings) }
             }
             sleeve(x:48,y:touched ? 56 : 60,size:touched ? 248 : 296,hidden:stopped)
-            VStack(alignment:.leading,spacing:8) {
-                if touched, let ref = model.player.current.artistReference, !ref.isEmpty {
-                    Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
-                        Text(artist.uppercased()).font(Design.font(15,caps:true)).tracking(2.7).opacity(0.55).lineLimit(1).frame(width:width,height:64,alignment:.leading).contentShape(Rectangle())
-                    }.buttonStyle(.plain).accessibilityIdentifier("now-artist").audit("now-artist",font:15,tap:true,truncates:true)
-                } else {
-                    Text(artist.uppercased()).font(Design.font(24,caps:true)).tracking(2).lineLimit(1)
-                        .opacity(0.7).frame(height:64).audit("artist",font:24,opacity:0.7,truncates:true)
-                }
-                DesignText(value:title,units:stopped ? 36 : size,serif:true,lines:2)
-                    .frame(width:width,height:100,alignment:.leading)
-                    .audit("track-title",font:stopped ? 36 : size,truncates:true,text:title,fontName:Design.name(serif:true),lines:2)
-                if !stopped {
-                    if touched, let ref = model.player.current.albumReference, !ref.isEmpty {
-                        Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: {
-                            Text(model.player.album).font(Design.font(28,serif:true,italic:true)).lineLimit(1)
-                                .frame(width:width-216,height:64,alignment:.leading).contentShape(Rectangle())
-                        }.buttonStyle(.plain).accessibilityIdentifier("now-album").audit("now-album",font:28,tap:true,truncates:true)
-                    } else {
-                        DesignText(value:model.player.album,units:28,serif:true,italic:true).opacity(0.7)
-                            .frame(height:64).audit("album",font:28,opacity:0.7,truncates:true)
-                    }
-                }
-            }.frame(width:width,height:244,alignment:.topLeading).audit("now-text-block")
-                .position(x:x+width/2,y:touched ? 130 : 208)
+            let titleHeight = DesignText.height(title, units:stopped ? 32 : size, width:width, serif:true, lines:2)
+            let blockHeight = 20 + 14 + titleHeight + (stopped ? 0 : 14 + 34)
+            let top: CGFloat = touched ? 56 : 208 - blockHeight/2
+            ZStack(alignment:.topLeading) {
+                label(artist,id:"artist",x:0,y:0,w:width,h:22,size:15,alpha:0.55,caps:true)
+                label(title,id:"track-title",x:0,y:34,w:width,h:titleHeight,size:stopped ? 32 : size,alpha:stopped || !model.online ? 0.7 : 1,serif:true,lines:2)
+                if !stopped { label(model.player.album,id:"album",x:0,y:48+titleHeight,w:width,h:36,size:26,alpha:0.7,serif:true,italic:true) }
+            }.frame(width:width,height:blockHeight,alignment:.topLeading).audit("now-text-block")
+                .position(x:x+width/2,y:top+blockHeight/2)
             if touched {
-                icon(.previous,id:"previous",label:"Previous track",x:355,y:272,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("prev")],target:"previous") }
-                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:264,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:52) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
-                icon(.next,id:"next",label:"Next track",x:579,y:272,w:98,h:96,enabled:model.controlsAvailable,glyph:48) { model.mutate("transport",["command":.string("next")],target:"next") }
-                icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:272,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
-                icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:272,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:44) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
+                if let ref = model.player.current.artistReference, !ref.isEmpty {
+                    Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: { Color.clear.frame(width:width,height:64).contentShape(Rectangle()) }
+                        .buttonStyle(.plain).accessibilityIdentifier("now-artist").accessibilityLabel(artist).audit("now-artist",tap:true).position(x:x+width/2,y:64)
+                }
+                if !stopped, let ref = model.player.current.albumReference, !ref.isEmpty {
+                    Button { model.details(MusicItem(.object(["reference":.string(ref)]))) } label: { Color.clear.frame(width:width,height:64).contentShape(Rectangle()) }
+                        .buttonStyle(.plain).accessibilityIdentifier("now-album").accessibilityLabel(model.player.album).audit("now-album",tap:true).position(x:x+width/2,y:min(224,top+titleHeight+66))
+                }
+            }
+            if touched {
+                icon(.previous,id:"previous",label:"Previous track",x:355,y:272,w:98,h:96,enabled:model.controlsAvailable,glyph:36) { model.mutate("transport",["command":.string("prev")],target:"previous") }
+                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:464,y:264,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:40) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
+                icon(.next,id:"next",label:"Next track",x:579,y:272,w:98,h:96,enabled:model.controlsAvailable,glyph:36) { model.mutate("transport",["command":.string("next")],target:"next") }
+                icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:272,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
+                icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:272,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
                 Button { model.navigate(.queue) } label: {
                     VStack(alignment:.leading,spacing:2) {
-                        Text("Up next").font(Design.font(20))
-                        Text(model.queue.dropFirst().first?.title ?? "Queue").font(Design.font(24,serif:true)).lineLimit(1)
+                        Text("UP NEXT").font(Design.font(15,caps:true)).tracking(2.7).opacity(0.55)
+                        Text(model.queue.dropFirst().first?.title ?? "Queue").font(Design.font(26,serif:true)).lineLimit(1)
                     }.frame(width:248,height:64,alignment:.leading).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityIdentifier("up-next").audit("up-next",font:26,tap:true).position(x:172,y:432)
-                icon(.mic,id:"ask",label:"Ask; start listening",x:480,y:392,w:80,h:80,ring:true,accent:true,glyph:40) { model.navigate(.ask); model.startVoice() }
-                icon(.search,id:"find",label:"Find music",x:816,y:400,w:80,h:64,glyph:40) { model.navigate(.ask) }
-                icon(.library,id:"library",label:"Library",x:920,y:400,w:80,h:64,glyph:40) { model.navigate(.library) }
+                }.buttonStyle(.plain).accessibilityIdentifier("up-next").audit("up-next",font:26,tap:true).position(x:172,y:420)
+                icon(.mic,id:"ask",label:"Ask; start listening",x:488,y:376,w:72,h:72,ring:true,accent:true,glyph:28) { model.navigate(.ask); model.startVoice() }
+                icon(.search,id:"find",label:"Find music",x:816,y:384,w:80,h:64,glyph:30) { model.navigate(.ask) }
+                icon(.library,id:"library",label:"Library",x:920,y:384,w:80,h:64,glyph:30) { model.navigate(.library) }
                 if model.unknownAction == "amplifier" {
-                    RoundedRectangle(cornerRadius:8).stroke(Design.ink.opacity(0.55),style:StrokeStyle(lineWidth:1,dash:[4,4]))
+                    RoundedRectangle(cornerRadius:32).stroke(Design.ink.opacity(0.55),style:StrokeStyle(lineWidth:1,dash:[4,4]))
                         .frame(width:184,height:80).position(x:908,y:312).allowsHitTesting(false)
                     label("Volume outcome unknown",id:"unknown",x:760,y:360,w:288,h:24,size:15,alpha:0.7,align:.center)
                 } else if model.unknownAction != nil {
@@ -216,7 +210,7 @@ struct StillWaterView: View {
     private func header(_ title: String) -> some View {
         ZStack {
             label(title,id:"screen-title",x:48,y:30,w:560,h:42,size:32,serif:true)
-            button("‹ Back",id:"back",x:860,y:24,w:140,border:false,size:26) { model.back() }
+            button("‹ Back",id:"back",x:888,y:24,w:112,border:false,size:22) { model.back() }
         }
     }
     private func connectionLine() -> some View {
@@ -224,7 +218,7 @@ struct StillWaterView: View {
     }
     private func filters(y: CGFloat) -> some View {
         ForEach(Array(["albums","tracks","artists","playlists"].enumerated()),id:\.offset) { i,kind in
-            button(kind.capitalized,id:"filter-"+kind,x:48+CGFloat(i)*128,y:y,w:120,border:false,size:24,indicator:model.context.kind == kind) { model.filter(kind) }
+            button(kind.capitalized,id:"filter-"+kind,x:48+CGFloat(i)*128,y:y,w:120,border:false,size:18,indicator:model.context.kind == kind) { model.filter(kind) }
                 .opacity(model.context.kind == kind ? 1 : 0.55)
         }
     }
@@ -235,7 +229,8 @@ struct StillWaterView: View {
                 .focused($queryFocused).submitLabel(.search).onSubmit { queryFocused = false; model.search() }
                 .accessibilityIdentifier("results-query").frame(width:744,height:64).audit("results-query",font:26,tap:true).position(x:420,y:120)
             icon(.search,id:"edit-search",label:"Search",x:816,y:88) { queryFocused = false; model.search() }
-            icon(.mic,id:"results-mic",label:"Start voice search",x:928,y:88) { model.navigate(.ask); model.startVoice() }
+            icon(.mic,id:"results-mic",label:"Start voice search",x:928,y:88,accent:true) { model.navigate(.ask); model.startVoice() }
+            Rectangle().fill(Design.ink.opacity(0.35)).frame(width:744,height:1).position(x:420,y:152)
             filters(y:160); rows(y:224,height:256)
             connectionLine()
         }
@@ -245,7 +240,7 @@ struct StillWaterView: View {
             header("Library"); filters(y:88)
             if model.account == "disconnected" {
                 label("Connect your collection on the bridge computer",id:"collection-connect",x:48,y:152,w:952,h:72,size:26,alpha:0.7,serif:true,italic:true,lines:2)
-            } else { rows(y:148,height:332) }
+            } else { rows(y:152,height:328) }
         }
     }
     private func rows(y: CGFloat,height: CGFloat, items: [MusicItem]? = nil, tracks: Bool = false, width: CGFloat = 952, left: CGFloat = 48) -> some View {
@@ -262,10 +257,10 @@ struct StillWaterView: View {
                                     VStack(alignment:.leading,spacing:4) {
                                     Text(item.title).font(Design.font(26,serif:true)).lineLimit(1)
                                         .audit("row-title-"+item.id,font:26,scroll:true,truncates:true)
-                                    if !tracks { Text([item.artist,item.kind].filter { !$0.isEmpty }.joined(separator:" · ")).font(Design.font(22)).lineLimit(1).opacity(0.7) }
+                                    if !tracks { Text([item.artist,item.kind].filter { !$0.isEmpty }.joined(separator:" · ")).font(Design.font(18)).lineLimit(1).opacity(0.55) }
                                     }.frame(maxWidth:.infinity,alignment:.leading)
                                     if tracks, let duration = item.duration { Text(time(duration)).font(Design.font(18)).opacity(0.55) }
-                                }.frame(maxWidth:.infinity,alignment:.leading).frame(height:72).contentShape(Rectangle())
+                                }.frame(maxWidth:.infinity,alignment:.leading).frame(height:64).contentShape(Rectangle())
                             }.buttonStyle(.plain).audit("row-"+item.id,tap:true,scroll:true)
                             Button {
                                 model.mutate("library_save",["reference":.string(item.reference),"saved":.bool(item.saved != "saved")],target:"row-membership-"+item.id)
@@ -279,7 +274,7 @@ struct StillWaterView: View {
                                 .accessibilityIdentifier("row-membership-"+item.id)
                                 .accessibilityLabel(item.saved == "unknown" ? "Membership unavailable" : item.kind == "artists" ? (item.saved == "saved" ? "Unfollow artist" : "Follow artist") : item.kind == "tracks" ? (item.saved == "saved" ? "Unlike track" : "Like track") : (item.saved == "saved" ? "Remove from library" : "Add to library"))
                                 .audit("row-membership-"+item.id,tap:true,scroll:true)
-                        }.frame(height:88).overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }.id(item.id)
+                        }.frame(height:72).overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }.id(item.id)
                     }
                     if model.context.nextOffset != nil || model.context.cursor != nil {
                         Button("More") { if model.context.screen == .detail { model.moreChildren() } else { model.loadPage(more:true) } }
@@ -320,16 +315,16 @@ struct StillWaterView: View {
                         .frame(width:488,height:64,alignment:.leading).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("artist-link").audit("artist-link",font:15,tap:true,truncates:true).position(x:580,y:64)
             } else { label(item.artist,id:"detail-artist",x:336,y:56,w:488,h:24,size:15,alpha:0.55,caps:true) }
-            label(item.title,id:"detail-title",x:336,y:104,w:664,h:80,size:32,serif:true,lines:2)
-            label(facts,id:"detail-facts",x:336,y:192,w:664,h:28,size:18,alpha:0.55)
+            label(item.title,id:"detail-title",x:336,y:88,w:664,h:72,size:32,serif:true,lines:2)
+            label(facts,id:"detail-facts",x:336,y:168,w:664,h:28,size:18,alpha:0.55)
             if model.context.playable {
-                button("Play",id:"play-detail",x:336,y:232,w:140,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
+                button("Play",id:"play-detail",x:336,y:212,w:140,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
             }
             if item.kind == "tracks" {
-                icon(.heart,id:"membership-write",label:model.membershipAction,x:488,y:232,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }
-            } else { button(detailMembershipLabel,id:"membership-write",x:488,y:232,w:248,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction) }
+                icon(.heart,id:"membership-write",label:model.membershipAction,x:488,y:212,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }
+            } else { button(detailMembershipLabel,id:"membership-write",x:488,y:212,w:232,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction) }
             if let albumRef = item.albumReference {
-                button("Album ›",id:"album-link",x:760,y:232,w:144,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
+                button("Album ›",id:"album-link",x:760,y:212,w:144,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
             }
             if item.kind != "tracks" {
                 rows(y:328,height:152,tracks:true)
@@ -340,33 +335,37 @@ struct StillWaterView: View {
     private var artistDetail: some View {
         let item = model.context.selected, hasPortrait = cover != nil
         let left: CGFloat = hasPortrait ? 336 : 48, width: CGFloat = hasPortrait ? 664 : 776
+        let nameSize: CGFloat = hasPortrait ? 44 : 56
+        let nameHeight = DesignText.height(item.title,units:nameSize,width:width,serif:true,lines:2)
+        let bioTop = max(148,84 + nameHeight + 12)
+        let bioHeight: CGFloat = min(100,254-bioTop)
         let albums = model.context.items.filter { $0.kind == "albums" }, tracks = model.context.items.filter { $0.kind == "tracks" }
         return ZStack(alignment:.topLeading) {
             header("")
             if let cover {
-                Image(uiImage:cover).resizable().interpolation(.high).scaledToFill().frame(width:320,height:440).clipped()
+                Image(uiImage:cover).resizable().interpolation(.high).scaledToFill().frame(width:360,height:480).clipped()
                     .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.55),.init(color:.clear,location:1)],startPoint:.leading,endPoint:.trailing))
                     .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.7),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
-                    .position(x:160,y:240).allowsHitTesting(false)
+                    .position(x:180,y:240).allowsHitTesting(false)
             }
-            label("ARTIST · TIDAL",id:"artist-kind",x:left,y:28,w:488,h:24,size:15,alpha:0.55,caps:true)
-            label(item.title,id:"detail-title",x:left,y:56,w:hasPortrait ? 488 : 776,h:92,size:44,serif:true,lines:2)
+            label("ARTIST · TIDAL",id:"artist-kind",x:left,y:60,w:664,h:24,size:15,alpha:0.55,caps:true)
+            label(item.title,id:"detail-title",x:left,y:84,w:width,h:nameHeight,size:nameSize,serif:true,lines:2)
             if let biography = item.biography, !biography.isEmpty {
                 if model.context.biographyExpanded || model.context.artistTab == "about" {
-                    ScrollView { Text(biography).font(Design.font(22)).lineSpacing(5).frame(maxWidth:.infinity,alignment:.leading) }
-                        .frame(width:width,height:236).position(x:left+width/2,y:270)
+                    ScrollView { Text(biography).font(Design.font(18)).lineSpacing(5).opacity(0.7).frame(maxWidth:.infinity,alignment:.leading) }
+                        .frame(width:width,height:380-bioTop).position(x:left+width/2,y:(380+bioTop)/2)
                     button("Close biography",id:"artist-read-less",x:left,y:400,w:224,border:false) { model.context.biographyExpanded = false; model.context.artistTab = "albums" }
                 } else {
                     Button { model.context.biographyExpanded = true } label: {
-                        Text(biography).font(Design.font(18)).lineSpacing(5).lineLimit(4).frame(width:width,height:96,alignment:.topLeading).contentShape(Rectangle())
-                    }.buttonStyle(.plain).accessibilityIdentifier("artist-read-more").accessibilityLabel("Read artist biography").audit("artist-summary",font:18,tap:true,truncates:true).position(x:left+width/2,y:200)
+                        Text(biography).font(Design.font(18)).lineSpacing(5).lineLimit(max(2,Int(bioHeight/25))).opacity(0.7).frame(width:width,height:max(64,bioHeight),alignment:.topLeading).contentShape(Rectangle())
+                    }.buttonStyle(.plain).accessibilityIdentifier("artist-read-more").accessibilityLabel("Read artist biography").audit("artist-summary",font:18,tap:true,truncates:true).position(x:left+width/2,y:bioTop+max(64,bioHeight)/2)
                 }
             }
             if !model.context.biographyExpanded && model.context.artistTab != "about" {
-                button(detailMembershipLabel,id:"membership-write",x:left,y:item.biography == nil ? 152 : 256,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
+                button(detailMembershipLabel,id:"membership-write",x:left,y:item.biography == nil ? max(148,84+nameHeight+12) : 270,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
                 if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:48,y:320,w:120,border:false,size:18,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
                 if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:184,y:320,w:120,border:false,size:18,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
-                if model.context.artistTab == "tracks" { rows(y:384,height:96,items:tracks,tracks:true) }
+                if model.context.artistTab == "tracks" { rows(y:384,height:88,items:tracks,tracks:true) }
                 else if !albums.isEmpty {
                     ScrollView(.horizontal) {
                         HStack(spacing:16) {
@@ -380,7 +379,7 @@ struct StillWaterView: View {
                             }
                             if model.context.nextOffset != nil { Button("More albums") { model.moreChildren() }.font(Design.font(18)).frame(width:144,height:64).audit("artist-more",font:18,tap:true,scroll:true) }
                         }.scrollTargetLayout()
-                    }.scrollPosition(id:$model.context.scrollID,anchor:.leading).frame(width:952,height:96).position(x:524,y:432)
+                    }.scrollPosition(id:$model.context.scrollID,anchor:.leading).frame(width:952,height:96).position(x:524,y:424)
                 }
             }
         }
@@ -435,16 +434,16 @@ struct StillWaterView: View {
             }
             if recording { Ripples(reduce:reduceMotion || snapshot).frame(width:520,height:520).position(x:524,y:336).id(model.voiceSession).allowsHitTesting(false) }
             if !queryFocused && ((!recording && !ready) || !model.transcript.isEmpty) {
-                label(model.transcript.isEmpty ? "Say an artist, an album or the kind of music you want" : "“\(model.transcript)”",id:"transcript",x:184,y:120,w:680,h:116,size:model.transcript.isEmpty ? 32 : 44,alpha:model.transcript.isEmpty ? 0.7 : 1,serif:true,italic:true,lines:2,align:.center)
+                label(model.transcript.isEmpty ? "Say an artist, an album or\nthe kind of music you want" : "“\(model.transcript)”",id:"transcript",x:184,y:124,w:680,h:116,size:model.transcript.isEmpty ? 32 : 44,alpha:model.transcript.isEmpty ? 0.7 : 1,serif:true,italic:true,lines:2,align:.center)
             }
-            if !queryFocused { icon(recording ? .stop : ready ? .submit : .mic,id:ready ? "voice-search" : "voice-record",label:recording ? "Stop recording" : ready ? "Search transcript" : "Start recording",x:488,y:recording || ready ? 300 : 248,w:72,h:72,ring:true,accent:true,enabled:!ready || !model.transcript.isEmpty,glyph:36) {
+            if !queryFocused { icon(recording ? .stop : ready ? .submit : .mic,id:ready ? "voice-search" : "voice-record",label:recording ? "Stop recording" : ready ? "Search transcript" : "Start recording",x:488,y:recording || ready ? 300 : 232,w:72,h:72,ring:true,accent:true,enabled:!ready || !model.transcript.isEmpty,glyph:28) {
                 queryFocused = false; model.context.typing = false
                 if recording { model.stopVoice() } else if ready { model.submitVoice() } else { model.startVoice() }
             }
             }
             if ready { icon(.reset,id:"voice-reset",label:"Discard and record again",x:376,y:304,w:72,h:64,ring:true,glyph:30) { model.startVoice() } }
             if !recording && !ready {
-                TextField("Or type here",text:$model.context.query).font(Design.font(26,serif:true)).focused($queryFocused).submitLabel(.search).autocorrectionDisabled()
+                TextField("Or type here",text:$model.context.query).font(Design.font(26,serif:true,italic:true)).focused($queryFocused).submitLabel(.search).autocorrectionDisabled()
                     .accessibilityIdentifier("typed-query").onSubmit { queryFocused = false; model.submitTypedSearch() }
                     .frame(width:864,height:64).audit("query",font:26,tap:true).position(x:480,y:queryFocused ? 120 : 412)
                 Rectangle().fill(Design.ink.opacity(0.35)).frame(width:864,height:1).position(x:480,y:queryFocused ? 152 : 444)
@@ -472,10 +471,10 @@ struct StillWaterView: View {
                 Slider(value:$model.preferences.brightness,in:0.1...1).tint(Design.ink)
                     .onChange(of:model.preferences.brightness) { _,v in UIScreen.main.brightness = v; model.preferences.save() }
                     .frame(width:952,height:64).audit("brightness",tap:true).position(x:524,y:266)
-                label("Release idle timer after",id:"timeout-label",x:48,y:320,w:500,h:30,size:22)
+                label("Turn screen off after",id:"timeout-label",x:48,y:320,w:500,h:30,size:22)
                 Menu {
                     ForEach([30,60,120,300],id:\.self) { seconds in Button("\(seconds) seconds") { model.preferences.timeout = seconds; model.preferences.save() } }
-                } label: { Text("\(model.preferences.timeout) seconds⌄").font(Design.font(22)).frame(width:240,height:56).overlay(Capsule().stroke(Design.ink.opacity(0.18))).contentShape(Rectangle()) }
+                } label: { Text("\(model.preferences.timeout/60 > 0 ? String(model.preferences.timeout/60) + (model.preferences.timeout == 60 ? " minute" : " minutes") : "30 seconds")⌄").font(Design.font(22)).frame(width:240,height:56).overlay(Capsule().stroke(Design.ink.opacity(0.18))).contentShape(Rectangle()) }
                     .audit("timeout",font:22,tap:true,pill:true).position(x:168,y:388)
             case .connection:
                 settingRow("Bridge",value:model.online ? "Connected with provisioned trust" : model.status,index:0) { Task { await model.refresh() } }
@@ -500,7 +499,7 @@ struct StillWaterView: View {
         Button(action:action) {
             VStack(alignment:.leading,spacing:6) {
                 Text(title).font(Design.font(22))
-                Text(value).font(Design.font(18)).opacity(0.7).lineLimit(1)
+                Text(value).font(Design.font(18)).opacity(0.55).lineLimit(1)
             }.frame(width:952,height:72,alignment:.leading).overlay(alignment:.trailing) { Text("›").font(Design.font(22)).opacity(0.45) }
                 .overlay(alignment:.bottom) { Rectangle().fill(Design.ink.opacity(0.18)).frame(height:1) }
                 .contentShape(Rectangle())

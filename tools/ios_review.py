@@ -14,18 +14,19 @@ import shutil
 import zipfile
 
 REFERENCES = {
-    'wake': '04-wake', 'still-fallback': '05-still', 'still-artwork': '05-still',
-    'touched': '06-touched', 'first-contact': '06-touched', 'queue': '07-river',
-    'ask-recording': '08-ask', 'ask-stopped': '08-ask', 'paused': '10-paused',
-    'stopped': '11-stopped', 'offline': '12-offline', 'pending': '13-pending',
-    'unknown': '14-unknown', 'longtitle': '15-longtitle', 'noart': '16-noart',
-    'find': '17-find', 'after-search': '17-find', 'keyboard': '18-keyboard', 'detail': '19-detail',
-    'library': '20-library', 'settings': '21-settings', 'display': '22-display',
+    'wake':'04-wake','still-fallback':'05-still','still-artwork':'05-still',
+    'touched':'06-touched','now-liked':'06-touched','first-contact':'06-touched','remediation-phone':'06-touched',
+    'queue':'07-river','ask-recording':'08-ask','ask-stopped':'09-ready','ask-empty':'09-ready',
+    'paused':'11-paused','stopped':'12-stopped','offline':'13-offline','pending':'14-pending',
+    'volume-pending':'14-pending','unknown':'15-unknown','longtitle':'16-longtitle','noart':'17-noart',
+    'ask-idle':'18-find','ask-typing':'18-find','ask-unavailable':'18-find','find-idle-phone':'18-find',
+    'find':'19-results','after-search':'19-results','keyboard':'20-keyboard',
+    'detail':'21-detail','album-saved':'21-detail','remediation-album':'21-detail','track-liked':'21-detail',
+    'artist-following':'22-artist','artist-tracks':'22-artist','artist-tracks-phone':'22-artist',
+    'artist-about':'22-artist','artist-missing':'22-artist','artist-no-bio':'22-artist',
+    'artist-no-portrait':'22-artist','artist-no-albums':'22-artist','artist-long-name':'22-artist',
+    'library':'23-library','settings':'24-settings','display':'25-display',
 }
-
-REFERENCES.update({'touched':'06-touched','ask-idle':'18-find','ask-recording':'08-ask',
-                   'ask-stopped':'09-ready','find':'19-results','detail':'21-detail',
-                   'artist-following':'22-artist','library':'23-library','settings':'24-settings','display':'25-display'})
 
 
 def build(archive, output, revision=None):
@@ -91,12 +92,12 @@ h1{font:36px Georgia;margin:0 0 10px}p{max-width:1000px;line-height:1.5;color:#b
 nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:24px 0}select,button{font:inherit;padding:10px;background:#26332b;color:#eeeade;border:1px solid #607463;border-radius:6px}
 section{margin:24px 0}h2{font-size:18px}figure{margin:0;overflow:auto;border:1px solid #354037;background:#000;padding:8px}
 img{display:block;width:min(100%,1510px);height:auto}body.full img{width:auto;max-width:none}a{color:#d8c49a}small{color:#bac3b9}
-</style><h1>Still Water · native simulator review</h1>
-<p>__EVIDENCE__</p><p>Actual iPhone 11 simulator captures. This page reviews screenshots; it does not run the app or send commands. The original reference is 800 × 480; D032 expands the phone layout and restores functional parity; the original references are historical visual guidance. Physical and user acceptance remain separate.</p>
+.comparison{display:flex;gap:24px;align-items:start;overflow:auto}.comparison section{flex:none}.comparison img{height:480px;width:auto;max-width:none!important}.comparison figure{padding:0}.comparison p{max-width:800px}.comparison h2{margin-top:0}body.full .comparison img{height:auto} </style><h1>Still Water · native simulator review</h1>
+<p>__EVIDENCE__</p><p>Actual iPhone 11 simulator captures. This page reviews screenshots; it does not run the app or send commands. The original reference is 800 × 480; D032 expands the phone layout and restores functional parity; the supplied revised references are the visual target, adapted to the wider phone safe area and retained controls. Physical and user acceptance remain separate.</p>
 <nav><button id="prev">Previous</button><label>State <select id="state">__OPTIONS__</select></label><button id="next">Next</button><label><input type="checkbox" id="full"> Full pixel size</label><a href="test-summary.json">Test evidence</a><a href="environment.json">Build environment</a><a href="provenance.json">Artifact identity</a></nav>
-<section><h2 id="caption"></h2><figure><img id="native" alt="Native simulator screenshot"></figure></section>
-<section id="reference-block"><h2>Original design reference</h2><p>Compare hierarchy, type, spacing and state feedback. Do not stretch this narrower reference to match the native canvas.</p><figure><img id="reference" alt="Original supplied design reference" style="max-width:800px"></figure></section>
-<p id="extra" hidden>Additional native utility screen; no matching supplied render.</p>
+<div class="comparison"><section><h2 id="caption"></h2><figure><img id="native" alt="Native simulator screenshot"></figure></section>
+<section id="reference-block"><h2>Original design reference</h2><p>Compare hierarchy, type, spacing and state feedback. Both images use the same 480-unit content height; the wider native canvas remains undistorted. Compare vertical rhythm, type size and colour at equal scale. Plain Back, safe areas, track hearts and larger transport targets are deliberate retained differences.</p><figure><img id="reference" alt="Original supplied design reference" style="max-width:800px"></figure></section>
+</div><p id="extra" hidden>Additional native utility screen; no matching supplied render.</p>
 <script>const references=__REFERENCES__;const picker=document.querySelector('#state');
 function show(){const name=picker.value;document.querySelector('#native').src=name+'.png';document.querySelector('#caption').textContent='Native · '+name;const ref=references[name];document.querySelector('#reference-block').hidden=!ref;document.querySelector('#extra').hidden=!!ref;if(ref)document.querySelector('#reference').src=ref;}
 picker.onchange=show;document.querySelector('#prev').onclick=()=>{picker.selectedIndex=(picker.selectedIndex+picker.length-1)%picker.length;show()};document.querySelector('#next').onclick=()=>{picker.selectedIndex=(picker.selectedIndex+1)%picker.length;show()};document.querySelector('#full').onchange=e=>document.body.classList.toggle('full',e.target.checked);show();</script></html>'''

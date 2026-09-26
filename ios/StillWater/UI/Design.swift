@@ -87,7 +87,7 @@ enum Design {
     }
     static let ink = RGB(0xF1EBDF).color, accent = RGB(0xF1C98D).color
     static func name(serif: Bool = false, italic: Bool = false, caps: Bool = false) -> String {
-        serif ? (italic ? "InstrumentSerif-Italic" : "InstrumentSerif-Regular") : (caps ? "Geist-Medium" : "Geist-Regular")
+        serif ? (italic ? "TimesNewRomanPS-ItalicMT" : "TimesNewRomanPSMT") : "ArialMT"
     }
     static func font(_ units: CGFloat, serif: Bool = false, italic: Bool = false, caps: Bool = false) -> Font {
         // Render in design units then scale the entire canvas once.
@@ -132,6 +132,11 @@ struct DesignText: UIViewRepresentable {
         paragraph.alignment = alignment; paragraph.lineBreakMode = .byTruncatingTail
         return [.font:font,.paragraphStyle:paragraph,.kern:caps ? units*0.18 : 0,
                 .foregroundColor:UIColor(red:241/255,green:235/255,blue:223/255,alpha:1)]
+    }
+    static func height(_ value: String, units: CGFloat, width: CGFloat, serif: Bool = false, lines: Int = 2) -> CGFloat {
+        let attributes = attributes(units:units,serif:serif,italic:false,caps:false)
+        let bounds = (value as NSString).boundingRect(with:CGSize(width:width,height:10000),options:[.usesLineFragmentOrigin,.usesFontLeading],attributes:attributes,context:nil)
+        return min(ceil(bounds.height)+2,units * (serif ? 1.02 : 1.3) * CGFloat(lines)+2)
     }
     func makeUIView(context: Context) -> UILabel {
         let label = UILabel(); label.backgroundColor = .clear; label.isUserInteractionEnabled = false

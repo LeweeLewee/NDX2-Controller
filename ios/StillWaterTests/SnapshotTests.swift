@@ -48,6 +48,9 @@ import UIKit
                 XCTAssertFalse(taps[i].frame.insetBy(dx:0.25,dy:0.25).intersects(taps[j].frame.insetBy(dx:0.25,dy:0.25)),"Overlapping \(state): \(taps[i].id) / \(taps[j].id)")
                 XCTAssertFalse(taps[i].frame.insetBy(dx:-3.75,dy:-3.75).intersects(taps[j].frame.insetBy(dx:-3.75,dy:-3.75)),"Less than 8-unit target gap \(state): \(taps[i].id) / \(taps[j].id)")
             } }
+            if state.hasPrefix("artist-"), let albums = visible.first(where: { $0.id.hasPrefix("artist-album-") }) {
+                XCTAssertLessThanOrEqual(albums.frame.maxY,472.5,"Artist album row must clear the bottom edge")
+            }
             if state == "touched" {
                 for (id,rect) in [("previous",CGRect(x:355,y:272,width:98,height:96)),("play-pause",CGRect(x:464,y:264,width:104,height:104)),("next",CGRect(x:579,y:272,width:98,height:96)),("amp-down",CGRect(x:816,y:272,width:80,height:80)),("amp-up",CGRect(x:920,y:272,width:80,height:80))] {
                     let actual = try XCTUnwrap(visible.first { $0.id == id }?.frame)
@@ -72,7 +75,7 @@ import UIKit
             for title in visible where title.fontSize >= 26 && !title.tap && !title.scrollClipped {
                 try assertContrast(image,title:title,state:state)
             }
-            for name in ["InstrumentSerif-Regular","InstrumentSerif-Italic","Geist-Regular","Geist-Medium"] {
+            for name in [Design.name(serif:true),Design.name(serif:true,italic:true),Design.name(),"InstrumentSerif-Regular","Geist-Regular"] {
                 XCTAssertNotNil(UIFont(name:name,size:20),"Missing bundled font \(name)")
             }
             window.isHidden = true
@@ -81,8 +84,8 @@ import UIKit
     private func assertTextFits(_ e: AuditElement,state: String) throws {
         let size = (e.fontSize * Design.scale * 2).rounded() / (2 * Design.scale)
         let font = try XCTUnwrap(UIFont(name:e.fontName,size:size))
-        var attributes = DesignText.attributes(units:e.fontSize,serif:e.fontName.hasPrefix("Instrument"),
-            italic:e.fontName.hasSuffix("Italic"),caps:e.fontName.hasSuffix("Medium"))
+        var attributes = DesignText.attributes(units:e.fontSize,serif:e.fontName.hasPrefix("TimesNewRoman"),
+            italic:e.fontName.contains("Italic"),caps:e.tracking > 0)
         attributes[.kern] = e.tracking
         let measured = (e.text as NSString).boundingRect(with:CGSize(width:e.frame.width,height:10000),
             options:[.usesLineFragmentOrigin,.usesFontLeading],attributes:attributes,context:nil)
