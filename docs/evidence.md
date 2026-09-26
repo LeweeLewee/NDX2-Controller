@@ -361,3 +361,15 @@ GitHub billing ceased blocking the user-requested retry. Native run 36233599779 
 User feedback during upload identified a missed shared-header inconsistency. The latest source still places Silent Demo at y24 on NOW versus y6 elsewhere; this refactor remains open. Safe-area fitting and canvas centering were compared with the earlier B1 source and are unchanged. The visual review therefore does not constitute user acceptance; [audit](ios-visual-audit.md) records the affected screens and retained limitations.
 
 Release completion: Apple processed build **0.1.0 (7.1.0)**; assignment to the existing **Naim NDX2 Controller TestFlight** group is verified with status **Testing**. Release artifact `10904386131` SHA-256 verified: `9c2f040628353880234e2d80d710d806bacbd51d7998fc4d0966cb340b4d910b`. Shared-boundary correction remains open.
+
+
+## Brief B.1 testing amendment — 26 September 2026
+
+Offline validation: 150 Python tests, five navigation tests, six silent TLS fixture stages and the generated iOS project check passed. No bridge/firmware/route change or live NDX command was made.
+
+Native run 36246296700 at 6aac1917e6f065cee9726df00b319b8747469d95 passed 29 tests with zero failures and the unsigned iOS-device archive. Artifact 10907508574 is 69,608,552 bytes; SHA-256 7ae85874453c6dab336c9021ea224918db3c9b885a5c5e159741691e75c6ec9c verified. Gallery local/ios/review-b1-amendment-first/review.html contains 50 native captures. Forty-four were inspected directly; six (longtitle, noart, still-artwork, still-fallback, stopped, wake) are pixel-identical to the previously reviewed build. Shared marker, transport alignment, Library layouts, keyboard and phone safe areas were verified. Visual finishing aligns the artist selection underline with its label and fades the portrait boundary. Final evidence is tracked in ios-b1-amendment.md.
+
+
+Final native source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41` passed all **30 native tests** and the unsigned device archive in [run 36247170788](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36247170788). Artifact `10908186354` (70,022,280 bytes) was SHA-256 verified: `2d83eb9cae1f086a41d375e77f93700fc888a7bc278b6ab453ce98dcba7d142f`. The final gallery is `local/ios/review-b1-amendment/review.html`, with 50 captures: eleven changed captures were inspected directly and 39 are pixel-identical to the first reviewed amendment. Artist underline, portrait fade, seeded playlists, queue and full-phone alignment were checked. This remains simulator visual evidence, not mounted-phone acceptance.
+
+[Release run 36248128881](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36248128881) repeated all 30 native tests and archive checks, then signed and uploaded **0.1.0 (8.1.0)**. Apple processing completed; assignment to the existing **Naim NDX2 Controller TestFlight** group is verified with status **Testing**. Tag `ios-preview-2026-09-26-b1-amendment` remains at reviewed source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41`. Phone installation and acceptance of this amendment remain unverified.

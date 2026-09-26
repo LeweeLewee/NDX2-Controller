@@ -72,3 +72,13 @@ During the upload, the user identified an inconsistent boundary across secondary
 Affected: Up next; Find Idle/Listening/Ready/Results and typing header; Library; album/track details; all artist variants; Settings, Display, Connection, Device, Wi-Fi and Pairing. Artist portrait decoration needs boundary review too. NOW supplies the reference boundary and should remain the layout anchor.
 
 Verified: the latest work did not alter KioskHost positioning, Design.fit, system safe-area handling, the extra 8-point inset or the x48 primary text anchor. The entire design has not been shifted left into the iPhone 11 notch area. Only the colour field ignores the device safe area. The requested follow-up is confirmation and affected-screen identification; this record does not claim a new alignment implementation or another release. Preserve the left exclusion zone in any subsequent shared-header refactor.
+
+
+## Shared boundary and accumulated testing amendments
+
+The user completed testing and authorized implementation on 26 September. The shared marker is now x48/y24 across every screen; secondary headings and contents are adjusted together. This supersedes the open implementation item above, but 7.1.0 itself remains unchanged. The safe-area container and left exclusion zone remain unchanged. See [Brief B.1 amendment](ios-b1-amendment.md) for implementation, all validation, remaining release status and the other queued changes.
+
+
+Final native source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41` passed all **30 native tests** and the unsigned device archive in [run 36247170788](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36247170788). Artifact `10908186354` (70,022,280 bytes) was SHA-256 verified: `2d83eb9cae1f086a41d375e77f93700fc888a7bc278b6ab453ce98dcba7d142f`. The final gallery is `local/ios/review-b1-amendment/review.html`, with 50 captures: eleven changed captures were inspected directly and 39 are pixel-identical to the first reviewed amendment. Artist underline, portrait fade, seeded playlists, queue and full-phone alignment were checked. This remains simulator visual evidence, not mounted-phone acceptance.
+
+[Release run 36248128881](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36248128881) repeated all 30 native tests and archive checks, then signed and uploaded **0.1.0 (8.1.0)**. Apple processing completed; assignment to the existing **Naim NDX2 Controller TestFlight** group is verified with status **Testing**. Tag `ios-preview-2026-09-26-b1-amendment` remains at reviewed source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41`. Phone installation and acceptance of this amendment remain unverified.

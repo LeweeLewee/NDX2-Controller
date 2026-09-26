@@ -1,6 +1,6 @@
 # Brief B.1 — accumulated testing amendments, 26 September 2026
 
-Implementation is on `codex/still-water-b1` in the isolated checkout. The working prototype and newer primary-checkout work remain preserved. This amendment follows the user's completed-testing instruction; validation and release are pending below.
+Implementation is on `codex/still-water-b1` in the isolated checkout. The working prototype and newer primary-checkout work remain preserved. This amendment follows the user's completed-testing instruction; final validation and internal release are complete, with evidence below.
 
 ## Adopted changes
 
@@ -19,3 +19,9 @@ All 150 Python tests, five navigation tests, six silent TLS fixture stages and t
 No live playback, volume, NDX, speech, bridge, firmware, route, trust, or tester changes. Presence remains excluded.
 
 The silent preview starts with 12 fictional saved items in each Library filter, including one artist with no portrait. Ordinary contract fixtures remain unseeded by default; no real account or saved library is changed.
+
+## Final visual validation and release
+
+Final native source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41` passed all **30 native tests** and the unsigned device archive in [run 36247170788](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36247170788). Artifact `10908186354` (70,022,280 bytes) was SHA-256 verified: `2d83eb9cae1f086a41d375e77f93700fc888a7bc278b6ab453ce98dcba7d142f`. The final gallery is `local/ios/review-b1-amendment/review.html`, with 50 captures: eleven changed captures were inspected directly and 39 are pixel-identical to the first reviewed amendment. Artist underline, portrait fade, seeded playlists, queue and full-phone alignment were checked. This remains simulator visual evidence, not mounted-phone acceptance.
+
+[Release run 36248128881](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36248128881) repeated all 30 native tests and archive checks, then signed and uploaded **0.1.0 (8.1.0)**. Apple processing completed; assignment to the existing **Naim NDX2 Controller TestFlight** group is verified with status **Testing**. Tag `ios-preview-2026-09-26-b1-amendment` remains at reviewed source `0f9ecc6e1a2b9a9e4c49b614ff43edf2150fba41`. Phone installation and acceptance of this amendment remain unverified.
