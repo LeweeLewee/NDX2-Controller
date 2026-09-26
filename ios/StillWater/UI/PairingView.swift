@@ -17,7 +17,7 @@ struct PairingView: View {
         ScrollView {
             VStack(alignment:.leading,spacing:12) {
                 Text(message).font(Design.font(18)).foregroundStyle(Design.ink.opacity(0.7))
-                TextField("https://bridge-host:8991",text:$origin).textInputAutocapitalization(.never).autocorrectionDisabled()
+                TextField("Bridge address",text:$origin,prompt:Text("https://bridge-host:8991").foregroundStyle(Design.ink.opacity(0.55))).textInputAutocapitalization(.never).autocorrectionDisabled()
                     .font(Design.font(22)).frame(height:56)
                 HStack(spacing:12) {
                     Button("Import trust") { showImporter = true }.frame(width:200,height:56)

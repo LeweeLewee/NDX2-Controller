@@ -95,6 +95,10 @@ import UIKit
         var attributes = DesignText.attributes(units:e.fontSize,serif:e.fontName.hasPrefix("TimesNewRoman"),
             italic:e.fontName.contains("Italic"),caps:e.tracking > 0)
         attributes[.kern] = e.tracking
+        if e.maxLines > 1, let paragraph = (attributes[.paragraphStyle] as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle {
+            paragraph.lineBreakMode = .byWordWrapping
+            attributes[.paragraphStyle] = paragraph
+        }
         let measured = (e.text as NSString).boundingRect(with:CGSize(width:e.frame.width,height:10000),
             options:[.usesLineFragmentOrigin,.usesFontLeading],attributes:attributes,context:nil)
         let line = (attributes[.paragraphStyle] as? NSParagraphStyle)?.maximumLineHeight ?? font.lineHeight

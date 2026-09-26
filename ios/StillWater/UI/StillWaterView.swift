@@ -362,7 +362,7 @@ struct StillWaterView: View {
                 }
             }
             if !model.context.biographyExpanded && model.context.artistTab != "about" {
-                button(detailMembershipLabel,id:"membership-write",x:hasPortrait ? left : 816,y:item.biography == nil ? max(148,84+nameHeight+12) : 270,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
+                button(detailMembershipLabel,id:"membership-write",x:hasPortrait || item.biography == nil ? left : 816,y:item.biography == nil ? max(148,84+nameHeight+12) : 270,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
                 if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:48,y:312,w:120,border:false,size:18,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
                 if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:184,y:312,w:120,border:false,size:18,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
                 if model.context.artistTab == "tracks" { rows(y:384,height:88,items:tracks,tracks:true) }

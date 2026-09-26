@@ -135,7 +135,13 @@ struct DesignText: UIViewRepresentable {
                 .foregroundColor:UIColor(red:241/255,green:235/255,blue:223/255,alpha:1)]
     }
     static func height(_ value: String, units: CGFloat, width: CGFloat, serif: Bool = false, lines: Int = 2) -> CGFloat {
-        let attributes = attributes(units:units,serif:serif,italic:false,caps:false)
+        var attributes = attributes(units:units,serif:serif,italic:false,caps:false)
+        // Measure wrapping before applying the visible line limit. A truncating
+        // paragraph reports one line even when UILabel renders two lines.
+        if let paragraph = (attributes[.paragraphStyle] as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle {
+            paragraph.lineBreakMode = .byWordWrapping
+            attributes[.paragraphStyle] = paragraph
+        }
         let bounds = (value as NSString).boundingRect(with:CGSize(width:width,height:10000),options:[.usesLineFragmentOrigin,.usesFontLeading],attributes:attributes,context:nil)
         return min(ceil(bounds.height)+2,units * (serif ? 1.02 : 1.3) * CGFloat(lines)+2)
     }
