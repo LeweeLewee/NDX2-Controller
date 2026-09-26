@@ -21,7 +21,7 @@ The user repeated the selected bank name, UGREEN Nexode 20000mAh PD 20W QC Power
 | Overall planning bounds | 240 W × 170 D × 105 H mm |
 | Phone angle | 50 degrees from the table |
 | Lower phone glass edge | 36 mm above underside datum |
-| Visible aperture | 137.9 × 62.7 mm nominal rectangle; 6.5 mm inset from every outer phone edge |
+| Visible aperture | 138.9 × 63.7 mm nominal rectangle; 6 mm inset from every outer phone edge |
 | Local glass recess | 1.2 mm trial target |
 | Bank bay | 151 × 76 × 32 mm, around the 147 × 72 × 28 envelope |
 | Rear-of-phone reserve | 6 mm beyond nominal phone body, not a measured camera dimension |
@@ -49,7 +49,7 @@ Use a shallow local glass recess, initially around 1–1.5 mm for a physical moc
 
 Apple specifies the iPhone 11 body as **150.9 × 75.7 × 8.3 mm**, 194 g, with a 1792 × 828 LCD. These are nominal product dimensions, not a mounting drawing: measure the actual phone, camera projection, buttons and cable plug before fit CAD. [Apple specifications](https://support.apple.com/en-gb/111865).
 
-**26 September revision:** the user rejected the 118 × 54 mm opening as too small and proposed **6.5 mm overlap measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 13) × (75.7 − 13) = **137.9 × 62.7 mm**, centred on the phone body. This is approximately **35.7% more rectangular opening area**, not a claim about active pixel area. Rounded corners and any local microphone relief remain to be measured.
+**26 September revision:** the user rejected the 118 × 54 mm opening as too small and subsequently reduced the proposed overlap to **6 mm measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 12) × (75.7 − 12) = **138.9 × 63.7 mm**, centred on the phone body. This is approximately **38.9% more rectangular opening area**, not a claim about active pixel area. Rounded corners and any local microphone relief remain to be measured.
 
 Maximise display exposure within this baseline. A uniform overlap does not prove that the notch is hidden or that the front microphone is clear. Check registration on the actual phone; use local lip relief and an interrupted gasket wherever needed to leave the inlet and a short, broad path to room air open. Do not shrink the whole aperture again merely to hide the notch. Exact relief dimensions await microphone mapping; the rectangular paper template is a visual registration aid only. The earlier 755 × 346 pt/1048 × 480 design-unit mapping is superseded for this aperture and must be recalculated from actual screen registration before UI work.
 
@@ -69,4 +69,4 @@ Bank automatic shutoff/restart, concurrent charging/output, charge-window switch
 
 Recommended agreement: **rear-loaded intact phone; serviceable padded cradle; opaque stone lip; hidden black light seal; original phone glass exposed; shallow local recess.** The user suggested rear/inside mounting; this is the developed proposal for review, not a recorded final approval of its dimensions.
 
-Before detailed CAD: verify the UGREEN variant; register a removable 137.9 × 62.7 mm paper/card mask with 6.5 mm overlap on each edge over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.
+Before detailed CAD: verify the UGREEN variant; register a removable 138.9 × 63.7 mm paper/card mask with 6 mm overlap on each edge over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.

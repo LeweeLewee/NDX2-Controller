@@ -2,7 +2,7 @@
 import json,math
 from pathlib import Path
 out=Path(__file__).resolve().parents[1]/'docs/hardware/river-stone/iphone-mount';out.mkdir(exist_ok=True)
-overlap=6.5
+overlap=6.0
 window=[round(d-2*overlap,1) for d in (150.9,75.7)]
 a=math.radians(50);c,s=math.cos(a),math.sin(a)
 def point(v,t):return (-55+v*c-t*s,36+v*s+t*c)
@@ -25,8 +25,8 @@ def poly(points,fill,stroke='#526564'):
 text(40,43,'01 RIVER STONE / concealed iPhone mounting layout',30);text(40,76,'Original 01 only • proposed envelopes and service paths • dimensions in mm • not fit CAD',18)
 text(40,122,'1  FRONT / viewed normal to screen',22)
 parts.append('<path d="M55 325 C45 200 115 144 250 144 C455 136 569 170 606 313 C625 385 551 404 350 402 L170 402 C93 400 54 382 55 325Z" fill="#c4bba5" stroke="#968b73"/>')
-rect(139,208,377.25,189.25,'none','#617273','6 5');rect(139+overlap*2.5,208+overlap*2.5,window[0]*2.5,window[1]*2.5,'#2c4547');text(210,310,'137.9 × 62.7 window',20)
-text(60,436,'Dashed: hidden 150.9 × 75.7 phone body');text(60,466,'Notch left / Lightning right; 6.5 overlap; mic paths open',16)
+rect(139,208,377.25,189.25,'none','#617273','6 5');rect(139+overlap*2.5,208+overlap*2.5,window[0]*2.5,window[1]*2.5,'#2c4547');text(210,310,f'{window[0]:g} × {window[1]:g} window',20)
+text(60,436,'Dashed: hidden 150.9 × 75.7 phone body');text(60,466,f'Notch left / Lightning right; {overlap:g} mm overlap; mic paths open',16)
 text(730,122,'2  SECTION / proposed 50° tilt',22)
 # Each axis 2.5 px per mm, y rearwards right, z upwards.
 def side(y,z):return (760+(y+85)*2.5,425-z*2.5)

@@ -171,3 +171,5 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 `charge?` now reports `reason: "window"` for all fresh yes/no decisions, `"stale"` for expired reports and `"none"` for no report since boot. Stale and none remain no. Fresh validation: 137 Python tests, five JavaScript navigation tests and all six silent TLS demo stages passed. Boundary tests distinguish window/no from stale/no at exactly one hour, verify invalid reports cannot refresh expiry and confirm restart returns none. Brief A/A.1 and the unchanged 39-file Still Water source package form one coherent repository checkpoint. No new decision ID, UI, firmware, route or live-device operation.
 
 - 26 September: revised iPhone aperture to 137.9 × 62.7 mm from user-proposed 6.5 mm overlap on every outer edge; updated layout and paper template. Next: actual phone registration and local microphone relief before a mounting sample.
+
+- 26 September follow-up: current aperture baseline is 138.9 × 63.7 mm with 6 mm overlap per outer edge; supersedes the 6.5 mm trial.
