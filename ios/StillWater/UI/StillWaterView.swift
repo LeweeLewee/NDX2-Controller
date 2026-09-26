@@ -124,7 +124,7 @@ struct StillWaterView: View {
                 .foregroundStyle(filled ? RGB(0x141614).color : Design.ink)
                 .background(filled ? Design.ink : .clear, in: Capsule())
                 .overlay(Capsule().stroke(Design.ink.opacity(border ? 0.18 : 0),lineWidth:1))
-                .overlay(alignment:.bottom) { if indicator { Rectangle().fill(Design.ink).frame(width:24,height:1).padding(.bottom,8) } }
+                .overlay(alignment:alignment == .leading ? .bottomLeading : .bottom) { if indicator { Rectangle().fill(Design.ink).frame(width:24,height:1).padding(.leading,alignment == .leading ? 18 : 0).padding(.bottom,8) } }
                 .contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(!enabled).opacity(enabled ? 1 : 0.35)
             .accessibilityIdentifier(id).audit(id,font:size,tap:true,pill:true,text:title)
@@ -201,7 +201,7 @@ struct StillWaterView: View {
                         Text(model.queue.dropFirst().first?.title ?? "Queue").font(Design.font(26,serif:true)).lineLimit(1)
                     }.frame(width:248,height:64,alignment:.leading).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("up-next").audit("up-next",font:26,tap:true).position(x:172,y:420)
-                icon(.mic,id:"ask",label:"Ask; start listening",x:488,y:376,w:72,h:72,ring:true,accent:true,glyph:28) { model.navigate(.ask); model.startVoice() }
+                icon(.mic,id:"ask",label:"Find music",x:488,y:376,w:72,h:72,ring:true,accent:true,glyph:28) { model.navigate(.ask) }
                 icon(.library,id:"library",label:"Library",x:920,y:384,w:80,h:64,glyph:30) { model.navigate(.library) }
                 if model.unknownAction == "amplifier" {
                     RoundedRectangle(cornerRadius:32).stroke(Design.ink.opacity(0.55),style:StrokeStyle(lineWidth:1,dash:[4,4]))
@@ -432,8 +432,8 @@ struct StillWaterView: View {
             header("")
             if let cover {
                 Image(uiImage:cover).resizable().interpolation(.high).scaledToFill().frame(width:360,height:448).clipped()
-                    .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.55),.init(color:.clear,location:1)],startPoint:.leading,endPoint:.trailing))
-                    .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:0.7),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
+                    .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:0.08),.init(color:.black,location:0.55),.init(color:.clear,location:1)],startPoint:.leading,endPoint:.trailing))
+                    .mask(LinearGradient(stops:[.init(color:.clear,location:0),.init(color:.black,location:0.06),.init(color:.black,location:0.7),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
                     .position(x:228,y:248).allowsHitTesting(false)
             }
             label("ARTIST · TIDAL",id:"artist-kind",x:left,y:60,w:664,h:24,size:15,alpha:0.55,caps:true)

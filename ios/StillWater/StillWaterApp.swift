@@ -24,7 +24,7 @@ enum RuntimeMode {
     private let speech = SpeechCapture()
     init() {
         let transport: BridgeTransport
-        if RuntimeMode.fixture { transport = FixtureTransport() }
+        if RuntimeMode.fixture { transport = FixtureTransport(seedCollection:true) }
         else if let record = try? SecureEnrollment.load(), record.state == "paired" { transport = BridgeClient(record) }
         else { transport = UnconfiguredTransport() }
         _model = StateObject(wrappedValue:ControllerModel(transport:transport))

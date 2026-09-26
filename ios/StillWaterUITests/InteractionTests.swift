@@ -79,7 +79,8 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["wake-contact"].waitForExistence(timeout:5)); app.buttons["wake-contact"].tap()
         XCTAssertFalse(app.buttons["find"].exists); app.buttons["ask"].tap()
         let record = app.buttons["voice-record"]
-        XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Stop recording")
+        XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Start recording")
+        record.tap(); expectLabel(record,"Stop recording")
         let ready = XCTNSPredicateExpectation(predicate:NSPredicate(format:"enabled == true"),object:app.buttons["voice-search"])
         XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:8),.completed)
         app.buttons["voice-search"].tap()
@@ -100,7 +101,7 @@ final class InteractionTests: XCTestCase {
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "First-contact-touched"; image.lifetime = .keepAlways; add(image)
         app.buttons["ask"].tap()
         XCTAssertTrue(app.buttons["voice-record"].waitForExistence(timeout:5))
-        expectLabel(app.buttons["voice-record"],"Stop recording")
+        expectLabel(app.buttons["voice-record"],"Start recording")
         XCTAssertFalse(app.buttons["ask"].exists)
     }
     private func assertKeyboardDismissed(_ app: XCUIApplication) {

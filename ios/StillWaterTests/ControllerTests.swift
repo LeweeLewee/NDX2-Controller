@@ -42,6 +42,18 @@ import XCTest
         XCTAssertFalse(transport.requests.contains("play"))
         XCTAssertFalse(transport.requests.contains("library_save"))
     }
+    func testSilentPreviewCollectionSupportsEveryLibraryLayout() async throws {
+        let fixture = FixtureTransport(seedCollection:true)
+        for kind in ["albums","tracks","artists","playlists"] {
+            let page = try await fixture.send(BridgeRequest("library_page",["kind":.string(kind)]))
+            let items = page.data["items"].values.map(MusicItem.init)
+            XCTAssertEqual(items.count,12)
+            XCTAssertTrue(items.allSatisfy { $0.kind == kind && $0.saved == "saved" })
+        }
+        let missing = try await fixture.send(BridgeRequest("artist_bio",["reference":.string("inputs/tidal/artists/203")]))
+        XCTAssertNil(missing.data["artwork"].text)
+        XCTAssertTrue(fixture.mutations.isEmpty)
+    }
     func settle() async { for _ in 0..<30 { await Task.yield() } }
     func testNowRelationshipsLikeAndIndependentAlbumArtistMembership() async throws {
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)

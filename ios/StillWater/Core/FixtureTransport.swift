@@ -8,9 +8,14 @@ import Foundation
     var fail = false
     var clock: () -> Double = { ProcessInfo.processInfo.systemUptime }
     private var battery: (level: Int, charging: Bool, received: Double)?
-    init() {
+    init(seedCollection: Bool = false) {
         if let url = Bundle.main.url(forResource:"BridgeFixtures",withExtension:"json"),
            let raw = try? Data(contentsOf:url), let samples = try? JSONDecoder().decode([String:JSONValue].self,from:raw) { self.samples = samples }
+        if seedCollection {
+            for kind in ["albums","tracks","artists","playlists"] {
+                for index in 201...212 { memberships["inputs/tidal/"+kind+"/"+String(index)] = "saved" }
+            }
+        }
     }
     func cancel() {}
     func sample(_ name: String) -> JSONValue { samples[name]?["reply"] ?? .null }
@@ -97,6 +102,9 @@ import Foundation
                 data["playable"] = .bool(false)
             } else if kind == "albums" {
                 data["item"] = album(max(1,index)); data["items"] = .array((101...106).map { trackItem($0,albumID:max(1,index)) })
+            } else if kind == "playlists" {
+                data["item"] = .object(["reference":.string(ref),"title":.string(["Evening Listening","Quiet Piano","After Rain","Acoustic Rooms"][(max(1,index)-1)%4]),"artist":.string("Silent collection"),"kind":.string("playlists"),"artwork":art((max(1,index)-1)%6)])
+                data["items"] = .array((101...106).map { trackItem($0,albumID:1) })
             } else if kind == "tracks" {
                 data["item"] = trackItem(max(101,index),albumID:1); data["items"] = .array([])
             }
@@ -113,7 +121,9 @@ import Foundation
             r["data"] = .object(data)
         }
         if request.action == "artist_bio", case .object(var data) = r["data"] {
-            data["reference"] = request.args["reference"]; r["data"] = .object(data)
+            data["reference"] = request.args["reference"]
+            if request.args["reference"]?.text == "inputs/tidal/artists/203" { data["artwork"] = .null }
+            r["data"] = .object(data)
         }
         if request.action == "charge?" {
             let fresh = battery.map { clock() >= $0.received && clock() - $0.received < 3600 } ?? false
