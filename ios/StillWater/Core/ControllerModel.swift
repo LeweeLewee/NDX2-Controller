@@ -390,6 +390,8 @@ struct Preview {
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
         let candidates = Array(items.prefix(24))
+        let candidateRefs = Set(candidates.map(\.reference))
+        missingArtUntil = missingArtUntil.filter { candidateRefs.contains($0.key) }
         let screen = context.screen
         guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
         let gen = generation
