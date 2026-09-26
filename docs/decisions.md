@@ -218,3 +218,8 @@ D035 delivery: **0.1.0 (6.1.0)** is Testing in the existing internal group after
 D035 implementation reconciliation: removing the standalone Find icon leaves the mic as the sole search entry. Pending the optional user preference question, use Find idle so both explicit voice start and typing remain accessible. The main microphone stays fixed geometrically. The preview-only Library receives fictional collection items for immediate on-phone layout testing; no provider library is changed.
 
 D035 testing-amendment delivery: 0.1.0 (8.1.0) is Testing in the existing internal group after 30 passing native tests, archive/sign/upload and Apple processing. No new decision ID or change to live-control authorization.
+
+
+## D036 — Internal live NDX beta trial
+
+On 26 September the user authorized proceeding from the committed UI beta to staged live NDX controls testing. Preserve the 8.1.0 silent beta and newer primary checkout; use an isolated live-beta branch and explicit signed live build. Start with authenticated pairing and read-only observations, then announce and verify bounded transport/native Naim playback trials, followed separately by collection and D011 amplifier commands. Existing trust, protected storage, rate limits, no-replay and uncertain-outcome semantics remain. Real speech and presence are outside this first trial. No new HTTP routes, firmware change, host migration, public distribution or tester expansion. See [trial plan](ios-live-beta.md). Actual host, phone and live command evidence must be recorded separately.

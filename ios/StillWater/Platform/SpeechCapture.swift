@@ -7,7 +7,7 @@ import Speech
     private var token = UUID(), tapped = false
     weak var model: ControllerModel?
     func start() {
-        guard !RuntimeMode.demoOnly else { return }
+        guard !RuntimeMode.demoOnly, RuntimeMode.speechEnabled else { unavailable(); return }
         cancel(); let current = token
         Task {
             let speech = await withCheckedContinuation { continuation in

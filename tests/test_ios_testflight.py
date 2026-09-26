@@ -7,10 +7,16 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from ios_testflight import build_number, export_options, profile_identity, value
+from ios_testflight import build_mode, build_number, export_options, profile_identity, value
 
 
 class TestFlightGates(unittest.TestCase):
+    def test_build_mode_is_explicit_and_rejects_unknown_values(self):
+        self.assertEqual(build_mode('preview'), 'STILL_WATER_PREVIEW')
+        self.assertEqual(build_mode('live'), 'STILL_WATER_LIVE_BETA')
+        for mode in ['', None, 'production', 'live;command']:
+            with self.assertRaises(ValueError): build_mode(mode)
+
     def profile(self):
         return {'UUID': '11111111-2222-3333-4444-555555555555',
                 'TeamIdentifier': ['ABCDEFGHIJ'], 'ExpirationDate': datetime(2030, 1, 1),

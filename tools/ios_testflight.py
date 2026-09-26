@@ -18,7 +18,12 @@ import tempfile
 
 OUTPUT = Path('local/ios-release')
 ARCHIVE = OUTPUT / 'StillWater.xcarchive'
-MODE = 'STILL_WATER_PREVIEW'
+MODES = {'preview': 'STILL_WATER_PREVIEW', 'live': 'STILL_WATER_LIVE_BETA'}
+
+def build_mode(mode):
+    if mode not in MODES:
+        raise ValueError('Explicit preview or live build mode required')
+    return MODES[mode]
 
 
 def run(*args, private=False):
@@ -70,7 +75,8 @@ def build_number():
     return f'{int(number)}.{int(attempt)}.0'
 
 
-def archive(bundle, signing=()):
+def archive(bundle, signing=(), mode="preview"):
+    condition = build_mode(mode)
     OUTPUT.mkdir(parents=True, exist_ok=True)
     if ARCHIVE.exists():
         raise ValueError('Archive already exists; use a fresh checkout/job rather than overwrite evidence')
@@ -79,20 +85,21 @@ def archive(bundle, signing=()):
         '-configuration', 'Release', '-destination', 'generic/platform=iOS',
         '-archivePath', str(ARCHIVE), '-derivedDataPath', str(OUTPUT / 'DerivedData'),
         f'PRODUCT_BUNDLE_IDENTIFIER={bundle}', f'CURRENT_PROJECT_VERSION={build_number()}',
-        f'STILL_WATER_MODE={MODE}', *signing)
-    return inspect_archive(ARCHIVE, bundle)
+        f'STILL_WATER_MODE={condition}', *signing)
+    return inspect_archive(ARCHIVE, bundle, mode)
 
 
-def inspect_archive(path, bundle):
+def inspect_archive(path, bundle, mode="preview"):
+    condition = build_mode(mode)
     app = path / 'Products/Applications/StillWater.app'
     info = plistlib.loads((app / 'Info.plist').read_bytes())
-    if (info.get('CFBundleIdentifier') != bundle or info.get('StillWaterBuildMode') != MODE
+    if (info.get('CFBundleIdentifier') != bundle or info.get('StillWaterBuildMode') != condition
             or info.get('CFBundleSupportedPlatforms') != ['iPhoneOS']
             or int(info.get('DTXcode', '0')) < 2600
             or not info.get('DTSDKName', '').startswith('iphoneos26')
             or not (app / 'Assets.car').is_file()
             or info.get('CFBundleIcons', {}).get('CFBundlePrimaryIcon', {}).get('CFBundleIconName') != 'AppIcon'):
-        raise ValueError('Archive is not the expected iOS 26 SDK silent-preview device build with an app icon')
+        raise ValueError('Archive is not the expected iOS 26 SDK build mode with an app icon')
     privacy = plistlib.loads((app / 'PrivacyInfo.xcprivacy').read_bytes())
     reasons = {x['NSPrivacyAccessedAPIType']: x['NSPrivacyAccessedAPITypeReasons']
                for x in privacy['NSPrivacyAccessedAPITypes']}
@@ -107,7 +114,7 @@ def inspect_archive(path, bundle):
     evidence['uploaded'] = False
     evidence['binary_sha256'] = hashlib.sha256((app / 'StillWater').read_bytes()).hexdigest()
     (OUTPUT / 'archive-check.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
-    print('Verified preview archive, SDK, icon and privacy manifest; upload has not occurred.')
+    print('Verified archive mode, SDK, icon and privacy manifest; upload has not occurred.')
     return app
 
 
@@ -118,7 +125,8 @@ def export_options(team, bundle, profile):
             'uploadSymbols': True, 'testFlightInternalTestingOnly': True}
 
 
-def upload():
+def upload(mode="preview"):
+    build_mode(mode)
     team = value('APPLE_TEAM_ID', r'[A-Z0-9]{10}')
     bundle = value('APPLE_BUNDLE_ID', r'[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+')
     key_id = value('ASC_KEY_ID', r'[A-Z0-9]{10}')
@@ -158,7 +166,7 @@ def upload():
             run('security', 'set-key-partition-list', '-S', 'apple-tool:,apple:,codesign:', '-s', '-k', keychain_password, str(keychain), private=True)
             run('security', 'list-keychains', '-d', 'user', '-s', str(keychain), *keychains, private=True)
             app = archive(bundle, [f'DEVELOPMENT_TEAM={team}', 'CODE_SIGN_STYLE=Manual',
-                                  'CODE_SIGN_IDENTITY=Apple Distribution', f'PROVISIONING_PROFILE_SPECIFIER={identifier}'])
+                                  'CODE_SIGN_IDENTITY=Apple Distribution', f'PROVISIONING_PROFILE_SPECIFIER={identifier}'], mode=mode)
             run('codesign', '--verify', '--deep', '--strict', str(app))
             options = folder / 'ExportOptions.plist'
             options.write_bytes(plistlib.dumps(export_options(team, bundle, identifier)))
@@ -177,11 +185,12 @@ def upload():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=('archive-check', 'upload'))
+    parser.add_argument('--mode', choices=tuple(MODES), default='preview')
     args = parser.parse_args()
     try:
         if args.action == 'upload':
-            upload()
+            upload(args.mode)
         else:
-            archive('com.ndx2.controller', ['CODE_SIGNING_ALLOWED=NO'])
+            archive('com.ndx2.controller', ['CODE_SIGNING_ALLOWED=NO'], mode=args.mode)
     except (ValueError, RuntimeError) as error:
         raise SystemExit(str(error)) from None

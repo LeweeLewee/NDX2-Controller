@@ -1,11 +1,13 @@
 import SwiftUI
 
 enum RuntimeMode {
-    #if STILL_WATER_PREVIEW
-    static let demoOnly = true
-    #else
+    #if STILL_WATER_LIVE_BETA
     static let demoOnly = false
+    #else
+    static let demoOnly = true
     #endif
+    // Live beta initially tests controls and typed search; audio capture is separate.
+    static let speechEnabled = false
     static let fixture = demoOnly || ProcessInfo.processInfo.arguments.contains("--fixture") || ProcessInfo.processInfo.environment["STILL_WATER_FIXTURE"] == "1"
 }
 
@@ -27,7 +29,9 @@ enum RuntimeMode {
         if RuntimeMode.fixture { transport = FixtureTransport(seedCollection:true) }
         else if let record = try? SecureEnrollment.load(), record.state == "paired" { transport = BridgeClient(record) }
         else { transport = UnconfiguredTransport() }
-        _model = StateObject(wrappedValue:ControllerModel(transport:transport))
+        let controller = ControllerModel(transport:transport)
+        if transport is UnconfiguredTransport { controller.context.screen = .pairing }
+        _model = StateObject(wrappedValue:controller)
     }
     var body: some Scene {
         WindowGroup {

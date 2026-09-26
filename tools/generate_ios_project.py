@@ -58,7 +58,7 @@ def generate(check=False):
                         'SDKROOT': 'iphoneos', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator', 'CODE_SIGN_STYLE': 'Automatic',
                         'SWIFT_OPTIMIZATION_LEVEL': '-Onone' if config == 'Debug' else '-O',
                         'SWIFT_ACTIVE_COMPILATION_CONDITIONS': ('DEBUG ' if config == 'Debug' else '') + '$(STILL_WATER_MODE)',
-                        'STILL_WATER_MODE': '', 'CURRENT_PROJECT_VERSION': '1', 'MARKETING_VERSION': '0.1.0',
+                        'STILL_WATER_MODE': 'STILL_WATER_PREVIEW', 'CURRENT_PROJECT_VERSION': '1', 'MARKETING_VERSION': '0.1.0',
                         'ENABLE_TESTABILITY': 'YES' if config == 'Debug' else 'NO', 'CLANG_ENABLE_MODULES': 'YES',
                         'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/Frameworks', '@loader_path/Frameworks']}
             if name == 'StillWater':

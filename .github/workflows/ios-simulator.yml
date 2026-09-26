@@ -2,7 +2,7 @@ name: Still Water iOS simulator
 
 on:
   push:
-    branches: [codex/still-water-cloud-build, codex/still-water-b1]
+    branches: [codex/still-water-cloud-build, codex/still-water-b1, codex/still-water-live-beta]
     paths:
       - 'ios/**'
       - 'tools/ios_ci.py'
@@ -11,6 +11,10 @@ on:
       - '.github/workflows/ios-simulator.yml'
   workflow_dispatch:
   workflow_call:
+    inputs:
+      mode:
+        type: string
+        default: preview
 
 permissions:
   contents: read
@@ -26,6 +30,7 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       STILL_WATER_FIXTURE: '1'
+      BUILD_MODE: ${{ inputs.mode || (github.ref_name == 'codex/still-water-live-beta' && 'live' || 'preview') }}
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -45,10 +50,10 @@ jobs:
             -parallel-testing-enabled NO \
             -derivedDataPath local/ios-ci/DerivedData \
             -resultBundlePath local/ios-ci/StillWater.xcresult \
-            CODE_SIGNING_ALLOWED=NO STILL_WATER_MODE=STILL_WATER_PREVIEW \
+            CODE_SIGNING_ALLOWED=NO STILL_WATER_MODE=$(python3 -c 'import os,sys; sys.path.insert(0,"tools"); from ios_testflight import build_mode; print(build_mode(os.environ["BUILD_MODE"]))') \
             | tee local/ios-ci/xcodebuild.log
       - name: Check unsigned iOS device archive
-        run: python3 tools/ios_testflight.py archive-check
+        run: python3 tools/ios_testflight.py archive-check --mode "$BUILD_MODE"
       - name: Export results and screenshots for Windows
         if: always()
         run: python3 tools/ios_ci.py export
