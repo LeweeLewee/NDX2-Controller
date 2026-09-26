@@ -280,6 +280,7 @@ struct Preview {
                     self.context.selected.artwork = bio.data["artwork"].text
                 }
             }
+            guard self.generation == gen else { return }
             await self.membership()
         }
     }
@@ -346,6 +347,17 @@ struct Preview {
         }
     }
     func loadArtwork() async {
+        // Re-register detail art through metadata after expiry, never extend a preview locally.
+        if context.screen == .detail {
+            let selected = context.selected.reference, gen = generation
+            let action = context.selected.kind == "artists" ? "artist_bio" : "browse"
+            guard let metadata = await perform(BridgeRequest(action,["reference":.string(selected)])),
+                  metadata.outcome == "observed", generation == gen, context.selected.reference == selected else { return }
+            let value = action == "artist_bio" ? metadata.data : metadata.data["item"]
+            guard value["reference"].text == selected else { return }
+            context.selected.artwork = value["artwork"].text
+            if action == "artist_bio" { context.selected.biography = value["biography"].text }
+        }
         guard let ref = artworkReference, ref.range(of: "^/artwork/[0-9a-f]{64}\\.jpg$", options: .regularExpression) != nil else { return }
         let gen = generation
         let paletteStart = clock()

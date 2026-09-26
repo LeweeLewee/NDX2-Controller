@@ -53,7 +53,8 @@ class ArtistMetadataTests(unittest.TestCase):
 
     def test_fixture_read_registers_chunked_portrait_without_mutation(self):
         service = FixtureService()
-        contract = Contract(service, MemoryVault(), clock=lambda: 100)
+        clock = [100]
+        contract = Contract(service, MemoryVault(), clock=lambda: clock[0])
         def read(action, args):
             return contract.handle('fixture', {'version': 1, 'request_id': 'artist_test_0001', 'action': action, 'args': args})
         bio = read('artist_bio', {'reference': 'inputs/tidal/artists/1'})
@@ -62,6 +63,10 @@ class ArtistMetadataTests(unittest.TestCase):
         for offset in (0, 96000):
             portrait = read('artwork', {'reference': bio['data']['artwork'], 'side': 320, 'pixel_offset': offset})
             self.assertEqual(portrait['outcome'], 'observed')
+        clock[0] += 60
+        self.assertFalse(read('artwork', {'reference': bio['data']['artwork'], 'side': 320})['data']['available'])
+        read('artist_bio', {'reference': 'inputs/tidal/artists/1'})
+        self.assertTrue(read('artwork', {'reference': bio['data']['artwork'], 'side': 320})['data']['available'])
         self.assertFalse(service.naim.calls)
         self.assertFalse(contract.vault.data['commands'])
         for args in ({}, {'reference': 'inputs/tidal/artists/1', 'url': 'https://example.com'}):

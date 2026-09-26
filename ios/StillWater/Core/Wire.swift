@@ -136,7 +136,6 @@ struct Player: Equatable {
         state = ["playing","paused","stopped"].contains(observed) ? observed : "unknown"
         source = value["sourceDetail"].text ?? ""; artwork = value["artwork"].text
         position = value["transportPosition"].number.flatMap { $0 >= 0 ? $0 : nil }
-        trackCount = value["track_count"].number.flatMap { (1...10000).contains($0) ? $0 : nil }
         duration = value["duration"].number.flatMap { $0 > 0 ? $0 : nil }
     }
 }
