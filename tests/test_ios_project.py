@@ -70,7 +70,7 @@ class IOSProjectTests(unittest.TestCase):
         info = plistlib.loads((ROOT / 'ios/StillWater/Info.plist').read_bytes())
         self.assertEqual(info['UIBackgroundModes'], ['processing'])
         self.assertEqual(info['UISupportedInterfaceOrientations'], ['UIInterfaceOrientationLandscapeRight'])
-        self.assertNotIn('NSAppTransportSecurity', info)
+        self.assertEqual(info['NSAppTransportSecurity'], {'NSAllowsLocalNetworking': True})
         for key in ('NSMicrophoneUsageDescription', 'NSSpeechRecognitionUsageDescription', 'NSLocalNetworkUsageDescription'):
             self.assertTrue(info[key])
         folder = ROOT / 'ios/StillWater/Resources/Fonts'

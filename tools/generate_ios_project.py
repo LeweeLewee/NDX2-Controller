@@ -122,6 +122,7 @@ def generate(check=False):
             'NSMicrophoneUsageDescription':'Capture an explicit music search. Cancel discards audio; nothing plays automatically.',
             'NSSpeechRecognitionUsageDescription':'Transcribe music searches on this phone. Audio is not sent to a speech server.',
             'NSLocalNetworkUsageDescription':'Connect to your provisioned authenticated music-control bridge.',
+            'NSAppTransportSecurity':{'NSAllowsLocalNetworking':True},
             'UIAppFonts':['InstrumentSerif-Regular.ttf','InstrumentSerif-Italic.ttf','Geist-Regular.ttf','Geist-Medium.ttf'],
             'ITSAppUsesNonExemptEncryption':False}
     emit(ROOT/'StillWater/Info.plist',plistlib.dumps(info,sort_keys=False))

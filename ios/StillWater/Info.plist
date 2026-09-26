@@ -49,6 +49,11 @@
 	<string>Transcribe music searches on this phone. Audio is not sent to a speech server.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Connect to your provisioned authenticated music-control bridge.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>InstrumentSerif-Regular.ttf</string>
