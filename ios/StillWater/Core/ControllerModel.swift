@@ -43,6 +43,14 @@ struct Preview {
     @Published var preferences = DisplayPreferences.load()
     @Published var colorPreview: Preview?
     @Published var queueArtwork: [String:Preview] = [:]
+    @Published private(set) var libraryFirstIndex = 0
+    private var missingArtUntil: [String:Double] = [:]
+    var fieldPreview: Preview? {
+        guard context.screen == .library else { return colorPreview }
+        let ordered = Array(context.items.dropFirst(libraryFirstIndex)) + Array(context.items.prefix(libraryFirstIndex))
+        return ordered.compactMap { queueArtwork[$0.reference] }.first { clock() < $0.deadline }
+    }
+    func settleLibrary(firstIndex: Int) { libraryFirstIndex = min(max(0,firstIndex),max(0,context.items.count-1)) }
     @Published var voiceState = "idle"
     @Published var transcript = ""
     @Published var voiceSeconds = 0
@@ -147,7 +155,7 @@ struct Preview {
         } else if artwork == nil && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
-        } else if (context.screen == .queue || (context.screen == .detail && context.selected.kind == "artists")) && artTask == nil && online && now >= nextQueueArtAttempt {
+        } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
             nextQueueArtAttempt = now + 5
             artTask = Task { await self.loadQueueArtwork(); self.artTask = nil }
         }
@@ -255,7 +263,7 @@ struct Preview {
             }
             guard let r = await self.perform(BridgeRequest(action, args)), r.outcome == "observed", self.generation == gen else { return }
             self.context.items = r.data["items"].values.map(MusicItem.init)
-            self.context.scrollID = nil
+            self.context.scrollID = nil; self.libraryFirstIndex = 0; self.missingArtUntil = [:]
             self.context.pageCursor = args["cursor"]?.text
             self.context.nextOffset = r.data["next_offset"].number; self.context.cursor = r.data["cursor"].text
             self.context.resultID = r.data["result_id"].text
@@ -381,17 +389,18 @@ struct Preview {
     }
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
-        let candidates = Array((context.screen == .detail ? items.filter { $0.kind == "albums" } : items).prefix(context.screen == .detail ? 4 : 7))
+        let candidates = Array(items.prefix(24))
         let screen = context.screen
-        guard [.queue,.detail].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil }) else { return }
+        guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
         let gen = generation
+        missingArtUntil[item.reference] = clock() + 30
         // Queue/card artwork is registered by a native read, never fetched as an arbitrary URL.
         guard let detail = await perform(BridgeRequest("browse",["reference":.string(item.reference)])),
               detail.outcome == "observed", detail.data["item"]["reference"].text == item.reference,
               let ref = detail.data["item"]["artwork"].text,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
               generation == gen else { return }
-        let side = screen == .detail ? 320 : 80
+        let side = 320
         var image = ArtworkAssembly(reference:ref,side:side)
         while !image.complete && active && generation == gen && !Task.isCancelled {
             if clock() >= nextPoll { nextPoll = clock() + 2; await refresh() }
@@ -399,7 +408,7 @@ struct Preview {
             guard let reply = await perform(BridgeRequest("artwork",["reference":.string(ref),"side":.int(side),"pixel_offset":.int(image.offset)])), generation == gen else { return }
             do { try image.append(reply,started:started,now:clock()) } catch { return }
         }
-        guard image.complete, online, clock() < freshUntil, context.screen == screen else { return }
+        guard image.complete, online, clock() < freshUntil, clock() < image.deadline, generation == gen, context.screen == screen else { return }
         let currentRefs = Set(candidates.map(\.reference))
         queueArtwork = queueArtwork.filter { currentRefs.contains($0.key) }
         queueArtwork[item.reference] = Preview(reference:ref,pixels:image.bytes,side:side,deadline:image.deadline)

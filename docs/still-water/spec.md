@@ -249,8 +249,14 @@ Data: the portrait and the bio come from the bridge through the existing authent
 
 ### 5.4 COLLECTION (Library)
 
-- Title `Library` at (48, 30). Sub-sections as filter words at y 88: `Albums  Tracks  Artists  Playlists`, same style as FIND filters.
-- Rows from y 140 as FIND rows.
+Revised 26 September: the Library is browsed by eye, so Albums and Playlists are shelves of covers, not lists.
+
+- Title `Library` at (48, 30), `Back to now` pill. Filter words at y 88: `Albums  Tracks  Artists  Playlists`, same style as Find.
+- **Albums**: a grid of covers from y 156, six across at 104 × 104 with 16 gaps (x 48, 168, 288, 408, 528, 648), rows 156 apart, title beneath each cover in sans-15 @ 70%, one line with ellipsis. The grid scrolls vertically in a container clipped at 480 with a 40-unit fade at the foot. Each cover is the target (104 × 104). Tap opens Album.
+- **Playlists**: as Albums, with a second cover edge offset 6 units up and right behind each cover at 50% to read as several.
+- **Artists**: round portraits at 104 on the same grid, name beneath. No picture: a hairline circle with the initial in serif-32 @ 62%.
+- **Tracks**: rows from y 150, 72 high, x 48 to 752: cover thumbnail 56 × 56 at the left (radius 3, no shadow), title serif-26 at x 72, subtitle sans-18 @ 55% at x 72 built as `artist · duration`, saved mark at x 704. Same row component as Find results.
+- Field tinted from the first cover in view (extraction per section 6) rather than the fallback palette, so the screen changes with the collection. Recompute on scroll settle, not per frame.
 - Disconnected account: serif-26 italic @ 62% `Connect your collection on the bridge computer` at (48, 152), and nothing else.
 
 ### 5.5 VOICE (Ask)

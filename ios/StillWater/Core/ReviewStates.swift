@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "library-albums", "library-tracks", "library-artists", "library-playlists", "artist-following", "artist-tracks", "artist-about", "artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -30,7 +30,7 @@ import Foundation
         case "queue":
             model.context.screen = .queue; model.context.items = model.queue
             for _ in 0..<7 { await model.loadQueueArtwork() }
-        case "find","keyboard","library","detail":
+        case "find","keyboard","detail":
             let fixture = FixtureTransport()
             model.context.items = fixture.sample("search-albums")["data"]["items"].values.map(MusicItem.init)
             if state == "detail" {
@@ -40,7 +40,25 @@ import Foundation
                 model.context.selected.title = "An exceptionally long album title for seated reading and layout trials"; model.context.membership = "unsaved"
             } else { model.context.screen = state == "library" ? .library : .find }
             model.context.query = "Evening listening"
+            for _ in 0..<model.context.items.count { await model.loadQueueArtwork() }
+            if state == "detail" { await model.loadArtwork() }
             if state == "keyboard" { model.context.screen = .ask; model.context.typing = true; model.keyboardVisible = true }
+        case "library","library-albums","library-tracks","library-artists","library-playlists":
+            let fixture = FixtureTransport()
+            let kind = state == "library-tracks" ? "tracks" : state == "library-artists" ? "artists" : state == "library-playlists" ? "playlists" : "albums"
+            model.context.screen = .library; model.context.kind = kind; model.account = "connected"
+            model.context.items = []
+            for index in 0..<12 {
+                let number = kind == "tracks" ? 101+index : 1+index
+                let ref = "inputs/tidal/"+kind+"/"+String(number)
+                if let d = try? await fixture.send(BridgeRequest("browse",["reference":.string(ref)])) {
+                    var item = MusicItem(d.data["item"]); item.reference = ref; item.kind = kind; item.saved = "saved"
+                    if kind == "artists" { item.title = ["River Stone Ensemble","Maren Holt","The Alder Quartet","Oskar Lind"][index%4] }
+                    model.context.items.append(item)
+                }
+            }
+            for _ in 0..<12 { await model.loadQueueArtwork() }
+            if kind == "artists", let last = model.context.items.last { model.queueArtwork[last.reference] = nil }
         case "artist-following","artist-tracks","artist-about","artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name","track-liked","album-saved":
             let fixture = FixtureTransport()
             let kind = state.hasPrefix("artist-") ? "artists" : state == "track-liked" ? "tracks" : "albums"

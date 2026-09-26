@@ -79,14 +79,14 @@ struct ControllerField: View {
     @State private var palette = FieldPalette.fallback("sage")
     private var utility: Bool { [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) }
     private var intensity: Double { model.context.screen == .ask ? 0.28 : model.context.screen == .queue ? 0.6 : model.context.screen == .detail ? 0.5 : [.find,.library].contains(model.context.screen) ? 0.35 : [.settings,.display,.connection,.device,.wifi,.pairing].contains(model.context.screen) ? 0.6 : 1 }
-    private var paletteKey: String { (model.colorPreview?.reference ?? "fallback") + ":" + model.preferences.palette }
+    private var paletteKey: String { (model.fieldPreview?.reference ?? "fallback") + ":" + model.preferences.palette }
     var body: some View {
         MusicField(palette:utility ? .fallback(model.preferences.palette) : palette,intensity:intensity)
             .onAppear { updatePalette() }
             .onChange(of:paletteKey) { _,_ in updatePalette() }
     }
     private func updatePalette() {
-        let next = model.colorPreview.map { FieldPalette.extract($0,fallback:model.preferences.palette) } ?? .fallback(model.preferences.palette)
+        let next = model.fieldPreview.map { FieldPalette.extract($0,fallback:model.preferences.palette) } ?? .fallback(model.preferences.palette)
         withAnimation(reduceMotion ? nil : .easeInOut(duration:0.6)) { palette = next }
     }
 }

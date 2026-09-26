@@ -16,7 +16,7 @@ final class InteractionTests: XCTestCase {
         XCTAssertLessThan(app.buttons["library"].frame.maxX,screen.maxX - 8)
         XCTAssertGreaterThan(app.buttons["library"].frame.maxX,screen.maxX - 110)
         // iPhone 11 landscape safe area: 44 pt at each side, 21 pt below.
-        for id in ["previous","play-pause","next","now-artist","now-album","up-next","ask","find","library"] {
+        for id in ["previous","play-pause","next","now-artist","now-album","up-next","ask","library"] {
             let frame = app.buttons[id].frame
             XCTAssertGreaterThanOrEqual(frame.minX,screen.minX + 52,id)
             XCTAssertLessThanOrEqual(frame.maxX,screen.maxX - 52,id)
@@ -77,10 +77,9 @@ final class InteractionTests: XCTestCase {
         let app = XCUIApplication(); app.launchArguments = ["--fixture"]
         XCUIDevice.shared.orientation = .landscapeLeft; app.launch()
         XCTAssertTrue(app.buttons["wake-contact"].waitForExistence(timeout:5)); app.buttons["wake-contact"].tap()
-        XCTAssertTrue(app.buttons["find"].waitForExistence(timeout:5)); app.buttons["find"].tap()
+        XCTAssertFalse(app.buttons["find"].exists); app.buttons["ask"].tap()
         let record = app.buttons["voice-record"]
-        XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Start recording")
-        record.tap(); expectLabel(record,"Stop recording")
+        XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Stop recording")
         let ready = XCTNSPredicateExpectation(predicate:NSPredicate(format:"enabled == true"),object:app.buttons["voice-search"])
         XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:8),.completed)
         app.buttons["voice-search"].tap()
@@ -99,9 +98,9 @@ final class InteractionTests: XCTestCase {
         XCTAssertEqual(app.buttons["play-pause"].label,"Pause")
         XCTAssertGreaterThan(app.windows.firstMatch.frame.width,app.windows.firstMatch.frame.height)
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "First-contact-touched"; image.lifetime = .keepAlways; add(image)
-        app.buttons["find"].tap()
+        app.buttons["ask"].tap()
         XCTAssertTrue(app.buttons["voice-record"].waitForExistence(timeout:5))
-        expectLabel(app.buttons["voice-record"],"Start recording")
+        expectLabel(app.buttons["voice-record"],"Stop recording")
         XCTAssertFalse(app.buttons["ask"].exists)
     }
     private func assertKeyboardDismissed(_ app: XCUIApplication) {

@@ -43,11 +43,28 @@ import UIKit
                     XCTAssertGreaterThanOrEqual(e.frame.height,e.pill ? 56 : 64,"\(state) \(e.id)")
                 }
             }
+            let fixture = try XCTUnwrap(visible.first { $0.id == "fixture" })
+            XCTAssertEqual(fixture.frame.minX,48,accuracy:0.5)
+            XCTAssertEqual(fixture.frame.minY,24,accuracy:0.5)
             let taps = visible.filter { $0.tap }
             for i in taps.indices { for j in taps.indices where j > i {
                 XCTAssertFalse(taps[i].frame.insetBy(dx:0.25,dy:0.25).intersects(taps[j].frame.insetBy(dx:0.25,dy:0.25)),"Overlapping \(state): \(taps[i].id) / \(taps[j].id)")
                 XCTAssertFalse(taps[i].frame.insetBy(dx:-3.75,dy:-3.75).intersects(taps[j].frame.insetBy(dx:-3.75,dy:-3.75)),"Less than 8-unit target gap \(state): \(taps[i].id) / \(taps[j].id)")
             } }
+            if state == "library-albums" {
+                let covers = visible.filter { $0.id.hasPrefix("library-cover-") }.sorted { $0.frame.minY == $1.frame.minY ? $0.frame.minX < $1.frame.minX : $0.frame.minY < $1.frame.minY }
+                XCTAssertGreaterThanOrEqual(covers.count,6)
+                for (index,cover) in covers.prefix(6).enumerated() {
+                    XCTAssertEqual(cover.frame.minX,48+CGFloat(index)*120,accuracy:1)
+                    XCTAssertEqual(cover.frame.width,104,accuracy:1)
+                    XCTAssertEqual(cover.frame.height,104,accuracy:1)
+                }
+            }
+            if state == "artist-following" {
+                let tab = try XCTUnwrap(visible.first { $0.id == "artist-tab-albums" })
+                let name = try XCTUnwrap(visible.first { $0.id == "detail-title" })
+                XCTAssertEqual(tab.frame.minX,name.frame.minX,accuracy:1)
+            }
             if state.hasPrefix("artist-"), let albums = visible.first(where: { $0.id.hasPrefix("artist-album-") }) {
                 XCTAssertLessThanOrEqual(albums.frame.maxY,472.5,"Artist album row must clear the bottom edge")
             }
@@ -59,8 +76,14 @@ import UIKit
                 XCTAssertEqual(title.frame.minY-artist.frame.maxY,12,accuracy:2)
                 XCTAssertEqual(album.frame.minY-title.frame.maxY,14,accuracy:2)
                 let ask = try XCTUnwrap(visible.first { $0.id == "ask" })
+                let play = try XCTUnwrap(visible.first { $0.id == "play-pause" })
+                XCTAssertEqual(ask.frame.midX,play.frame.midX,accuracy:0.5)
+                for id in ["previous","next","amp-down","amp-up"] {
+                    XCTAssertEqual(try XCTUnwrap(visible.first { $0.id == id }).frame.midY,play.frame.midY,accuracy:0.5)
+                }
+                XCTAssertFalse(visible.contains { $0.id == "find" })
                 XCTAssertLessThanOrEqual(ask.frame.maxY,448.5,"Ask ring must have breathing room above the waterline")
-                for (id,rect) in [("previous",CGRect(x:355,y:272,width:98,height:96)),("play-pause",CGRect(x:464,y:264,width:104,height:104)),("next",CGRect(x:579,y:272,width:98,height:96)),("amp-down",CGRect(x:816,y:272,width:80,height:80)),("amp-up",CGRect(x:920,y:272,width:80,height:80))] {
+                for (id,rect) in [("previous",CGRect(x:363,y:268,width:98,height:96)),("play-pause",CGRect(x:472,y:264,width:104,height:104)),("next",CGRect(x:587,y:268,width:98,height:96)),("amp-down",CGRect(x:816,y:276,width:80,height:80)),("amp-up",CGRect(x:920,y:276,width:80,height:80))] {
                     let actual = try XCTUnwrap(visible.first { $0.id == id }?.frame)
                     XCTAssertEqual(actual.minX,rect.minX,accuracy:4); XCTAssertEqual(actual.minY,rect.minY,accuracy:4)
                     XCTAssertEqual(actual.width,rect.width,accuracy:4); XCTAssertEqual(actual.height,rect.height,accuracy:4)
@@ -71,10 +94,10 @@ import UIKit
                 let touched = ["touched","paused","offline","pending","unknown"].contains(state)
                 let cover = try XCTUnwrap(visible.first { $0.id == "cover" }?.frame)
                 XCTAssertEqual(cover.minX,48,accuracy:4); XCTAssertEqual(cover.minY,touched ? 56 : 60,accuracy:4)
-                XCTAssertEqual(cover.width,touched ? 248 : 296,accuracy:4); XCTAssertEqual(cover.width,cover.height,accuracy:1)
+                XCTAssertEqual(cover.width,touched ? 256 : 296,accuracy:4); XCTAssertEqual(cover.width,cover.height,accuracy:1)
                 let text = try XCTUnwrap(visible.first { $0.id == "now-text-block" }?.frame)
-                XCTAssertEqual(text.minX,touched ? 336 : 392,accuracy:4)
-                XCTAssertEqual(text.width,touched ? 664 : 608,accuracy:4)
+                XCTAssertEqual(text.minX,touched ? 344 : 392,accuracy:4)
+                XCTAssertEqual(text.width,touched ? 656 : 608,accuracy:4)
                 if state != "stopped" {
                     let line = try XCTUnwrap(visible.first { $0.id == "waterline" }?.frame)
                     XCTAssertEqual(line.minY,472,accuracy:4); XCTAssertEqual(line.width,1048,accuracy:1)

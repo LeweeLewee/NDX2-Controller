@@ -25,7 +25,8 @@ REFERENCES = {
     'artist-following':'22-artist','artist-tracks':'22-artist','artist-tracks-phone':'22-artist',
     'artist-about':'22-artist','artist-missing':'22-artist','artist-no-bio':'22-artist',
     'artist-no-portrait':'22-artist','artist-no-albums':'22-artist','artist-long-name':'22-artist',
-    'library':'23-library','settings':'24-settings','display':'25-display',
+    'library':'23-library','library-albums':'23-library','library-tracks':'24-librarytracks',
+    'library-artists':'23-library','library-playlists':'23-library','settings':'25-settings','display':'26-display',
 }
 
 

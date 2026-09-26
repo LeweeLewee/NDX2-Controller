@@ -5,16 +5,42 @@ import XCTest
     final class FaultTransport: BridgeTransport {
         let fixture = FixtureTransport()
         var requests: [String] = []
+        var artworkSides: [Int] = []
         var loseMutation = false
         var afterReply: ((BridgeRequest) -> Void)?
         func cancel() {}
         func send(_ request: BridgeRequest) async throws -> BridgeReply {
             requests.append(request.action)
+            if request.action == "artwork" { artworkSides.append(request.args["side"]?.number ?? 80) }
             let reply = try await fixture.send(request)
             afterReply?(request)
             if loseMutation && request.isMutation { throw BridgeFailure.unavailable }
             return reply
         }
+    }
+    func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
+        var now = 100.0
+        let transport = FaultTransport()
+        let model = ControllerModel(transport:transport,clock:{now},restore:false)
+        model.active = true; model.snapshotMode = true
+        await model.refresh()
+        model.context.screen = .library
+        model.context.items = [1,2].map { MusicItem(.object(["reference":.string("inputs/tidal/albums/\($0)"),"kind":.string("albums")])) }
+        for _ in 0..<2 { await model.loadQueueArtwork() }
+        XCTAssertEqual(model.queueArtwork.count,2)
+        XCTAssertFalse(transport.artworkSides.isEmpty)
+        XCTAssertTrue(transport.artworkSides.allSatisfy { $0 == 320 })
+        let first = try XCTUnwrap(model.queueArtwork[model.context.items[0].reference])
+        let second = try XCTUnwrap(model.queueArtwork[model.context.items[1].reference])
+        XCTAssertEqual(model.fieldPreview?.reference,first.reference)
+        model.settleLibrary(firstIndex:1)
+        XCTAssertEqual(model.fieldPreview?.reference,second.reference)
+        model.queueArtwork[model.context.items[1].reference] = nil
+        XCTAssertEqual(model.fieldPreview?.reference,first.reference,"Use loaded cover before fallback")
+        now = first.deadline
+        XCTAssertNil(model.fieldPreview,"Never tint with an expired preview")
+        XCTAssertFalse(transport.requests.contains("play"))
+        XCTAssertFalse(transport.requests.contains("library_save"))
     }
     func settle() async { for _ in 0..<30 { await Task.yield() } }
     func testNowRelationshipsLikeAndIndependentAlbumArtistMembership() async throws {
