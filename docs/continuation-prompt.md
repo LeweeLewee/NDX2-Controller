@@ -43,3 +43,8 @@ Keep the functional prototype, transport fixes, preferences, recovery, enrollmen
 
 
 **Live pairing diagnostic follow-up:** Windows authenticated live reads succeeded; physical iPhone pairing remains blocked. Stage-specific, secret-free enrollment diagnostics are prepared on the live-beta branch; native validation/distribution pending. Browser reachability is confirmed and does not prove app enrollment. No live mutations. See [trial report](ios-live-beta.md).
+
+
+**Pairing diagnostic beta uploaded — 26 September 2026:** source `f0dba3e` (including diagnostics commit `d43a7d1`), tag `ios-preview-live-2026-09-26-pairing-v3`, passed all **32 native tests**, the unsigned device archive, signing and upload in [run 36264297307](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36264297307). The uploaded live build is **0.1.0 (11.1.0)**. The separate branch validation run 36264296786 also passed; artifact 10913830393 SHA-256 `bb416fe9cd69ec5ce3b0901e4df4de941505ae8bb6e5ffe0efcb40b0a799b749` was verified and the revised pairing capture inspected. Eleven local project/distribution checks passed, followed by four passing project checks after the local-network declaration. The earlier diagnostic-only release was cancelled before upload.
+
+Apple processing and existing-group assignment await restored browser sign-in; the existing API key returned HTTP 403 for build reads. Do not claim the diagnostic beta is available in TestFlight yet. Physical pairing remains unresolved: the next attempt should expose a safe stage-specific error if the local-network declaration does not resolve it. No playback, volume or collection mutations.
