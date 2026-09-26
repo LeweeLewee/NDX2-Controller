@@ -145,6 +145,34 @@ class TidalCatalog:
                                    'title': item['title'] or kind[:-1].title(), 'artist': ''})
         return result
 
+    def artist_metadata(self, reference):
+        """Read only exact artist relationships; absent catalogue data stays absent."""
+        from artist_metadata import plain_biography
+        parts = reference.split('/') if isinstance(reference, str) else []
+        if len(parts) != 4 or parts[2] != 'artists' or candidate_reference('artists', parts[3]) != reference:
+            raise ValueError('Expected a TIDAL artist reference')
+        page = self._get('artists/' + parts[3], {'countryCode': self.country, 'include': 'biography,profileArt'})
+        artist = page.get('data') or {}
+        if not isinstance(artist, dict) or artist.get('type') != 'artists' or artist.get('id') != parts[3]:
+            raise CatalogError('TIDAL returned a different artist')
+        included = {(i.get('type'), i.get('id')): i for i in page.get('included', []) if isinstance(i, dict)}
+        def related(name, kind):
+            refs = (artist.get('relationships', {}).get(name) or {}).get('data') or []
+            if isinstance(refs, dict): refs = [refs]
+            return [included[(kind, r.get('id'))].get('attributes', {}) for r in refs
+                    if isinstance(r, dict) and r.get('type') == kind and (kind, r.get('id')) in included]
+        biographies = related('biography', 'artistBiographies')
+        biography = plain_biography(biographies[0].get('text')) if biographies else None
+        from artwork_cache import validate_artwork_url
+        portrait = None
+        for art in related('profileArt', 'artworks'):
+            for file in art.get('files', []):
+                try: portrait = validate_artwork_url(file.get('href'))
+                except (ValueError, AttributeError): continue
+                break
+            if portrait: break
+        return {'biography': biography, 'portrait': portrait}
+
     def page(self, result_id, kind, cursor=None):
         # Current API IDs are opaque; do not substitute the search text for ID.
         if kind not in KINDS or not isinstance(result_id, str) or not 1 <= len(result_id) <= 2048 or result_id in ('.', '..'):

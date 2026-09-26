@@ -2,7 +2,7 @@ name: Still Water iOS simulator
 
 on:
   push:
-    branches: [codex/still-water-cloud-build]
+    branches: [codex/still-water-cloud-build, codex/still-water-b1]
     paths:
       - 'ios/**'
       - 'tools/ios_ci.py'

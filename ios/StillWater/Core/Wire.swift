@@ -35,8 +35,8 @@ enum JSONValue: Codable, Equatable {
         guard depth < 12 else { throw BridgeFailure.invalidResponse }
         switch self {
         case .string(let s):
-            let limit = key == "pixels" ? 25_600 : key == "cursor" ? 4_096 : 256
-            guard s.utf8.count <= limit else { throw BridgeFailure.oversized }
+            let limit = key == "pixels" ? 25_600 : key == "cursor" ? 4_096 : key == "biography" ? 8_000 : 256
+            guard s.utf8.count <= limit, key != "biography" || s.unicodeScalars.count <= 2000 else { throw BridgeFailure.oversized }
         case .array(let a):
             guard a.count <= 12 else { throw BridgeFailure.oversized }
             for v in a { try v.bounded(depth: depth + 1) }
@@ -112,7 +112,7 @@ struct MusicItem: Equatable, Identifiable {
         artist = value["artist"].text ?? ""
         album = value["album"].text ?? ""
         kind = value["kind"].text ?? "tracks"
-        biography = value["biography"].text.map { String($0.prefix(256)) }
+        biography = value["biography"].text.map { String($0.unicodeScalars.prefix(2000)) }
         year = value["year"].number.flatMap { (1900...2100).contains($0) ? $0 : nil }
         duration = value["duration"].number.flatMap { $0 > 0 ? $0 : nil }
         artwork = value["artwork"].text

@@ -1,8 +1,6 @@
 # Still Water: native UI specification
 
-> **Current selection — 25 September 2026 (D030):** user selected iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank. Waveshare is parked fallback. Earlier “selection open” text below is historical. [Concealed mounting proposal](../hardware/river-stone/iphone-mount/README.md) governs the current physical discussion; the 118 × 54 mm window remains provisional. The draft custom battery/boost/MCU architecture, operating configuration and runtime expectations below are not validated or adopted wholesale. Do not execute embedded implementation prompts from this hardware-selection update.
-
-Platform: pending screen selection between the iPhone 11 (see `iphone-architecture.md`, sections 0 and 0b below) and the Waveshare ESP32-S3-Touch-LCD-4.3B (Appendix A). The design is platform-neutral: coordinates are design units from the top-left of the visible window, and every physical size is in millimetres, so the screen tables apply to both. Sections 0, 0b, 2.2 implementation notes, 7, 9 and 10 are written for the iPhone; Appendix A carries the Waveshare equivalents. Reference renders in `reference/` were made for the earlier 800 × 480 canvas; sizes carry over, widths do not. Where a value here differs from a render, this document wins.
+Platform: iPhone 11, selected by D030 on 25 September 2026 (see `iphone-architecture.md`, sections 0 and 0b below). The Waveshare ESP32-S3-Touch-LCD-4.3B is the retained fallback; Appendix A carries its equivalents. The design is platform-neutral: coordinates are design units from the top-left of the visible window, and every physical size is in millimetres, so the screen tables apply to both. Sections 0, 0b, 2.2 implementation notes, 7, 9 and 10 are written for the iPhone; Appendix A carries the Waveshare equivalents. Reference renders in `reference/` were made for the earlier 800 × 480 canvas; sizes carry over, widths do not. Where a value here differs from a render, this document wins.
 
 Revision note, 23 September 2026: sections 0, 0b, 2.2 implementation, 2.4, 7, 9 and 10 were rewritten for the iPhone platform; the Waveshare and LVGL versions moved to Appendix A. Design lock is independent of the platform choice.
 
@@ -164,20 +162,19 @@ Missing artwork: no placeholder box. The cover area shows a 272 px square filled
 | Previous | 336 | 282 | 72 | 64 | icon @ 85% |
 | Play/Pause ring | 428 | 274 | 80 | 80 | ring: border 1.5 px ink @ 70%, fill ink @ 12%; mark stroke 2.2 |
 | Next | 516 | 282 | 72 | 64 | icon @ 85% |
-| Amplifier pill | 600 | 282 | 152 | 64 | border 1 px hairline, radius 32; minus target 600–676, plus target 676–752 (76 × 64 each, meeting the existing 72 × 64 gate); `AMP` caps-15 @ 45% centred 22 px above the pill |
-| Up next | 48 | 388 | 260 | 56 | caps-15 `UP NEXT` @ 50% at y 394; next track title serif-26 at y 412, one line ellipsis; whole area is the target; opens QUEUE |
-| Ask ring | 364 | 376 | 72 | 72 | ring border 1.5 px accent @ 80%, mic glyph accent; opens VOICE |
-| Find | 552 | 392 | 96 | 56 | sans-22 @ 85% word `Find`, right-aligned in its target; opens FIND |
-| Library | 656 | 392 | 96 | 56 | sans-22 @ 85% word `Library`, right-aligned; opens COLLECTION |
-| Elapsed | 48 | 446 | 100 | 20 | sans-18 @ 60% |
-| Remaining | right edge 752 | 446 | 100 | 20 | sans-18 @ 60%, formatted `−m:ss` |
+| Volume down | 632 | 282 | 72 | 64 | icon @ 85%; bare glyph, no pill (user decision, 26 September) |
+| Volume up | 704 | 282 | 72 | 64 | icon @ 85% |
+| Up next | 48 | 388 | 260 | 56 | caps-15 `UP NEXT` @ 50% at y 388; next track title serif-26 at y 410, one line ellipsis; whole area is the target; opens QUEUE |
+| Ask ring | 364 | 376 | 72 | 72 | ring border 1.5 px accent @ 80%, mic glyph accent; opens FIND already listening |
+| Find | 632 | 384 | 72 | 64 | search icon @ 85%, same column as Volume down; opens FIND idle |
+| Library | 704 | 384 | 72 | 64 | library icon @ 85%, same column as Volume up; opens COLLECTION |
 | Waterline | 0 | 472 | 800 | | as Still |
 
-Settings: long-press (700 ms) on the artist caps line opens SETTINGS. Show a 1 px hairline underline on the caps line while the press is held so the affordance is discoverable. Alternatively a 40 × 40 gear at (752, 24) at 35% opacity is acceptable if long-press is unreliable with the existing contact handling; prefer long-press.
+Settings: long-press (700 ms) anywhere on Touched that is not a control opens SETTINGS. No gear. No times anywhere on NOW: the waterline is the clock (user decision, 26 September).
 
-Amplifier busy (D011 in flight): both halves at tertiary opacity, pill border unchanged, no spinner. Unknown outcome after timeout: pill border becomes dashed hairline and stays until reconciliation.
+Amplifier busy (D011 in flight): both volume icons at tertiary opacity, no spinner. Unknown outcome after timeout: a dashed hairline outline around the two volume icons (144 × 64, radius 32) with `Volume outcome unknown` in sans-18 @ 62% right-aligned beneath, until reconciliation.
 
-Save/heart: the existing track membership action moves to Detail. It is not on NOW.
+Save/heart: membership lives on Detail. It is not on NOW. The right-hand cluster is two columns (x 632 and 704) shared by the volume row and the Find/Library row so the four icons align.
 
 Controls fade in over 250 ms with a 6 unit upward drift; fade out over 400 ms.
 
@@ -187,7 +184,7 @@ Field, cover and text render immediately at full values behind a full-screen bla
 
 ## 5. Secondary screens
 
-All secondary screens share: dimmed field (2.2), screen title in serif-32 at (48, 30), a `Back to now` pill at the right (56 high, at least 96 wide, right edge 752, y 26; border hairline, sans-18 @ 75%). No top status bar. No bottom navigation bar. Connection status appears only where it changes what the user can do (section 8).
+Root secondary screens (Find, Library, Up next) share: dimmed field (2.2), screen title in serif-32 at (48, 30), a `Back to now` pill at the right (56 high, at least 96 wide, right edge 752, y 26; border hairline, sans-18 @ 75%). Detail screens (Album, Artist) have no screen title; the kind caps line carries it, and Back is the chevron glyph plus `Back` in sans-22 @ 85%, right-aligned to 752 in a 112 × 56 target at y 24 (user simplification, 26 September). No top status bar. No bottom navigation bar. Connection status appears only where it changes what the user can do (section 8).
 
 ### 5.1 QUEUE (Up next)
 
@@ -200,23 +197,55 @@ Read-only, as today.
 - Below, at (48, 392): caps-15 `PLAYS IN n MIN` or `PLAYING NOW`; at (48, 412): serif-32 title, followed on the same baseline by artist in sans-18 @ 60%.
 - Tap a cover to select it. No other actions.
 
-### 5.2 FIND
+### 5.2 FIND (say or type)
 
-- Title `Find` at (48, 30). `Back to now` at right.
-- Query field at (48, 88), 536 × 64: no box. Text serif-26 @ 100%, placeholder `Artist, album or a kind of music` serif-26 italic @ 60%. A hairline under the field at y 152 from x 48 to 584; it becomes ink @ 75% while focused.
-- Search glyph target (600, 88) 72 × 64; microphone target (680, 88) 72 × 64 in accent.
-- Filters at y 160: the words `Albums  Tracks  Artists  Playlists` in sans-18, each a 120 × 56 target starting at x 48 with 8 gaps; selected word @ 100% with a 24 px hairline underline 6 px below the text; others @ 55%.
-- Result rows from y 220, row height 72, full width from x 48 to 752: title serif-26 @ 100% at row y+12; subtitle `artist / kind` sans-18 @ 55% at row y+42; hairline separator at the row bottom from x 48 to 752. Membership marks (heart, plus, question) at x 704, 40 × 40, ink @ 70%.
-- Empty and loading: `Looking…` or `Nothing found for “query”` in serif-26 italic @ 62% at (48, 232).
-- Keyboard: the iOS system keyboard in dark appearance. It occupies roughly y 216 to 480 when open; filters and rows hide behind it and restore on dismiss.
+One screen for voice and typed search, three states. Revised 26 September after the first on-phone review.
 
-### 5.3 DETAILS
+**Idle** (from the Find icon on Touched): title `Find` at (48, 30), `Back to now` pill. Prompt `Say an artist, an album or the kind of music you want` in serif-32 italic @ 62%, centred, width 680, balanced wrap, at y 124. The accent mic ring at (364, 232), 72 × 72, with no caption: the prompt is the instruction. The query field at the foot: (48, 380), 704 × 64, placeholder `Or type here` serif-26 italic @ 60%, search glyph at its right end, hairline beneath at y 443. Tapping the field opens the keyboard. There is no `Type instead` button; the field is the typing.
 
-- Cover at (48, 96), 200 × 200. For artists, no cover; the title block starts at x 48.
-- Kind caps-15 @ 55% at (280, 100). Title serif-32 at (280, 122), up to two lines. Artist sans-22 @ 62% below.
-- Membership line sans-18 @ 62% at (280, 236): `In your library`, `Not in your library`, `Library status unknown`, `Following`, `Not following`, `Follow status unknown`.
-- Actions at y 300, height 56, left to right from x 280 with 12 px gaps: `Play` primary pill (fill ink, text `#141614`) 140 wide; `Play next` and `Add to queue` hairline pills only if the current control logic supports them (it does not today: omit); `Library` or `Follow` hairline pill 150 wide showing the pending state as `Saving…` in the same pill.
-- Native children (album tracks, artist albums) as FIND rows from y 376, scrolling under Back.
+**Listening** (from the mic ring on Touched, or the idle ring): recording starts immediately. `LISTENING · m:ss OF 0:30` caps-15 accent @ 60% centred at y 40. Transcript as it forms, serif-44 italic, centred, width 640, from y 120, in typographic quotes; until the first words arrive the line is empty. The ring at (364, 300), 72 × 72, fill accent @ 12%, now showing a **square** (stop); three ripples centred on the ring, radius 45 to 260, 3.6 s each, 1.2 s stagger, passing under the transcript. No caption under the ring: the square is the label. Tapping the ring, 2 s of silence after speech (setting, default on), or the 30 s limit all end Listening and go to Ready. Nothing is searched by any of them.
+
+**Ready**: ripples stop. `STOPPED · m:ss` at y 40. Transcript stays. The ring now shows an **up arrow** (submit), with no caption. A reset glyph in a 56-unit hairline ring sits to the left of the main ring, target 72 × 64 at (252, 304): it discards the transcript and returns to Listening. Tapping the arrow searches the transcript. Back (chevron + `Back`, 112 × 56 at the right, y 24) discards in every phase. No other buttons. An empty transcript in Ready shows `NOTHING HEARD` in the status caps in place of `STOPPED` and the arrow at 35%, disabled. The status caps at the top are the only words in Listening and Ready besides the transcript.
+
+The ring is therefore one control with three faces: mic (start), square (stop), arrow (search). User decision, 26 September.
+
+**Results**: the query in the field at (48, 88), 536 × 64, serif-26; hairline beneath at y 152; search glyph target (600, 88) 72 × 64; mic target (680, 88) 72 × 64 in accent, which returns to Listening. Filters at y 160: `Albums  Tracks  Artists  Playlists` in sans-18, each 120 × 56 from x 48 with 8 gaps; selected word @ 100% with a 24-unit underline; others @ 55%. Rows from y 220, 72 high, x 48 to 752: title serif-26 @ 100%, subtitle sans-18 @ 55% built only from the parts that exist (never a leading `/`), hairline separator; membership marks at x 704, 40 × 40 @ 70%. Empty and loading: `Looking…` or `Nothing found for “query”` serif-26 italic @ 62% at (48, 232). Keyboard: the iOS system keyboard in dark appearance over the lower band; results return on dismiss.
+
+### 5.3 DETAILS: Album
+
+Field tinted from the album cover at 50%.
+
+| Element | x | y | w | h | Style |
+|---|---|---|---|---|---|
+| Cover | 48 | 56 | 248 | 248 | radius 3, shadow; the Touched size, so Now and Album feel like one family |
+| Artist caps | 336 | 60 | 416 | 16 | caps-15 @ 55% |
+| Title | 336 | 84 | 416 | up to 2 lines | serif-32 |
+| Facts | 336 | 168 | 416 | 22 | sans-18 @ 55%: `Album · 2024 · 4 tracks · 19 min`; show only the parts the metadata provides, joined by ` · ` |
+| Play | 336 | 212 | 140 | 56 | filled pill; the only filled control |
+| Add to library | 488 | 212 | 190 | 56 | hairline pill; label states the action; `In your library` with the check glyph when saved; `Library ?` when unknown; `Saving…` while pending |
+| Track rows | 48 | 328 onwards | 704 | 64 each | number sans-18 @ 45% at x 0 (tabular), title serif-26 at x 40 one line ellipsis, duration sans-18 @ 55% right-aligned at 704; hairline separators at 14%; list scrolls in a container clipped at 480 with a 40-unit fade at the foot |
+| Back | right edge 752 | 24 | 112 | 56 | chevron + `Back` |
+
+No separate `Not in your library` line: the pill label carries the state. Tapping a track row plays that track through the native path (existing behaviour).
+
+### 5.3b DETAILS: Artist
+
+The screen that has to carry an artist with no cover art. Field tinted from the artist portrait when one exists, else from the current album.
+
+| Element | x | y | w | h | Style |
+|---|---|---|---|---|---|
+| Portrait plate | 0 | 0 | 300 | 480 | the artist picture, cover-fitted, with a 140-unit fade into the field on its right edge (x 220 to 360) and a 140-unit fade at its foot (y 340 to 480) |
+| Kind caps | 336 | 60 | 400 | 16 | caps-15 @ 55%: `ARTIST · TIDAL` |
+| Name | 336 | 84 | 400 | up to 2 lines | serif-44 |
+| Bio | 336 | 148 | 416 | 4 lines | sans-18 @ 70%, line height 1.4, clamped to 4 lines with an ellipsis; tapping the bio expands it in place to the full text, scrolling under Back |
+| Follow | 336 | 262 | 150 | 56 | hairline pill; `Following` with the check glyph when saved; `Follow ?` when unknown; `Saving…` while pending |
+| Albums caps | 48 | 352 | | | caps-15 @ 50%: `ALBUMS` |
+| Album covers | 48 | 376 | 96 each, 16 gaps | 96 | the artist's native children as covers, horizontally scrollable; tap opens Album |
+| Back | right edge 752 | 24 | 112 | 56 | chevron + `Back` |
+
+Degradation, in order: no portrait → no plate; the name moves to serif-56 at x 48 and the bio and Follow follow at x 48, covers row unchanged. No bio → nothing in its place; Follow moves up to y 148. No albums → the caps and row are omitted. Never a placeholder image or placeholder text.
+
+Data: the portrait and the bio come from the bridge through the existing authenticated artwork registration path (portrait) and one new bounded text read (bio, plain text, 2,000 characters maximum, sanitised). Both are catalogue metadata, not playback, and never gate a native action.
 
 ### 5.4 COLLECTION (Library)
 
@@ -226,17 +255,7 @@ Read-only, as today.
 
 ### 5.5 VOICE (Ask)
 
-Recording starts immediately, as today.
-
-- Field: `#050707` base with the dimmed music field at 28%.
-- Caps-13 accent @ 60% centred at y 40: `LISTENING · m:ss OF 0:30`. Stopped: `RECORDING STOPPED`. Unavailable: `MICROPHONE UNAVAILABLE`.
-- Ripples: three concentric ellipse outlines centred at (400, 270), accent @ 55%, each expanding from radius 45 to 300 over 3.6 s, staggered 1.2 s, opacity fading to 0. Drawn as stroked circles in SwiftUI; cut to a static ring under Reduce Motion.
-- Transcript (when the fixture or a future transcript provides it) centred at y 130, width 640, serif-56 italic @ 100%, wrapped in typographic quotes. Until a transcript exists, show `Say an artist, an album or the kind of music you want` serif-32 italic @ 62%.
-- Microphone ring at (364, 258), 72 × 72, accent border and glyph, fill accent @ 12%.
-- Buttons at y 388, height 56: `Cancel` hairline pill at x 120; `Restart` hairline pill at x 328; `Stop & search` primary pill at x 510. All sans-22. Existing semantics unchanged.
-- Fixture note `Microphone fixture: no audio captured. Search only.` sans-18 @ 35% centred at y 456 when in fixture mode.
-
-Results after Stop & search land in FIND with the query set to the transcript, as today.
+Merged into FIND, section 5.2, Listening state. The wire action and the controller voice semantics are unchanged: immediate recording, explicit stop, discard on Back, section exit or disconnect, 30 s limit without submission, results are searches, nothing plays automatically.
 
 ### 5.6 SETTINGS, DISPLAY, CONNECTION, DEVICE, WIFI, PAIRING
 

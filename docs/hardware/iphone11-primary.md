@@ -51,3 +51,10 @@ Deliver a sanitized report distinguishing user assessment, documentary facts, fi
 ## Parallel physical design
 
 The newer [rear-loaded mounting proposal](river-stone/iphone-mount/README.md) and D030 govern the physical layout. Original 01 River Stone is the sole body/screen interface reference; preserve all microphone acoustic paths. The app build does not approve provisional aperture dimensions or replace the ongoing mounting work.
+
+
+### B1 kiosk configuration
+
+Enable Guided Access and turn **Volume Buttons off** in its session options. Apple documents this as preventing use of those buttons: https://support.apple.com/en-ie/111795. This is the configuration intended to prevent physical volume presses from raising the iOS volume overlay while Still Water is locked to the app. Leave Touch and Software Keyboards available for the controller. Configure the side button and auto-lock deliberately for the mounted trial. Verify suppression on the actual iPhone/iOS combination; merely enabling Guided Access is not proof that all buttons or overlays are disabled.
+
+The implemented phone layout uses the full-screen colour field and system safe area plus 8 pt from D032. Earlier fixed-window/black-mask wording above is historical and does not govern B1.

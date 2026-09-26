@@ -16,16 +16,13 @@ final class InteractionTests: XCTestCase {
         XCTAssertLessThan(app.buttons["library"].frame.maxX,screen.maxX - 8)
         XCTAssertGreaterThan(app.buttons["library"].frame.maxX,screen.maxX - 110)
         // iPhone 11 landscape safe area: 44 pt at each side, 21 pt below.
-        for id in ["previous","play-pause","next","now-artist","now-album","now-like","up-next","settings","find","library"] {
+        for id in ["previous","play-pause","next","now-artist","now-album","up-next","ask","find","library"] {
             let frame = app.buttons[id].frame
             XCTAssertGreaterThanOrEqual(frame.minX,screen.minX + 52,id)
             XCTAssertLessThanOrEqual(frame.maxX,screen.maxX - 52,id)
             XCTAssertLessThanOrEqual(frame.maxY,screen.maxY - 29,id)
         }
-        let like = app.buttons["now-like"]
-        XCTAssertTrue(like.isEnabled); like.tap()
-        expectLabel(like,"Unlike track")
-        like.tap(); expectLabel(like,"Like track")
+        XCTAssertFalse(app.buttons["now-like"].exists)
         app.buttons["now-artist"].tap()
         let membership = app.buttons["membership-write"]
         XCTAssertTrue(membership.waitForExistence(timeout:5)); expectLabel(membership,"Follow")
@@ -33,10 +30,10 @@ final class InteractionTests: XCTestCase {
         membership.tap(); expectLabel(membership,"Follow")
         app.buttons["artist-tab-tracks"].tap()
         let artist = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); artist.name = "Artist-tracks-full-phone"; artist.lifetime = .keepAlways; add(artist)
-        app.buttons["artist-tab-about"].tap()
+        app.buttons["artist-read-more"].tap()
         XCTAssertTrue(app.staticTexts.containing(NSPredicate(format:"label CONTAINS %@","fictional ensemble")).firstMatch.waitForExistence(timeout:5))
         app.buttons["back"].tap()
-        app.buttons["settings"].tap()
+        app.coordinate(withNormalizedOffset:CGVector(dx:0.7,dy:0.85)).press(forDuration:0.8)
         XCTAssertTrue(app.buttons["back"].waitForExistence(timeout:5))
         XCTAssertFalse(app.buttons["back-now"].exists)
         app.buttons["back"].tap()
@@ -60,7 +57,6 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(record.waitForExistence(timeout:10)); expectLabel(record,"Start recording")
         XCTAssertFalse(app.keyboards.firstMatch.exists)
         let idle = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); idle.name = "Find-idle"; idle.lifetime = .keepAlways; add(idle)
-        app.buttons["type-instead"].tap()
         let field = app.textFields["typed-query"]
         XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("Evening listening")
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout:5))
@@ -70,9 +66,8 @@ final class InteractionTests: XCTestCase {
         search.coordinate(withNormalizedOffset:CGVector(dx:0.1,dy:0.5)).tap()
         assertKeyboardDismissed(app)
         XCTAssertTrue(app.buttons["filter-albums"].waitForExistence(timeout:5))
-        app.buttons["edit-search"].tap()
+        app.buttons["back"].tap()
         expectLabel(record,"Start recording")
-        app.buttons["type-instead"].tap()
         XCTAssertTrue(field.waitForExistence(timeout:5)); field.tap(); field.typeText("\n")
         assertKeyboardDismissed(app)
         let result = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); result.name = "Find-after-search"; result.lifetime = .keepAlways; add(result)
@@ -85,14 +80,9 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["find"].waitForExistence(timeout:5)); app.buttons["find"].tap()
         let record = app.buttons["voice-record"]
         XCTAssertTrue(record.waitForExistence(timeout:5)); expectLabel(record,"Start recording")
-        record.tap(); expectLabel(record,"Restart recording")
-        app.buttons["type-instead"].tap()
-        XCTAssertTrue(app.textFields["typed-query"].waitForExistence(timeout:5))
-        // The top typing-mode switch remains reachable above the landscape keyboard.
-        app.buttons["use-voice"].tap(); expectLabel(record,"Start recording")
-        record.tap(); expectLabel(record,"Restart recording")
+        record.tap(); expectLabel(record,"Stop recording")
         let ready = XCTNSPredicateExpectation(predicate:NSPredicate(format:"enabled == true"),object:app.buttons["voice-search"])
-        XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:5),.completed)
+        XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:8),.completed)
         app.buttons["voice-search"].tap()
         XCTAssertTrue(app.buttons["filter-albums"].waitForExistence(timeout:5))
         app.buttons["back"].tap(); expectLabel(record,"Start recording")

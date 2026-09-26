@@ -24,7 +24,10 @@ import Foundation
         case "browse": name = "browse-" + ((request.args["reference"]?.text ?? "").split(separator:"/").dropFirst(2).first.map(String.init) ?? "albums")
         case "queue": name = "queue"
         case "library_state": name = "membership-" + (memberships[request.args["reference"]?.text ?? ""] ?? saved)
-        case "artwork": name = request.args["side"]?.number == 320 ? "artwork-" + String(request.args["pixel_offset"]?.number ?? 0) : "artwork-80"
+        case "artwork":
+            let portrait = request.args["reference"]?.text == sample("artist-bio")["data"]["artwork"].text
+            name = request.args["side"]?.number == 320 ? (portrait ? "portrait-" : "artwork-") + String(request.args["pixel_offset"]?.number ?? 0) : "artwork-80"
+        case "artist_bio": name = "artist-bio"
         case "voice_review": name = "voice"
         case "battery_report":
             guard let level = request.args["level"]?.number, (0...100).contains(level),
@@ -87,7 +90,7 @@ import Foundation
                 .object(["reference":.string("inputs/tidal/tracks/\(number)"),"title":.string(["A Still Morning","Soft Light","Quiet Hours","On the Water","After Rain","Evening Study"][(number-101)%6]),"artist":.string("River Stone Ensemble"),"album":.string(titles[(albumID-1)%4]),"kind":.string("tracks"),"artwork":art,"duration":.int(210000+(number-101)%6*24000),"saved":.string("unsaved"),"artist_reference":.string("inputs/tidal/artists/1"),"album_reference":.string("inputs/tidal/albums/\(albumID)")])
             }
             if kind == "artists" {
-                data["item"] = .object(["reference":.string(ref),"title":.string("River Stone Ensemble"),"kind":.string("artists"),"biography":.string("A fictional ensemble for this silent preview. Piano, strings and soft electronic textures trace the changing light of a quiet room. Explore four imagined albums and six tracks.")])
+                data["item"] = .object(["reference":.string(ref),"title":.string("River Stone Ensemble"),"kind":.string("artists"),"artwork":sample("artist-bio")["data"]["artwork"],"biography":.string("A fictional ensemble for this silent preview. Piano, strings and soft electronic textures trace the changing light of a quiet room. Explore four imagined albums and six tracks.")])
                 data["items"] = .array((1...4).map(album) + (101...106).map { trackItem($0,albumID:1) })
                 data["playable"] = .bool(false)
             } else if kind == "albums" {
@@ -106,6 +109,9 @@ import Foundation
                 return .object(fields)
             })
             r["data"] = .object(data)
+        }
+        if request.action == "artist_bio", case .object(var data) = r["data"] {
+            data["reference"] = request.args["reference"]; r["data"] = .object(data)
         }
         if request.action == "charge?" {
             let fresh = battery.map { clock() >= $0.received && clock() - $0.received < 3600 } ?? false

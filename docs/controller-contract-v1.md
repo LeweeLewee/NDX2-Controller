@@ -78,3 +78,10 @@ The same allowlisted registered JPEG source, RGB conversion, Lanczos square resi
 `reason` is always one of these three strings; every fresh reply uses `window`, including `{"charge": "yes", "reason": "window"}`. A report with a negative age is treated as stale. The distinction lets a power module distinguish a current window decision from missing/expired telemetry; it does not implement a fallback or authorize a hardware action.
 
 No report, a restart, or report age >= 3,600 seconds gives no. With a fresh report: below 35% gives yes; at or above 75% gives no; 35–74% follows the reported charging boolean. This uses the last physical charging observation to maintain the window, without a second latched state or treating a prior yes as proof that charging started. Querying never refreshes report age. This is an advisory read only: no power switch, MCU fallback, battery-life claim or hardware control is implemented.
+
+
+### Brief B1: artist metadata read
+
+`artist_bio` is a read under the same authenticated v1 envelope, taking only `reference: inputs/tidal/artists/<numeric id>` (1–32 digits). It returns `reference`, `available` (biography present), `biography` (plain text or null), and `artwork` (registered portrait reference or null). Missing catalogue/relationships return unavailable, not invented text. Provider failures remain rejected/unavailable. No route, pairing, freshness-for-mutations or journal rule changes.
+
+Biography HTML is stripped, script/style content discarded, entities decoded and whitespace normalized. At most 2,000 Unicode scalar values (8,000 UTF-8 bytes) are returned; the 32,768-byte envelope bound stays intact. This allowance applies only to `biography`; normal client strings retain their 256-byte bound. Only exact artist relationships from catalogue metadata are used. Portrait URLs pass the existing HTTPS TIDAL JPEG allowlist and registration, normalization, four-preview cache, chunk identity and expiry checks; callers cannot supply image URLs. Portrait/cover consumers use the existing 320 preview assembly. This read grants no playback capability and calls no NDX mutation.

@@ -106,3 +106,15 @@ def fixture_jpeg(alternate=False):
     draw.ellipse((70, 70, 170, 170), fill=(44, 62, 78) if alternate else (57, 75, 55))
     draw.rectangle((0, 190, 239, 210), fill=(130, 151, 165) if alternate else (124, 147, 111))
     output = io.BytesIO(); image.save(output, format='JPEG'); return output.getvalue()
+
+
+def fixture_portrait():
+    """Original abstract portrait study for the fictional artist; no external image."""
+    from PIL import Image, ImageDraw
+    image = Image.new('RGB', (320, 320), (35, 44, 36))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((24, 0, 68, 319), fill=(88, 100, 70))
+    draw.rectangle((236, 0, 270, 319), fill=(72, 83, 64))
+    draw.ellipse((122, 50, 194, 126), fill=(157, 168, 135))
+    draw.polygon([(112, 148), (200, 148), (224, 320), (88, 320)], fill=(102, 119, 88))
+    output = io.BytesIO(); image.save(output, format='JPEG'); return output.getvalue()

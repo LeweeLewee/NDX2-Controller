@@ -209,8 +209,8 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
   <div class="proto">
     <div class="steps" id="steps" role="group" aria-label="Screen state"></div>
     <div class="frame"><div class="host" id="protoHost"></div></div>
-    <div class="caption"><span class="what" id="capWhat"></span><span class="why" id="capWhy"></span></div>
-    <span class="hint">Tap targets use the spec minimums (72 × 64, pills 96 × 56). This is a composition study, not a touch or power validation. For the on-table trial open this page with <code>#kiosk</code> after the address: the screen fills the display, and a long-press in the top-left corner opens the state chooser.</span>
+    <div class="caption"><span class="what" id="capWhat"></span><span class="why" id="capWhy"></span><span class="hint" id="capClock"></span></div>
+    <span class="hint">Tap targets use the spec minimums (72 × 64, pills 96 × 56). This is a composition study, not a touch or power validation. Rest ladder in this prototype runs on demo timings: Touched 8 s to Still, Still 45 s to Presence (music tint if playing, moonlit if paused or stopped), Presence 60 s to Asleep; any tap wakes. Presence is a concept state and is not in the app scope. For the on-table trial open this page with <code>#kiosk</code> after the address: the screen fills the display, and a long-press in the top-left corner opens the state chooser.</span>
   </div>
 </section>
 
@@ -350,6 +350,10 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
     mic:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
     play:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l11 7-11 7z"/></svg>',
     search:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/></svg>',
+    stop:'<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+    up:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+    reset:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></svg>',
+    lib:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4v16M10 4v16M14 5l5 15"/></svg>',
     back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
     minus:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
     plus:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>'
@@ -380,32 +384,47 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
   }
   function controls(v){
     v=v||{};const dis=v.disabled?"opacity:.35;pointer-events:none;":"";
-    const ring=(extra)=>`<div class="ring solid tap" data-go="still" style="left:92px;top:4px;width:80px;height:80px;${extra||""}">${v.paused?ico.play:ico.pause}</div>`;
+    const ring=`<div class="ring solid tap" data-go="still" style="left:92px;top:4px;width:80px;height:80px">${v.paused?ico.play:ico.pause}</div>`;
     const pend=v.pending==="next"?"box-shadow:0 0 0 1px rgba(241,235,223,.9) inset;border-radius:32px;":"";
-    const unk=v.unknown?"border:1px dashed rgba(241,235,223,.6);":"border:1px solid rgba(241,235,223,.22);";
+    const unk=v.unknown?"outline:1px dashed rgba(241,235,223,.6);outline-offset:-1px;border-radius:32px;":"";
+    /* right cluster: two columns at x 632 and 704 (relative 296 and 368), shared by volume and by Find/Library so the icons align */
     return`<div class="fade" style="left:336px;top:270px;width:416px;height:88px;${dis}">
         <div class="tap" data-go="still" style="left:0;top:12px;width:72px;height:64px;display:grid;place-items:center;opacity:.85">${ico.prev}</div>
-        ${ring()}
+        ${ring}
         <div class="tap" data-go="still" style="left:192px;top:12px;width:72px;height:64px;display:grid;place-items:center;opacity:${v.pending==="next"?1:.85};${pend}">${ico.next}</div>
-        <div style="left:264px;top:12px;width:152px;height:64px;${unk}border-radius:32px;${v.busy?"opacity:.35":""}">
-          <div class="tap" data-go="touched" style="left:0;top:0;width:76px;height:64px;display:grid;place-items:center;opacity:.8">${ico.minus}</div>
-          <div class="caps" style="left:56px;top:-26px;font-size:15px;opacity:.45">Amp</div>
-          <div class="tap" data-go="touched" style="left:76px;top:0;width:76px;height:64px;display:grid;place-items:center;opacity:.8">${ico.plus}</div>
+        <div style="left:296px;top:12px;width:144px;height:64px;${unk}${v.busy?"opacity:.35":""}">
+          <div class="tap" data-go="touched" style="left:0;top:0;width:72px;height:64px;display:grid;place-items:center;opacity:.85">${ico.minus}</div>
+          <div class="tap" data-go="touched" style="left:72px;top:0;width:72px;height:64px;display:grid;place-items:center;opacity:.85">${ico.plus}</div>
         </div>
-        ${v.unknown?`<div style="left:264px;top:84px;width:200px;font-size:18px;opacity:.62">Volume outcome unknown</div>`:""}
+        ${v.unknown?`<div style="left:236px;top:84px;width:204px;text-align:right;font-size:18px;opacity:.62;white-space:nowrap">Volume outcome unknown</div>`:""}
       </div>
       <div class="fade tap" data-go="river" style="left:48px;top:388px;width:260px;height:56px;${dis}">
         <div class="caps" style="left:0;top:0;font-size:15px;opacity:.5">Up next</div>
         <div class="serif" style="left:0;top:22px;font-size:26px;white-space:nowrap">${ALBUMS[1].t}</div>
       </div>
       <div class="ring tap fade" data-go="ask" style="left:364px;top:376px;width:72px;height:72px;border-color:rgba(241,201,141,.8);color:#f1c98d">${ico.mic}</div>
-      <div class="tap fade" data-go="find" style="left:552px;top:392px;width:96px;height:56px;display:grid;place-items:center;justify-items:end;font-size:22px;opacity:.85;${dis}">Find</div>
-      <div class="tap fade" data-go="library" style="left:656px;top:392px;width:96px;height:56px;display:grid;place-items:center;justify-items:end;font-size:22px;opacity:.85;${dis}">Library</div>`;
+      <div class="tap fade" data-go="find" style="left:632px;top:384px;width:72px;height:64px;display:grid;place-items:center;opacity:.85;${dis}">${ico.search}</div>
+      <div class="tap fade" data-go="library" style="left:704px;top:384px;width:72px;height:64px;display:grid;place-items:center;opacity:.85;${dis}">${ico.lib}</div>`;
   }
   function head(title,back){
     return`<div class="serif" style="left:48px;top:30px;font-size:32px">${title}</div>
       <div class="pill tap" data-go="${back||"touched"}" style="right:48px;top:26px">Back to now</div>`;
   }
+  function backOnly(to){ return`<div class="tap" data-go="${to||"find"}" style="right:48px;top:24px;width:112px;height:56px;display:flex;align-items:center;justify-content:flex-end;gap:2px;font-size:22px;opacity:.85;white-space:nowrap">${ico.back}<span style="position:static">Back</span></div>`; }
+  const BIO="Formed around a shared interest in slow music and open rooms, the ensemble records in a converted boathouse on the estuary. Their albums favour long takes, natural reverb and the space between notes. Listening Studies, Vol. 01 is their third record.";
+  const portraitCache={};
+  function portrait(){
+    if(portraitCache.p)return portraitCache.p;
+    const W=360,H=480,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#3d4a44");g.addColorStop(1,"#141b18");x.fillStyle=g;x.fillRect(0,0,W,H);
+    /* abstract fixture portrait: a lit shoulder and a window, no face */
+    const lg=x.createRadialGradient(250,120,10,250,120,220);lg.addColorStop(0,"rgba(221,214,183,.55)");lg.addColorStop(1,"rgba(221,214,183,0)");x.fillStyle=lg;x.fillRect(0,0,W,H);
+    const sh=x.createLinearGradient(0,0,W,0);sh.addColorStop(0,"rgba(8,12,10,.55)");sh.addColorStop(.5,"rgba(8,12,10,0)");sh.addColorStop(1,"rgba(8,12,10,.35)");x.fillStyle=sh;x.fillRect(0,0,W,H);
+    x.fillStyle="rgba(221,214,183,.10)";x.fillRect(96,60,6,420);x.fillStyle="rgba(8,12,10,.25)";x.fillRect(102,60,22,420);
+    x.fillStyle="rgba(241,235,223,.06)";for(let i=0;i<2000;i++){x.fillRect(Math.random()*W,Math.random()*H,1,1)}
+    return portraitCache.p=cv.toDataURL();
+  }
+
   function rows(items,y,mark){
     return `<div style="left:0;top:${y}px;width:800px;height:${480-y}px;overflow:hidden">`+items.map((it,i)=>`<div class="row tap" data-go="detail" style="top:${i*72}px">
       <div class="serif" style="left:0;top:12px;width:620px;font-size:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.t}</div>
@@ -486,21 +505,24 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
     {id:"presence",n:"2 · Presence, quiet room",what:"Presence, no music",why:"Motion in the room wakes the water, not the interface. Smooth pebbles under a moonlit pool, slow light, an occasional ripple. Nothing to read.",quiet:true},
     {id:"presence",n:"2 · Presence, music playing",what:"Presence, music playing",why:"Same pool and pebbles, tinted by the album that is playing. A ripple starts where the sensor saw movement, so the stone answers the room. Still no controls; the first touch brings them.",quiet:false,key:"presence-music"},
     {id:"wake",n:"3 · Touch",what:"Waking",why:"The light rises from the waterline in under a second. This touch never counts as an action."},
-    {id:"still",n:"Still",what:"Still",why:"The default while music plays. No controls, just the music and its colour. Tap to bring up the controls."},
-    {id:"touched",n:"Touched",what:"Touched",why:"Controls fade in for 8 s. Transport sits in the centre, Ask in the middle of the foot, and the amp control stays at the edge. Tap Up next or the mic."},
+    {id:"still",n:"Still",what:"Still",why:"The default while music plays. No controls, just the music and its colour. Tap to bring up the controls. Left alone, it settles into Presence (demo: 45 s)."},
+    {id:"touched",n:"Touched",what:"Touched",why:"Controls fade in for 8 s. Transport in the centre, volume at the right, Ask centred at the foot, Find and Library icons aligned under the volume columns. No times: the waterline is the clock. Long-press anywhere for Settings."},
     {id:"river",n:"Up next",what:"Up next",why:"The queue as stones downstream, read-only. Tap a stone to see when it plays."},
-    {id:"ask",n:"Ask",what:"Ask",why:"Recording starts straight away. Ripples spread from the centre and the table glow breathes. Stop & search, Restart and Cancel are always available."},
+    {id:"ask",n:"Listening",what:"Listening",why:"Recording starts straight away. Ripples spread from the ring, which now shows a square: tap to stop. 2 s of silence or the 30 s limit also stops. Back discards."},
+    {id:"ready",n:"Ready",what:"Ready",why:"The transcript is there to read. The ring shows an up arrow: tap to search. The small reset ring discards and listens again. Nothing searches until you tap the arrow."},
     {id:"three",n:"Three for you",what:"Three for you",why:"Every suggestion is explained and resolved to a native reference before it can be played. Nothing starts until you choose it. After a few minutes untouched the screen returns to Presence, and to Asleep once the room is empty."},
-    {id:"paused",n:"Paused",what:"Paused",why:"Same composition. The caps line says so, the ring shows the play mark, the played waterline drops to 40%."},
+    {id:"paused",n:"Paused",what:"Paused",why:"Same composition. The caps line says so, the ring shows the play mark, the played waterline drops to 40%. Left alone it goes to Still, then to the quiet Presence, since nothing is playing."},
     {id:"stopped",n:"Stopped",what:"Nothing playing",why:"Fallback field, no placeholder box, the source on the caps line, no waterline."},
     {id:"offline",n:"Offline",what:"Reconnecting",why:"Last-known music stays legible at 62%. Mutation controls at 35% and disabled. No spinner, no red."},
     {id:"pending",n:"Pending",what:"Pending",why:"Next was tapped. It holds full ink with a hairline ring until the bridge confirms; the amplifier is busy. Nothing else moves."},
     {id:"unknown",n:"Unknown outcome",what:"Unknown outcome",why:"A volume request expired without a reply. The pill goes dashed and says so until state is reconciled. No retry button."},
     {id:"longtitle",n:"Long title",what:"Long title",why:"Two lines, then an ellipsis. Nothing else moves to make room."},
     {id:"noart",n:"Missing artwork",what:"Missing artwork",why:"No fabricated cover. A quiet square in the fallback field says so; the music stays first."},
-    {id:"find",n:"Find",what:"Find",why:"Query hairline, filter words, rows with membership marks. Long rows truncate on one line."},
-    {id:"keyboard",n:"Find · keyboard",what:"Keyboard",why:"The system keyboard in dark appearance takes the lower band; filters and rows return on dismiss."},
-    {id:"detail",n:"Detail",what:"Detail",why:"Play is the only filled control on the object. Library shows its pending and unknown states in the same pill."},
+    {id:"find",n:"Find",what:"Find",why:"One screen for saying or typing. The ring starts listening; the field at the foot is the typing, so there is no Type instead button."},
+    {id:"results",n:"Find · results",what:"Results",why:"The query in the field, filter words, rows with membership marks, the mic beside the field to redo it. Long rows truncate on one line."},
+    {id:"keyboard",n:"Find · keyboard",what:"Keyboard",why:"The system keyboard in dark appearance takes the lower band; the results return on dismiss."},
+    {id:"detail",n:"Album",what:"Album",why:"Cover at the Touched size, artist as the caps line, title in serif, one line of facts, Play filled, Add to library hairline, numbered tracks with durations. Field tinted from the cover."},
+    {id:"artist",n:"Artist",what:"Artist",why:"A portrait plate fills the left third and fades into the field; name, four lines of bio, Follow; the artist's albums as a row of covers. No portrait or bio: the name and the covers carry the screen."},
     {id:"library",n:"Library",what:"Library",why:"Same rows as Find, saved marks instead of membership questions."},
     {id:"settings",n:"Settings",what:"Settings",why:"Fallback field, never artwork colour. Reached by long-press on the artist line."},
     {id:"display",n:"Display",what:"Display",why:"Palette words, a hairline slider, the sleep dropdown. The feedback line keeps the existing wording."}
@@ -514,41 +536,66 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
       if(state==="wake")cls.push("waking");
       h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,true)}${waterline(al,pos,{})}`;
     }else if(state==="touched"){
-      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({})}${waterline(al,pos,{times:true})}`;
+      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({})}${waterline(al,pos,{})}`;
     }else if(state==="paused"){
-      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false,{caps:"Paused · "+al.a})}${controls({paused:true})}${waterline(al,pos,{times:true,played:.4})}`;
+      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false,{caps:"Paused · "+al.a})}${controls({paused:true})}${waterline(al,pos,{played:.4})}`;
     }else if(state==="stopped"){
       const q={t:"",a:"",al:"",c:QUIET,v:0,len:1};
       h=`<div class="field" style="background:${field(q)}"></div>${nowBlock(q,true,{stopped:true,caps:"TIDAL · NDX 2",noart:true})}`;
     }else if(state==="offline"){
       h=`<div class="field" style="background:${field(al,.7)}"></div>${nowBlock(al,false,{caps:"Reconnecting",dim:true})}${controls({disabled:true})}${waterline(al,pos,{played:.3})}`;
     }else if(state==="pending"){
-      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({pending:"next",busy:true})}${waterline(al,pos,{times:true})}`;
+      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({pending:"next",busy:true})}${waterline(al,pos,{})}`;
     }else if(state==="unknown"){
-      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({unknown:true})}${waterline(al,pos,{times:true})}`;
+      h=`<div class="field" style="background:${field(al)}"></div>${nowBlock(al,false)}${controls({unknown:true})}${waterline(al,pos,{})}`;
     }else if(state==="longtitle"){
       h=`<div class="field" style="background:${field(LONG)}"></div>${nowBlock(LONG,true,{title:LONG.t})}${waterline(LONG,pos,{})}`;
     }else if(state==="noart"){
       const q={...al,c:QUIET};
       h=`<div class="field" style="background:${field(q)}"></div>${nowBlock(q,true,{noart:true})}${waterline(q,pos,{})}`;
-    }else if(state==="find"||state==="keyboard"){
+    }else if(state==="find"){
+      h=`<div class="field" style="background:${field(al,.5)}"></div>${head("Find")}
+      <div class="serif" style="left:60px;width:680px;top:124px;text-align:center;font-size:32px;font-style:italic;opacity:.62;text-wrap:balance">Say an artist, an album or the kind of music you want</div>
+      <div class="ring tap" data-go="ask" style="left:364px;top:232px;width:72px;height:72px;border-color:rgba(241,201,141,.8);color:#f1c98d">${ico.mic}</div>
+            <div class="tap" data-go="keyboard" style="left:48px;top:380px;width:704px;height:64px">
+        <div class="serif" style="left:0;top:14px;width:640px;font-size:26px;font-style:italic;opacity:.6">Or type here</div>
+        <div style="left:640px;top:0;width:64px;height:64px;display:grid;place-items:center;opacity:.6">${ico.search}</div>
+        <div style="left:0;top:63px;width:704px;height:1px;background:rgba(241,235,223,.18)"></div>
+      </div>`;
+    }else if(state==="keyboard"||state==="results"){
       const kb=state==="keyboard";
-      h=`<div class="field" style="background:${field(al,.6)}"></div>${head("Find")}
-      <div class="serif" style="left:48px;top:104px;width:536px;height:32px;font-size:26px;${kb?"":"font-style:italic;opacity:.6"}">${kb?"Evening lis<span style='position:static;border-left:1.5px solid rgba(241,235,223,.9)'></span>":"Artist, album or a kind of music"}</div>
+      h=`<div class="field" style="background:${field(al,.5)}"></div>${head("Find")}
+      <div class="serif" style="left:48px;top:104px;width:536px;height:32px;font-size:26px">${kb?"Evening lis<span style='position:static;border-left:1.5px solid rgba(241,235,223,.9)'></span>":"Evening listening"}</div>
       <div style="left:48px;top:152px;width:536px;height:1px;background:rgba(241,235,223,${kb?".75":".18"})"></div>
       <div class="tap" style="left:600px;top:88px;width:72px;height:64px;display:grid;place-items:center;opacity:.85">${ico.search}</div>
       <div class="tap" data-go="ask" style="left:680px;top:88px;width:72px;height:64px;display:grid;place-items:center;color:#f1c98d">${ico.mic}</div>
       ${kb?keyboardHtml():filters(160,0,["Albums","Tracks","Artists","Playlists"])+rows(RESULTS,220,(it,i)=>marks[i%3])}`;
     }else if(state==="detail"){
-      h=`<div class="field" style="background:${field(al,.6)}"></div>${head("Album")}
-      <div class="cover" style="left:48px;top:96px;width:200px;height:200px;background-image:url(${cover(al)})"></div>
-      <div class="caps" style="left:280px;top:100px;opacity:.55">Album · TIDAL</div>
-      <div class="serif clamp2" style="left:280px;top:122px;width:472px;font-size:32px">${al.al}</div>
-      <div style="left:280px;top:170px;font-size:22px;opacity:.62">${al.a}</div>
-      <div style="left:280px;top:236px;font-size:18px;opacity:.62">Library status unknown</div>
-      <div class="btn primary tap" data-go="touched" style="left:280px;top:300px;width:140px;padding:0">Play</div>
-      <div class="btn tap" style="left:432px;top:300px;width:150px;padding:0">Library</div>
-      ${rows([{t:"A Still Morning",a:"4:12",k:"track"},{t:"Soft Light",a:"3:58",k:"track"}],376)}`;
+      const tracks=[{n:1,t:"A Still Morning",d:"5:30"},{n:2,t:"Soft Light",d:"4:22"},{n:3,t:"Quiet Hours",d:"5:05"},{n:4,t:"Low Tide",d:"4:04"}];
+      h=`<div class="field" style="background:${field(al,.5)}"></div>${backOnly("find")}
+      <div class="cover" style="left:48px;top:56px;width:248px;height:248px;background-image:url(${cover(al)})"></div>
+      <div class="caps" style="left:336px;top:60px;opacity:.55">${al.a}</div>
+      <div class="serif clamp2" style="left:336px;top:84px;width:416px;font-size:32px">${al.al}</div>
+      <div style="left:336px;top:168px;font-size:18px;opacity:.55">Album · 2024 · 4 tracks · 19 min</div>
+      <div class="btn primary tap" data-go="touched" style="left:336px;top:212px;width:140px;padding:0">Play</div>
+      <div class="btn tap" style="left:488px;top:212px;width:190px;padding:0">Add to library</div>
+      <div style="left:0;top:328px;width:800px;height:152px;overflow:hidden">${tracks.map((t,i)=>`<div class="tap" data-go="touched" style="left:48px;top:${i*64}px;width:704px;height:64px;border-bottom:1px solid rgba(241,235,223,.14)">
+        <div style="left:0;top:20px;font-size:18px;opacity:.45;font-variant-numeric:tabular-nums">${t.n}</div>
+        <div class="serif" style="left:40px;top:14px;width:560px;font-size:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.t}</div>
+        <div style="left:640px;top:20px;width:64px;text-align:right;font-size:18px;opacity:.55;font-variant-numeric:tabular-nums">${t.d}</div></div>`).join("")}</div>
+      <div style="left:0;top:440px;width:800px;height:40px;background:linear-gradient(to bottom,transparent,${shade(al.c[1],.55)})"></div>`;
+    }else if(state==="artist"){
+      h=`<div class="field" style="background:${field(al,.7)}"></div>
+      <div style="left:0;top:0;width:300px;height:480px;background:url(${portrait()}) center/cover"></div>
+      <div style="left:220px;top:0;width:140px;height:480px;background:linear-gradient(to right,transparent,${shade(al.c[1],.55)})"></div>
+      <div style="left:0;top:340px;width:300px;height:140px;background:linear-gradient(to bottom,transparent,${shade(al.c[1],.55)})"></div>
+      ${backOnly("find")}
+      <div class="caps" style="left:336px;top:60px;opacity:.55">Artist · TIDAL</div>
+      <div class="serif clamp2" style="left:336px;top:84px;width:400px;font-size:44px">${al.a}</div>
+      <div style="left:336px;top:148px;width:416px;font-size:18px;line-height:1.4;opacity:.7;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">${BIO}</div>
+      <div class="btn tap" style="left:336px;top:262px;width:150px;padding:0">Follow</div>
+      <div class="caps" style="left:48px;top:352px;opacity:.5;font-size:15px">Albums</div>
+      ${[ALBUMS[0],ALBUMS[3],ALBUMS[4],ALBUMS[5],ALBUMS[2]].map((a,i)=>`<div class="cover tap" data-go="detail" style="left:${48+i*112}px;top:376px;width:96px;height:96px;background-image:url(${cover(a)})"></div>`).join("")}`;
     }else if(state==="library"){
       h=`<div class="field" style="background:${field(al,.6)}"></div>${head("Library")}
       ${filters(88,0,["Albums","Tracks","Artists","Playlists"])}${rows(RESULTS.slice(0,4),150,(it,i)=>marks[2])}`;
@@ -579,16 +626,16 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
       <div style="left:0;top:300px;width:800px;height:1px;background:rgba(241,235,223,.18)"></div>${html}
       <div class="caps" style="left:48px;top:384px;font-size:15px;opacity:.55">${sel===0?"Playing now":"Plays in "+Math.round(wait/60)+" min"}</div>
       <div class="serif" style="left:48px;top:410px;font-size:32px">${s.t} <span style="position:static;font-family:var(--sans);font-size:18px;opacity:.6">&nbsp;${s.a}</span></div>`;
-    }else if(state==="ask"){
-      bg="#050707";
+    }else if(state==="ask"||state==="ready"){
+      const ready=state==="ready";bg="#050707";
       h=`<div class="field" style="background:${field(al,.28)}"></div>
-      ${[0,1.2,2.4].map(d=>`<div class="ripple" style="left:100px;top:-30px;width:600px;height:600px;animation-delay:${d}s"></div>`).join("")}
-      <div class="caps" style="left:0;width:800px;text-align:center;top:40px;font-size:15px;opacity:.6;color:#f1c98d">Listening · 0:04 of 0:30</div>
-      <div class="serif" style="left:80px;width:640px;top:130px;text-align:center;font-size:44px;font-style:italic">“Something like this,<br>but more acoustic”</div>
-      <div class="ring" style="left:364px;top:258px;width:72px;height:72px;border-color:#f1c98d;color:#f1c98d;background:rgba(241,201,141,.12)">${ico.mic}</div>
-      <div class="btn tap" data-go="touched" style="left:120px;top:388px">Cancel</div>
-      <div class="btn tap" data-go="ask" style="left:328px;top:388px">Restart</div>
-      <div class="btn primary tap" data-go="three" style="left:510px;top:388px">Stop &amp; search</div>`;
+      ${ready?"":[0,1.2,2.4].map(d=>`<div class="ripple" style="left:140px;top:76px;width:520px;height:520px;animation-delay:${d}s"></div>`).join("")}
+      <div class="caps" style="left:0;width:800px;text-align:center;top:40px;font-size:15px;opacity:.6;color:#f1c98d">${ready?"Stopped · 0:11":"Listening · 0:11 of 0:30"}</div>
+      <div class="serif" style="left:80px;width:640px;top:120px;text-align:center;font-size:44px;font-style:italic">“Something like this,<br>but more acoustic”</div>
+      <div class="ring tap" data-go="${ready?"three":"ready"}" style="left:364px;top:300px;width:72px;height:72px;border-color:#f1c98d;color:#f1c98d;background:rgba(241,201,141,.12)">${ready?ico.up:ico.stop}</div>
+      ${ready?`<div class="tap" data-go="ask" style="left:252px;top:304px;width:72px;height:64px;display:grid;place-items:center"><div class="ring" style="position:static;width:56px;height:56px;border-color:rgba(241,235,223,.35);opacity:.85">${ico.reset}</div></div>`:""}
+            ${backOnly("touched")}
+      <div style="left:0;width:800px;text-align:center;top:448px;font-size:18px;opacity:.35">Microphone fixture: no audio captured. Search only.</div>`;
     }else if(state==="three"){
       bg="#070909";
       h=`<div class="field" style="background:${field(al,.35)}"></div>
@@ -616,7 +663,9 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
 
   /* prototype */
   const protoHost=document.getElementById("protoHost"),steps=document.getElementById("steps");
-  let cur="still",timer=null,sel=1;
+  let cur="still",timer=null,sel=1,playing=true;
+  /* demo rest ladder: Touched 8 s -> Still; Still 45 s -> Presence (music tint if playing, quiet if paused or stopped); Presence 60 s -> Asleep. Real timings live in spec.md; Presence is a concept state, not in the app scope. */
+  const REST={still:[45000,()=>playing?"presence-music":"presence"],longtitle:[45000,()=>playing?"presence-music":"presence"],noart:[45000,()=>"presence"],presence:[60000,()=>"sleep"],paused:[8000,()=>"still"],stopped:[45000,()=>"presence"]};
   STATES.forEach(s=>{s.key=s.key||s.id;const b=document.createElement("button");b.type="button";b.textContent=s.n;b.dataset.id=s.key;b.addEventListener("click",()=>go(s.key));steps.appendChild(b)});
   function go(key){
     const st=STATES.find(s=>s.key===key)||STATES.find(s=>s.id===key);const id=st.id;
@@ -624,8 +673,11 @@ footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:v
     render(protoHost,id,{sel,quiet:st.quiet});
     document.getElementById("capWhat").textContent=st.what;document.getElementById("capWhy").textContent=st.why;
     steps.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===st.key));
+    if(id==="paused")playing=false; else if(id==="stopped")playing=false; else if(id==="touched"||id==="wake")playing=true;
     if(id==="wake")timer=setTimeout(()=>go("still"),1500);
-    if(id==="touched")timer=setTimeout(()=>{if(cur==="touched")go("still")},8000);
+    else if(id==="touched")timer=setTimeout(()=>{if(cur==="touched")go("still")},8000);
+    else if(REST[id]){const [ms,next]=REST[id];const from=id;timer=setTimeout(()=>{if(cur===from)go(next())},ms)}
+    const cl=document.getElementById("capClock");if(cl){cl.textContent=REST[id]?`then ${REST[id][0]/1000} s to the next rest state`:id==="touched"?"then 8 s to Still":""}
   }
   protoHost.addEventListener("click",e=>{
     const t=e.target.closest("[data-go],[data-sel]");

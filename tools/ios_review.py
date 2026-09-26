@@ -23,6 +23,10 @@ REFERENCES = {
     'library': '20-library', 'settings': '21-settings', 'display': '22-display',
 }
 
+REFERENCES.update({'touched':'06-touched','ask-idle':'18-find','ask-recording':'08-ask',
+                   'ask-stopped':'09-ready','find':'19-results','detail':'21-detail',
+                   'artist-following':'22-artist','library':'23-library','settings':'24-settings','display':'25-display'})
+
 
 def build(archive, output, revision=None):
     if revision is not None and not re.fullmatch(r'[0-9a-f]{40}', revision):

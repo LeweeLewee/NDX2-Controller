@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "artist-following", "artist-tracks", "artist-about", "artist-missing", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -22,6 +22,8 @@ import Foundation
         case "longtitle": model.player.title = "An Exceptionally Long Track Title for the Seated Listening Trial"
         case "noart": model.artwork = nil; model.colorPreview = nil
         case "offline": model.online = false; model.artwork = nil; model.colorPreview = nil
+        case "volume-pending": model.rest = .touched; model.pendingAction = "amplifier"; model.pendingTarget = "amp-down"
+        case "ask-empty": model.context.screen = .ask; model.voiceState = "stopped"
         case "pending": model.pendingAction = "transport"; model.pendingTarget = "play-pause"
         case "unknown": model.unknownAction = "amplifier"
         case "wake": model.rest = .waking
@@ -48,8 +50,9 @@ import Foundation
             model.context.playable = d["playable"].flag == true; model.context.membership = "saved"
             if kind == "artists" {
                 model.artwork = nil
+                if state != "artist-missing" { await model.loadArtwork() }
                 model.context.artistTab = state == "artist-tracks" ? "tracks" : state == "artist-about" ? "about" : "albums"
-                if state == "artist-missing" { model.context.selected.biography = nil; model.context.items = [] }
+                if state == "artist-missing" { model.context.selected.biography = nil; model.context.selected.artwork = nil; model.context.items = [] }
                 for _ in 0..<4 { await model.loadQueueArtwork() }
             }
         case "ask-idle","ask-typing","ask-unavailable":

@@ -62,5 +62,10 @@ final class WireTests: XCTestCase {
             XCTAssertThrowsError(try Enrollment.origin(text))
         }
         XCTAssertEqual(try Enrollment.origin("https://localhost:8991").host,"localhost")
+    }    func testBiographySpecificBoundDoesNotWidenOtherText() throws {
+        XCTAssertNoThrow(try JSONValue.object(["biography":.string(String(repeating:"🎵",count:2000))]).bounded())
+        XCTAssertThrowsError(try JSONValue.object(["biography":.string(String(repeating:"a",count:2001))]).bounded())
+        XCTAssertThrowsError(try JSONValue.object(["title":.string(String(repeating:"a",count:257))]).bounded())
     }
+
 }

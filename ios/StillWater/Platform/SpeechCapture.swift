@@ -27,7 +27,20 @@ import Speech
                 let req = SFSpeechAudioBufferRecognitionRequest()
                 req.requiresOnDeviceRecognition = true; req.shouldReportPartialResults = true
                 request = req
-                input.installTap(onBus:0,bufferSize:1024,format:format) { buffer,_ in req.append(buffer) }; tapped = true
+                input.installTap(onBus:0,bufferSize:1024,format:format) { [weak self] buffer,_ in
+                    req.append(buffer)
+                    // Audio activity, not absence of partial-transcript updates, drives silence.
+                    if let samples = buffer.floatChannelData?[0], buffer.frameLength > 0 {
+                        var energy: Float = 0
+                        for index in 0..<Int(buffer.frameLength) { energy += samples[index] * samples[index] }
+                        if sqrt(energy / Float(buffer.frameLength)) > 0.015 {
+                            Task { @MainActor in
+                                guard let self, self.token == current else { return }
+                                self.model?.noteSpeechActivity()
+                            }
+                        }
+                    }
+                }; tapped = true
                 task = recognizer.recognitionTask(with:req) { [weak self] result,error in
                     Task { @MainActor in
                         guard let self, self.token == current, self.model?.voiceState == "recording" else { return }

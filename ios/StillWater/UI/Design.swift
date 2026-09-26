@@ -151,7 +151,7 @@ struct DesignText: UIViewRepresentable {
     }
 }
 
-enum Mark { case play, pause, previous, next, mic, search, plus, minus, back, check, question, heart, volumeDown, volumeUp, settings, library, keyboard }
+enum Mark { case stop, submit, reset, play, pause, previous, next, mic, search, plus, minus, back, check, question, heart, volumeDown, volumeUp, settings, library, keyboard }
 struct OutlineMark: Shape {
     var mark: Mark
     func path(in rect: CGRect) -> Path {
@@ -161,6 +161,11 @@ struct OutlineMark: Shape {
             for pt in points.dropFirst() { p.addLine(to: CGPoint(x:pt.0,y:pt.1)) }
         }
         switch mark {
+        case .stop: p.addRect(CGRect(x:6,y:6,width:12,height:12))
+        case .submit: line([(12,21),(12,3)]); line([(5,10),(12,3),(19,10)])
+        case .reset:
+            p.addArc(center:CGPoint(x:12,y:12),radius:8,startAngle:.degrees(-90),endAngle:.degrees(190),clockwise:false)
+            line([(2,6),(3,14),(10,12)])
         case .play: line([(7,4),(20,12),(7,20),(7,4)])
         case .pause: line([(8,5),(8,19)]); line([(16,5),(16,19)])
         case .previous: line([(19,5),(8,12),(19,19),(19,5)]); line([(5,5),(5,19)])

@@ -10,7 +10,7 @@ import time
 import uuid
 
 from controller_service import Bridge
-from m2_artwork import ArtworkDelivery, fixture_jpeg, SIDE, MAX_SIDE, CHUNK_PIXELS
+from m2_artwork import ArtworkDelivery, fixture_jpeg, fixture_portrait, SIDE, MAX_SIDE, CHUNK_PIXELS
 from m2_security import Pairing, Vault
 
 MAX_REQUEST = 8192
@@ -18,7 +18,7 @@ from m2_limits import MAX_RESPONSE
 PAGE_SIZE = 12
 MUTATIONS = {'play', 'amplifier', 'transport', 'library_save'}
 FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 'offset'},
-          'browse': {'reference', 'offset'}, 'queue': {'offset'},
+          'artist_bio': {'reference'}, 'browse': {'reference', 'offset'}, 'queue': {'offset'},
           'library_state': {'reference'}, 'library_save': {'reference', 'saved'},
           'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command'},
           'voice_review': {'fixture'}, 'suggest': {'prompt'},
@@ -89,7 +89,8 @@ class FixtureService(Bridge):
     def __init__(self):
         super().__init__(FixtureNaim())
         self.fixture_images = {self.cover('https://resources.tidal.com/images/fixture/a.jpg'): fixture_jpeg(),
-                               self.cover('https://resources.tidal.com/images/fixture/b.jpg'): fixture_jpeg(True)}
+                               self.cover('https://resources.tidal.com/images/fixture/b.jpg'): fixture_jpeg(True),
+                               self.cover('https://resources.tidal.com/images/fixture/portrait.jpg'): fixture_portrait()}
         self.saved = {'inputs/tidal/artists/1': False, 'inputs/tidal/tracks/101': False}
     def image(self, path):
         return self.fixture_images[path]
@@ -111,6 +112,9 @@ class FixtureService(Bridge):
             if action == 'library_page':
                 items = [i for i in items if self.saved.get(i['reference'], i['saved'] == 'saved')]
             return {'items': items, 'cursor': None, 'result_id': 'fixture'}
+        if action == 'artist_bio':
+            if not re.fullmatch(r'inputs/tidal/artists/[0-9]{1,32}', args.get('reference', '')): raise ValueError('Expected artist')
+            return {'reference': args['reference'], 'available': True, 'biography': 'A fictional ensemble for this silent preview. Piano, strings and soft electronic textures trace the changing light of a quiet room. Explore four imagined albums and six tracks.', 'artwork': list(self.fixture_images)[2]}
         if action == 'current_item':
             return {'reference':self.naim.reference, 'title':self.naim.title, 'kind':'tracks'}
         if action == 'related':
@@ -177,12 +181,14 @@ class Contract:
                 if type(value) is not int or not 0 <= value <= 10000: raise ContractError('INVALID_ARGUMENT')
             elif not isinstance(value, str) or len(value.encode()) > (4096 if key == 'cursor' else 256):
                 raise ContractError('INVALID_ARGUMENT')
-        required = {'battery_report': {'level', 'charging', 'client_id'}, 'play': {'reference'}, 'browse': {'reference'}, 'artwork': {'reference'}, 'library_state': {'reference'},
+        required = {'artist_bio': {'reference'}, 'battery_report': {'level', 'charging', 'client_id'}, 'play': {'reference'}, 'browse': {'reference'}, 'artwork': {'reference'}, 'library_state': {'reference'},
                     'library_save': {'reference', 'saved'}, 'amplifier': {'direction'}, 'transport': {'command'}}
         if not required.get(action, set()).issubset(args): raise ContractError('INVALID_ARGUMENT')
         if action == 'amplifier' and args['direction'] not in ('up', 'down'): raise ContractError('INVALID_ARGUMENT')
         if action == 'transport' and args['command'] not in ('pause', 'resume', 'stop', 'next', 'prev'): raise ContractError('INVALID_ARGUMENT')
         if action in ('search', 'library_page') and args.get('kind', 'albums') not in ('albums','tracks','artists','playlists'):
+            raise ContractError('INVALID_ARGUMENT')
+        if action == 'artist_bio' and not re.fullmatch(r'inputs/tidal/artists/[0-9]{1,32}', args['reference']):
             raise ContractError('INVALID_ARGUMENT')
         if action == 'artwork':
             side, offset = args.get('side', SIDE), args.get('pixel_offset', 0)
@@ -217,6 +223,9 @@ class Contract:
         try:
             if action == 'artwork':
                 data = self.artwork.get(args['reference'], args.get('side', SIDE), args.get('pixel_offset', 0))
+            elif action == 'artist_bio':
+                data = self.service.request(action, args)
+                self.artwork.register(data.get('artwork'))
             elif action == 'battery_report':
                 # One volatile observation, receipt time owned by the bridge. No journal or NDX I/O.
                 self.last_battery_report = dict(args, received_at=self.clock())

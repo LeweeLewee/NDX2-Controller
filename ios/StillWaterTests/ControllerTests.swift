@@ -112,7 +112,7 @@ import XCTest
         m.navigate(.ask)
         XCTAssertEqual(m.voiceState,"idle"); XCTAssertFalse(m.context.typing)
         XCTAssertEqual(starts,0); XCTAssertFalse(t.requests.contains("search"))
-        m.submitVoice(); XCTAssertEqual(m.context.screen,.ask)
+        m.stopVoice(); m.submitVoice(); XCTAssertEqual(m.context.screen,.ask)
         m.startVoice(); XCTAssertEqual(starts,1)
         m.transcript = "discard me"; m.setTyping(true)
         XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(m.transcript,"")
@@ -123,11 +123,11 @@ import XCTest
         m.context.query = "  Evening listening  "; m.submitTypedSearch(); await settle()
         XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"Evening listening")
         XCTAssertTrue(t.requests.contains("search")); XCTAssertEqual(t.fixture.mutations,[])
-        m.back(); XCTAssertEqual(m.context.screen,.ask); XCTAssertTrue(m.context.typing)
-        XCTAssertEqual(m.context.query,"Evening listening"); XCTAssertEqual(starts,1)
+        m.back(); XCTAssertEqual(m.context.screen,.ask); XCTAssertFalse(m.context.typing)
+        XCTAssertEqual(m.context.query,""); XCTAssertEqual(starts,1)
         m.setTyping(false); XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(starts,1)
         m.fixture = false
-        m.startVoice(); m.transcript = "quiet piano"; m.submitVoice(); await settle()
+        m.startVoice(); m.transcript = "quiet piano"; m.stopVoice(); m.submitVoice(); await settle()
         XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"quiet piano")
         m.editSearch(); XCTAssertEqual(m.context.screen,.ask); XCTAssertFalse(m.context.typing)
         XCTAssertEqual(m.voiceState,"idle"); XCTAssertEqual(starts,2)
@@ -145,7 +145,7 @@ import XCTest
         m.startVoice(); XCTAssertEqual(m.transcript,""); XCTAssertEqual(m.voiceSession,2)
         time += 2.7; await m.refresh(); m.tick(); XCTAssertEqual(m.transcript,"Find quiet instrumental albums")
         XCTAssertEqual(m.context.screen,.ask); XCTAssertTrue(t.mutations.isEmpty)
-        m.submitVoice(); await settle(); XCTAssertEqual(m.context.screen,.find)
+        m.stopVoice(); m.submitVoice(); await settle(); XCTAssertEqual(m.context.screen,.find)
         m.details(MusicItem(.object(["reference":.string("inputs/tidal/artists/1")]))); await settle()
         XCTAssertEqual(m.context.items.filter { $0.kind == "albums" }.count,4)
         XCTAssertNotNil(m.context.selected.biography)
@@ -171,7 +171,7 @@ import XCTest
     func testOnDeviceSearchNeverPlays() async {
         let t = FixtureTransport(), m = ControllerModel(transport:FixtureTransport(),restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
-        m.navigate(.ask); m.startVoice(); m.transcript = "quiet instrumental"; m.submitVoice(); await settle()
+        m.navigate(.ask); m.startVoice(); m.transcript = "quiet instrumental"; m.stopVoice(); m.submitVoice(); await settle()
         XCTAssertEqual(m.context.screen,.find); XCTAssertEqual(m.context.query,"quiet instrumental")
         XCTAssertEqual(t.mutations,[]); m.deactivate()
     }
@@ -204,5 +204,21 @@ import XCTest
         reply = try await t.send(BridgeRequest("charge?")); XCTAssertEqual(reply.data["reason"].text,"stale"); XCTAssertEqual(reply.data["charge"].text,"no")
         _ = try await t.send(BridgeRequest("battery_report",["level":.int(75),"charging":.bool(true),"client_id":.string("test")]))
         reply = try await t.send(BridgeRequest("charge?")); XCTAssertEqual(reply.data["reason"].text,"window"); XCTAssertEqual(reply.data["charge"].text,"no")
+    }    func testSilenceStopsOnlyAfterActivityAndNeverSubmits() async {
+        var time = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{time},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.fixture = false; m.stopOnSilence = true; m.navigate(.ask); m.startVoice()
+        time += 3; await m.refresh(); m.fixture = false; m.tick()
+        XCTAssertEqual(m.voiceState,"recording")
+        m.transcript = "quiet piano"; m.noteSpeechActivity()
+        time += 1.9; await m.refresh(); m.fixture = false; m.tick(); XCTAssertEqual(m.voiceState,"recording")
+        time += 0.1; m.tick(); XCTAssertEqual(m.voiceState,"stopped")
+        XCTAssertFalse(t.requests.contains("search"))
+        m.startVoice(); XCTAssertEqual(m.transcript,"")
+        m.stopOnSilence = false; m.noteSpeechActivity(); time += 3
+        await m.refresh(); m.fixture = false; m.tick(); XCTAssertEqual(m.voiceState,"recording")
+        m.stopOnSilence = true; m.deactivate()
     }
+
 }

@@ -7,7 +7,7 @@ struct BrowseContext {
     var screen: Screen = .now, query = "", kind = "albums", items: [MusicItem] = []
     var cursor: String?, pageCursor: String?, nextOffset: Int?, resultID: String?, scrollID: String?
     var artistTab = "albums", artistScroll: [String:String] = [:]
-    var typing = false
+    var typing = false, biographyExpanded = false
     var selected = MusicItem(), playable = false, membership = "unknown", queueSelection = 1
 }
 struct DisplayPreferences: Codable {
@@ -49,6 +49,10 @@ struct Preview {
     @Published var loading = false
     @Published var keyboardVisible = false
     var voiceStart: (() -> Void)?, voiceCancel: (() -> Void)?
+    @Published var stopOnSilence = UserDefaults.standard.object(forKey: "stop-on-silence") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(stopOnSilence, forKey:"stop-on-silence") }
+    }
+    private var lastSpeechAt: Double?
     var reportBattery: (() async -> Void)?
     var applyIdlePolicy: ((Bool) -> Void)?
     var snapshotMode = false
@@ -128,7 +132,7 @@ struct Preview {
         if voiceState == "recording" {
             if fixture { updateFixtureTranscript(now:now) }
             voiceSeconds = min(30, max(0, Int(30 - (voiceDeadline - now))))
-            if now >= voiceDeadline { stopVoice() }
+            if now >= voiceDeadline || (stopOnSilence && lastSpeechAt.map { now - $0 >= 2 } == true) { stopVoice() }
         }
         // iOS owns actual lock. Releasing the idle timer cannot force a hardware sleep deadline.
         let idleHold = now - lastTouch < Double(preferences.timeout) && (rest == .touched || (context.screen == .ask && voiceState == "recording"))
@@ -216,6 +220,7 @@ struct Preview {
         readTask?.cancel(); artTask?.cancel(); artTask = nil; artwork = nil; colorPreview = nil; nextArtAttempt = 0; loading = false
         context = toNow ? BrowseContext() : history.popLast() ?? BrowseContext()
         if toNow { history.removeAll() }
+        if context.screen == .ask { context.query = ""; context.typing = false }
         noteContact()
     }
     func search() { noteContact(); keyboardVisible = false; context.cursor = nil; context.pageCursor = nil; context.nextOffset = nil; context.resultID = nil; loadPage() }
@@ -268,6 +273,13 @@ struct Preview {
             }
             self.context.selected = MusicItem(r.data["item"]); self.context.playable = r.data["playable"].flag == true
             self.context.items = r.data["items"].values.map(MusicItem.init); self.context.nextOffset = r.data["next_offset"].number
+            if item.kind == "artists" || item.reference.contains("/artists/") {
+                if let bio = await self.perform(BridgeRequest("artist_bio",["reference":.string(item.reference)])),
+                   bio.outcome == "observed", bio.data["reference"].text == item.reference, self.generation == gen {
+                    self.context.selected.biography = bio.data["biography"].text
+                    self.context.selected.artwork = bio.data["artwork"].text
+                }
+            }
             await self.membership()
         }
     }
@@ -367,29 +379,39 @@ struct Preview {
               let ref = detail.data["item"]["artwork"].text,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
               generation == gen else { return }
-        let start = clock()
-        guard let reply = await perform(BridgeRequest("artwork",["reference":.string(ref)])), generation == gen else { return }
-        var image = ArtworkAssembly(reference:ref,side:80)
-        do { try image.append(reply,started:start,now:clock()) } catch { return }
+        let side = screen == .detail ? 320 : 80
+        var image = ArtworkAssembly(reference:ref,side:side)
+        while !image.complete && active && generation == gen && !Task.isCancelled {
+            if clock() >= nextPoll { nextPoll = clock() + 2; await refresh() }
+            let started = clock()
+            guard let reply = await perform(BridgeRequest("artwork",["reference":.string(ref),"side":.int(side),"pixel_offset":.int(image.offset)])), generation == gen else { return }
+            do { try image.append(reply,started:started,now:clock()) } catch { return }
+        }
         guard image.complete, online, clock() < freshUntil, context.screen == screen else { return }
         let currentRefs = Set(candidates.map(\.reference))
         queueArtwork = queueArtwork.filter { currentRefs.contains($0.key) }
-        queueArtwork[item.reference] = Preview(reference:ref,pixels:image.bytes,side:80,deadline:image.deadline)
+        queueArtwork[item.reference] = Preview(reference:ref,pixels:image.bytes,side:side,deadline:image.deadline)
         nextQueueArtAttempt = clock() + 0.2
     }
     func startVoice() {
         guard context.screen == .ask, !context.typing else { return }
-        cancelVoice(); voiceSession += 1; voiceState = "recording"; voiceDeadline = clock() + 30; voiceSeconds = 0; noteContact()
+        context.query = ""; cancelVoice(); lastSpeechAt = nil; voiceSession += 1; voiceState = "recording"; voiceDeadline = clock() + 30; voiceSeconds = 0; noteContact()
         if !fixture { voiceStart?() }
     }
     private func updateFixtureTranscript(now: Double) {
         let words = ["Find", "quiet", "instrumental", "albums"]
         let elapsed = max(0,now - (voiceDeadline - 30))
         let count = min(words.count,Int(elapsed / 0.65))
-        transcript = words.prefix(count).joined(separator:" ")
+        let text = words.prefix(count).joined(separator:" ")
+        if text != transcript { transcript = text }
+        if count > 0 { lastSpeechAt = voiceDeadline - 30 + Double(count)*0.65 }
+    }
+    func noteSpeechActivity() {
+        guard voiceState == "recording" else { return }
+        lastSpeechAt = clock()
     }
     func stopVoice() { guard voiceState == "recording" else { return }; voiceCancel?(); voiceState = "stopped" }
-    func cancelVoice() { voiceCancel?(); voiceState = "idle"; transcript = ""; voiceSeconds = 0 }
+    func cancelVoice() { voiceCancel?(); voiceState = "idle"; transcript = ""; voiceSeconds = 0; lastSpeechAt = nil }
     func setTyping(_ typing: Bool) {
         cancelVoice(); context.typing = typing; noteContact()
     }
@@ -398,11 +420,11 @@ struct Preview {
         navigate(.ask); context.query = query; context.kind = kind
     }
     func submitTypedSearch() {
-        guard context.screen == .ask, context.typing else { return }
+        guard context.screen == .ask, voiceState != "recording" else { return }
         submitSearch(context.query)
     }
     func submitVoice() {
-        guard context.screen == .ask, !context.typing, ["recording","stopped"].contains(voiceState) else { return }
+        guard context.screen == .ask, !context.typing, voiceState == "stopped" else { return }
         stopVoice(); submitSearch(transcript)
     }
     private func submitSearch(_ text: String) {

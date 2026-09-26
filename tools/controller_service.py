@@ -74,6 +74,17 @@ class Bridge:
             if not self.catalog:
                 raise LibraryError('TIDAL catalogue access is needed for album and artist links.')
             return {'items': self.catalog.related(args.get('reference'))}
+        if action == 'artist_bio':
+            from artist_metadata import plain_biography
+            from tidal_catalog import candidate_reference
+            reference = args.get('reference')
+            parts = reference.split('/') if isinstance(reference, str) else []
+            if len(parts) != 4 or parts[2] != 'artists' or candidate_reference('artists', parts[3]) != reference:
+                raise ValueError('Expected a TIDAL artist reference')
+            metadata = self.catalog.artist_metadata(reference) if self.catalog else {}
+            biography = plain_biography(metadata.get('biography'))
+            return {'reference': reference, 'available': biography is not None,
+                    'biography': biography, 'artwork': self.cover(metadata.get('portrait'))}
         if action == 'search':
             if not self.catalog:
                 raise ValueError('Catalogue credentials are not configured')
