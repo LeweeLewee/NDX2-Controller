@@ -342,3 +342,11 @@ Fresh local validation passed 150 Python tests, five JavaScript tests, six silen
 
 
 D035 distribution: [signed run 36230634817](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36230634817), tag `ios-preview-2026-09-26-b1`, repeated all 28 native tests and unsigned archive checks, then signed and uploaded version **0.1.0 (6.1.0)**. Apple processing completed; the existing internal group was assigned and Apple visibly reports **Testing**. No new tester was added. Release artifact `10902269009` was downloaded and verified against SHA-256 `56a5f119a42daddbeb8de4e5245bfab431c51ed5bf65d9cbc2637fdb8aa6062a`; original validation and upload logs are retained privately. This demonstrates availability, not installation or B1 user acceptance.
+
+## Visual correction follow-up — 26 September 2026
+
+The user rejected the prior visual result. Functional success at `85628f2` remains valid for that source, but does not establish design acceptance. Corrections are implemented on the isolated B1 branch and remain unverified natively. Fresh local checks passed 150 Python tests, five navigation tests, six silent authenticated TLS demo stages, project generation and fixture generation. Subsequent changes are Swift layout/test adjustments only.
+
+[Run 36232443600](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232443600), source `a73fe4e`, was cancelled by the replacement push during native tests. Its tiny export artifact is not validation evidence. [Run 36232563391](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232563391), source `3a0312a`, failed before any runner or steps started. Check annotation: “The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings”. This is an external build blocker, not a compilation result. No billing settings were changed.
+
+Native compilation, geometry tests, fresh screenshot comparison and an updated internal release remain pending. TestFlight 0.1.0 (6.1.0) remains unchanged. See [visual audit](ios-visual-audit.md).

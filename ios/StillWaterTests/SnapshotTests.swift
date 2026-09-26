@@ -52,6 +52,14 @@ import UIKit
                 XCTAssertLessThanOrEqual(albums.frame.maxY,472.5,"Artist album row must clear the bottom edge")
             }
             if state == "touched" {
+                let artist = try XCTUnwrap(visible.first { $0.id == "artist" })
+                let title = try XCTUnwrap(visible.first { $0.id == "track-title" })
+                let album = try XCTUnwrap(visible.first { $0.id == "album" })
+                XCTAssertEqual(artist.fontSize,15)
+                XCTAssertEqual(title.frame.minY-artist.frame.maxY,12,accuracy:2)
+                XCTAssertEqual(album.frame.minY-title.frame.maxY,14,accuracy:2)
+                let ask = try XCTUnwrap(visible.first { $0.id == "ask" })
+                XCTAssertLessThanOrEqual(ask.frame.maxY,448.5,"Ask ring must have breathing room above the waterline")
                 for (id,rect) in [("previous",CGRect(x:355,y:272,width:98,height:96)),("play-pause",CGRect(x:464,y:264,width:104,height:104)),("next",CGRect(x:579,y:272,width:98,height:96)),("amp-down",CGRect(x:816,y:272,width:80,height:80)),("amp-up",CGRect(x:920,y:272,width:80,height:80))] {
                     let actual = try XCTUnwrap(visible.first { $0.id == id }?.frame)
                     XCTAssertEqual(actual.minX,rect.minX,accuracy:4); XCTAssertEqual(actual.minY,rect.minY,accuracy:4)

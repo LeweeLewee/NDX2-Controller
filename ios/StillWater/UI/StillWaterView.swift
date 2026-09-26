@@ -471,11 +471,12 @@ struct StillWaterView: View {
                 HairlineSlider(value:$model.preferences.brightness)
                     .onChange(of:model.preferences.brightness) { _,v in UIScreen.main.brightness = v; model.preferences.save() }
                     .frame(width:952,height:64).audit("brightness",tap:true).position(x:524,y:266)
-                label("Turn screen off after",id:"timeout-label",x:48,y:320,w:500,h:30,size:22)
+                label("Turn screen off after",id:"timeout-label",x:48,y:312,w:500,h:30,size:22)
                 Menu {
                     ForEach([30,60,120,300],id:\.self) { seconds in Button("\(seconds) seconds") { model.preferences.timeout = seconds; model.preferences.save() } }
                 } label: { Text("\(model.preferences.timeout/60 > 0 ? String(model.preferences.timeout/60) + (model.preferences.timeout == 60 ? " minute" : " minutes") : "30 seconds")⌄").font(Design.font(22)).frame(width:240,height:56).overlay(Capsule().stroke(Design.ink.opacity(0.18))).contentShape(Rectangle()) }
-                    .audit("timeout",font:22,tap:true,pill:true).position(x:168,y:388)
+                    .audit("timeout",font:22,tap:true,pill:true).position(x:168,y:372)
+                label("Saved on this iPhone",id:"preference-feedback",x:48,y:432,w:952,h:28,size:18,alpha:0.55)
             case .connection:
                 settingRow("Bridge",value:model.online ? "Connected with provisioned trust" : model.status,index:0) { Task { await model.refresh() } }
                 settingRow("Pairing",value:"Private enrollment and trust",index:1) { model.navigate(.pairing) }

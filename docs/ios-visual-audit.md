@@ -30,3 +30,11 @@ Fixture art is procedural and fictional, transcribed from the supplied HTML comp
 ## Validation
 
 Pending fresh native build, screenshot-by-screenshot review and final internal release. Do not infer visual acceptance from geometry tests alone.
+
+## Visual correction follow-up — 26 September 2026
+
+The user rejected the prior visual result. Functional success at `85628f2` remains valid for that source, but does not establish design acceptance. Corrections are implemented on the isolated B1 branch and remain unverified natively. Fresh local checks passed 150 Python tests, five navigation tests, six silent authenticated TLS demo stages, project generation and fixture generation. Subsequent changes are Swift layout/test adjustments only.
+
+[Run 36232443600](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232443600), source `a73fe4e`, was cancelled by the replacement push during native tests. Its tiny export artifact is not validation evidence. [Run 36232563391](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36232563391), source `3a0312a`, failed before any runner or steps started. Check annotation: “The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings”. This is an external build blocker, not a compilation result. No billing settings were changed.
+
+Native compilation, geometry tests, fresh screenshot comparison and an updated internal release remain pending. TestFlight 0.1.0 (6.1.0) remains unchanged. See [visual audit](ios-visual-audit.md).
