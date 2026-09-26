@@ -395,9 +395,12 @@ struct Preview {
         let gen = generation
         missingArtUntil[item.reference] = clock() + 30
         // Queue/card artwork is registered by a native read, never fetched as an arbitrary URL.
-        guard let detail = await perform(BridgeRequest("browse",["reference":.string(item.reference)])),
-              detail.outcome == "observed", detail.data["item"]["reference"].text == item.reference,
-              let ref = detail.data["item"]["artwork"].text,
+        let action = item.kind == "artists" ? "artist_bio" : "browse"
+        guard let detail = await perform(BridgeRequest(action,["reference":.string(item.reference)])),
+              detail.outcome == "observed", generation == gen else { return }
+        let metadata = action == "artist_bio" ? detail.data : detail.data["item"]
+        guard metadata["reference"].text == item.reference,
+              let ref = metadata["artwork"].text,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
               generation == gen else { return }
         let side = 320

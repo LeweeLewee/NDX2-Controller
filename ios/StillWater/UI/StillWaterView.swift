@@ -82,7 +82,11 @@ struct StillWaterView: View {
             guard model.context.screen == .library else { return }
             let stride: CGFloat = model.context.kind == "tracks" ? 72 : 156
             let columns = model.context.kind == "tracks" ? 1 : 6
-            model.settleLibrary(firstIndex:max(0,Int(floor(-collectionOffset/stride)))*columns)
+            let offset = max(0,-collectionOffset)
+            let row = Int(floor(offset/stride))
+            let coverBottom: CGFloat = model.context.kind == "tracks" ? 64 : 104
+            let first = row + (offset.truncatingRemainder(dividingBy:stride) >= coverBottom ? 1 : 0)
+            model.settleLibrary(firstIndex:first*columns)
         }
         .onChange(of: queryFocused) { _, v in model.keyboardVisible = v }
     }
