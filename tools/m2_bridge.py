@@ -240,7 +240,9 @@ class Contract:
                 sampled_at = self.clock()
                 player = self.service.request('status', {})
                 self.artwork.register(player.get('artwork'))
-                queue = self.service.request('queue', {})
+                queue = self.service.request('queue', {'artwork_limit': PAGE_SIZE})
+                for item in queue.get('items', [])[:PAGE_SIZE]:
+                    self.artwork.register(item.get('artwork'))
                 try: current = self.detail_links(self.service.request('current_item', {}))
                 except Exception: current = None
                 age_ms = max(0, int((self.clock() - sampled_at) * 1000))
@@ -258,6 +260,7 @@ class Contract:
                 offset = args.get('offset', 0)
                 passed = {k: v for k, v in args.items() if k != 'offset'}
                 if action == 'browse': passed['offset'] = offset
+                if action == 'queue': passed.update(artwork_offset=offset, artwork_limit=PAGE_SIZE)
                 if action == 'play':
                     # Resolve on EVERY play request, never trust cached catalogue IDs.
                     detail = self.service.request('browse', {'reference': args['reference']})
@@ -272,6 +275,8 @@ class Contract:
                     start = 0 if action == 'browse' else offset
                     data = {**data, 'items': items[start:start + PAGE_SIZE],
                             'next_offset': offset + PAGE_SIZE if len(items) > start + PAGE_SIZE else None}
+                    if action == 'queue':
+                        for item in data['items']: self.artwork.register(item.get('artwork'))
                     if action == 'browse' and data.get('total', 0) and offset + PAGE_SIZE < data['total']:
                         data['next_offset'] = offset + PAGE_SIZE
                 if action in ('library_state', 'library_save'):

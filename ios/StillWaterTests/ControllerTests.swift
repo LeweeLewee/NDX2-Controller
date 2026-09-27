@@ -98,6 +98,24 @@ import XCTest
         XCTAssertNil(m.colorPreview)
         m.deactivate()
     }
+    func testQueueArtworkUsesRegisteredCoverWithoutBrowsingQueueIdentity() async throws {
+        let transport = FaultTransport()
+        let model = ControllerModel(transport:transport,clock:{100},restore:false)
+        model.active = true; model.snapshotMode = true
+        await model.refresh()
+        let ref = try XCTUnwrap(model.player.artwork)
+        model.context.screen = .queue
+        let item = MusicItem(.object(["reference":.string("inputs/playqueue/145"),
+                                     "artwork":.string(ref),"kind":.string("tracks")]))
+        model.context.items = [item]
+        transport.requests = []
+        await model.loadQueueArtwork()
+        XCTAssertEqual(model.queueArtwork[item.reference]?.reference, ref)
+        XCTAssertEqual(model.queueArtwork[item.reference]?.side, 320)
+        XCTAssertFalse(transport.requests.contains("browse"))
+        XCTAssertTrue(transport.artworkSides.allSatisfy { $0 == 320 })
+        model.deactivate()
+    }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
         var now = 100.0
         let transport = FaultTransport()

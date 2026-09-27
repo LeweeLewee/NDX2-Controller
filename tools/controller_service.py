@@ -113,7 +113,12 @@ class Bridge:
             return {**{key: data.get(key) for key in fields}, 'album': data.get('album') or data.get('albumName'),
                     'artwork': self.cover(data.get('artwork')), 'state': playback_state(data)}
         if action == 'queue':
-            return {'items': [native_item(i) for i in self.naim.queue().get('children', [])]}
+            children = self.naim.queue().get('children', [])
+            offset, limit = args.get('artwork_offset', 0), args.get('artwork_limit', 12)
+            # Register only the returned page: a long queue must not evict its first covers.
+            return {'items': [{**native_item(i), 'artwork': self.cover(i.get('artwork'))}
+                              if offset <= n < offset + limit else native_item(i)
+                              for n, i in enumerate(children)]}
         if action == 'current_item':
             data = self.naim.queue()
             current = next((i for i in data.get('children', []) if i.get('ussi') == data.get('current')), {})

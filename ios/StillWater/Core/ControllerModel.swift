@@ -422,13 +422,18 @@ struct Preview {
         guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
         let gen = generation
         missingArtUntil[item.reference] = clock() + 30
-        // Queue/card artwork is registered by a native read, never fetched as an arbitrary URL.
-        let action = item.kind == "artists" ? "artist_bio" : "browse"
-        guard let detail = await perform(BridgeRequest(action,["reference":.string(item.reference)])),
-              detail.outcome == "observed", generation == gen else { return }
-        let metadata = action == "artist_bio" ? detail.data : detail.data["item"]
-        guard metadata["reference"].text == item.reference,
-              let ref = metadata["artwork"].text,
+        // Queue identities are not catalogue browse references. Use artwork registered
+        // by the authenticated queue read, retaining browse fallback for catalogue cards.
+        var reference = item.artwork
+        if reference == nil {
+            let action = item.kind == "artists" ? "artist_bio" : "browse"
+            guard let detail = await perform(BridgeRequest(action,["reference":.string(item.reference)])),
+                  detail.outcome == "observed", generation == gen else { return }
+            let metadata = action == "artist_bio" ? detail.data : detail.data["item"]
+            guard metadata["reference"].text == item.reference else { return }
+            reference = metadata["artwork"].text
+        }
+        guard let ref = reference,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
               generation == gen else { return }
         let side = 320

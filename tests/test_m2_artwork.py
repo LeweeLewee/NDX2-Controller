@@ -16,6 +16,32 @@ class ArtworkTests(unittest.TestCase):
         self.delivery = ArtworkDelivery(self.service, lambda: self.now[0])
         self.reference = next(iter(self.service.fixture_images))
 
+    def test_live_queue_artwork_is_registered_without_browsing_queue_ids(self):
+        class Vault:
+            data = {'commands': {}}
+        contract = Contract(self.service, Vault(), lambda: self.now[0])
+        def request(action, args=None):
+            return contract.handle('fixture', {'version': 1, 'request_id': 'a'*32,
+                                              'action': action, 'args': args or {}})
+        children = [{'ussi': f'inputs/playqueue/{n}', 'name': f'Track {n}',
+                     'artwork': f'https://resources.tidal.com/images/fixture/queue{n}.jpg'}
+                    for n in range(50)]
+        with patch.object(self.service.naim, 'queue', return_value={'children': children}), \
+             patch.object(self.service.naim, 'browse', side_effect=AssertionError('No queue browse')):
+            first = request('snapshot')['data']['queue']
+            second = request('queue', {'offset': 12})['data']['items']
+        self.assertEqual(len(first), 12)
+        self.assertEqual(second[0]['reference'], 'inputs/playqueue/12')
+        for item in first + second:
+            ref = item['artwork']
+            self.assertIn(ref, contract.artwork.registered)
+            self.assertIn(ref, self.service.artwork_refs)
+            self.service.fixture_images[ref] = fixture_jpeg()
+            self.assertTrue(request('artwork', {'reference': ref, 'side': 320})['data']['available'])
+        self.assertLessEqual(len(contract.artwork.cache), 4)
+        self.assertLessEqual(len(self.service.artwork_refs), 32)
+        self.assertEqual(self.service.naim.calls, [])
+
     def test_registration_and_url_injection(self):
         for value in (self.reference, 'https://resources.tidal.com/images/other.jpg',
                       'http://127.0.0.1/secret', '/artwork/' + '0' * 64 + '.jpg'):
