@@ -6,6 +6,7 @@ on:
     paths:
       - 'ios/**'
       - 'tools/ios_ci.py'
+      - 'tools/ios_tls_probe.py'
       - 'tools/ios_testflight.py'
       - 'tools/generate_ios_project.py'
       - '.github/workflows/ios-simulator.yml'
@@ -41,6 +42,20 @@ jobs:
       - name: Prepare iPhone 11 simulator
         id: simulator
         run: python3 tools/ios_ci.py prepare
+      - name: Start synthetic loopback TLS peer
+        run: |
+          python3 tools/ios_tls_probe.py > local/ios-ci/tls-probe.log 2>&1 &
+          echo $! > local/ios-ci/tls-probe.pid
+          python3 - <<'PY'
+          import json, time
+          from pathlib import Path
+          for _ in range(60):
+              if json.loads(Path('ios/StillWaterTests/TLSProbe.json').read_text()).get('available'):
+                  break
+              time.sleep(1)
+          else:
+              raise SystemExit('Synthetic TLS peer did not start')
+          PY
       - name: Build and test unsigned simulator app
         run: |
           set -euo pipefail
@@ -57,6 +72,12 @@ jobs:
       - name: Export results and screenshots for Windows
         if: always()
         run: python3 tools/ios_ci.py export
+      - name: Stop synthetic TLS peer
+        if: always()
+        run: |
+          if [ -f local/ios-ci/tls-probe.pid ]; then
+            kill "$(cat local/ios-ci/tls-probe.pid)" || true
+          fi
       - name: Keep build evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -66,6 +87,7 @@ jobs:
             local/ios-ci/environment.json
             local/ios-ci/xcodebuild.log
             local/ios-ci/test-summary.json
+            local/ios-ci/tls-probe.log
             local/ios-ci/screenshots/
             local/ios-ci/StillWater.xcresult/
             local/ios-release/archive-check.json

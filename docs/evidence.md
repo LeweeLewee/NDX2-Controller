@@ -391,3 +391,6 @@ Apple processing and existing-group assignment await restored browser sign-in; t
 
 
 **Diagnostic beta available — 26 September 2026:** Apple processed **0.1.0 (11.1.0)**, build `6fbc4f31-7ba4-48e1-a522-40668aa021e2`. After the user restored sign-in, it was assigned to the existing **Naim NDX2 Controller TestFlight** internal group and the page verified **Testing**. No tester or permission expansion. This supersedes the pending-processing/group-assignment note above. Phone update and pairing outcome remain pending; request the exact new Setup status if enrollment fails.
+
+
+**TLS pairing investigation — 27 September 2026:** physical pairing still fails before the pairing request reaches the bridge. The corrected private CA/leaf passes strict desktop validation, but that is not physical iOS acceptance. Add bounded, secret-free URL/Security numeric diagnostics and native URLSession tests against ephemeral loopback-only TLS peers (valid imported CA, unrelated anchor, wrong hostname). The fixture never contacts an NDX or changes an enrollment. Eleven local project/distribution checks pass; native compilation and the new TLS tests are pending. Trust policy, exclusive anchors, hostname/date validation and authenticated routes remain enforced. No live mutations.

@@ -6,6 +6,16 @@ struct KeychainFailure: Error {
     let status: OSStatus
 }
 
+struct TLSFailure: Error {
+    let networkCode: Int
+    let trustStep: String // selected only from local constant labels
+    let trustCode: Int?
+    var message: String {
+        "Certificate or TLS verification failed (URL \(networkCode); \(trustStep)" +
+        (trustCode.map { " \($0)" } ?? "") + ")."
+    }
+}
+
 struct PairingFailure: Error {
     enum Stage: String {
         case savedEnrollment = "Read saved enrollment"
@@ -20,7 +30,9 @@ struct PairingFailure: Error {
     let cause: Error
     var message: String {
         let detail: String
-        if let error = cause as? KeychainFailure {
+        if let error = cause as? TLSFailure {
+            detail = error.message
+        } else if let error = cause as? KeychainFailure {
             detail = "Keychain status \(error.status)."
         } else if let error = cause as? URLError {
             switch error.code {
@@ -29,7 +41,7 @@ struct PairingFailure: Error {
             case .notConnectedToInternet: detail = "Network unavailable; check Wi-Fi and Local Network permission."
             case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot,
                  .serverCertificateNotYetValid, .secureConnectionFailed:
-                detail = "Certificate or TLS verification failed."
+                detail = "Certificate or TLS verification failed (URL \(error.code.rawValue))."
             case .appTransportSecurityRequiresSecureConnection: detail = "iOS transport policy rejected the connection."
             default: detail = "Network error \(error.code.rawValue)."
             }
@@ -116,20 +128,50 @@ enum SecureEnrollment {
 
 final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     let record: Enrollment
+    private let diagnosticLock = NSLock()
+    private var diagnosticStep = "trust callback not reached"
+    private var diagnosticCode: Int?
     init(_ record: Enrollment) { self.record = record }
+    private func note(_ step: String, _ code: Int? = nil) {
+        diagnosticLock.lock(); defer { diagnosticLock.unlock() }
+        diagnosticStep = step; diagnosticCode = code
+    }
+    func resetDiagnostic() { note("trust callback not reached") }
+    func failure(_ error: URLError) -> TLSFailure {
+        diagnosticLock.lock(); defer { diagnosticLock.unlock() }
+        return TLSFailure(networkCode:error.code.rawValue,trustStep:diagnosticStep,trustCode:diagnosticCode)
+    }
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        note("trust callback reached")
         guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
               challenge.protectionSpace.host.lowercased() == record.origin.host?.lowercased(),
-              let trust = challenge.protectionSpace.serverTrust else { completionHandler(.cancelAuthenticationChallenge, nil); return }
+              let trust = challenge.protectionSpace.serverTrust else {
+            note("challenge identity rejected"); completionHandler(.cancelAuthenticationChallenge, nil); return
+        }
         let certificates = record.anchors.compactMap { SecCertificateCreateWithData(nil, $0 as CFData) }
+        guard !certificates.isEmpty, certificates.count == record.anchors.count else {
+            note("imported anchors invalid"); completionHandler(.cancelAuthenticationChallenge, nil); return
+        }
         let policy = SecPolicyCreateSSL(true, challenge.protectionSpace.host as CFString)
-        guard certificates.count == record.anchors.count,
-              SecTrustSetPolicies(trust, policy) == errSecSuccess,
-              SecTrustSetAnchorCertificates(trust, certificates as CFArray) == errSecSuccess,
-              SecTrustSetAnchorCertificatesOnly(trust, true) == errSecSuccess,
-              SecTrustSetNetworkFetchAllowed(trust, false) == errSecSuccess,
-              SecTrustEvaluateWithError(trust, nil) else { completionHandler(.cancelAuthenticationChallenge, nil); return }
+        let steps: [(String, () -> OSStatus)] = [
+            ("SSL policy", { SecTrustSetPolicies(trust, policy) }),
+            ("imported anchors", { SecTrustSetAnchorCertificates(trust, certificates as CFArray) }),
+            ("exclusive anchors", { SecTrustSetAnchorCertificatesOnly(trust, true) }),
+            ("local chain", { SecTrustSetNetworkFetchAllowed(trust, false) })
+        ]
+        for (label, apply) in steps {
+            let status = apply()
+            guard status == errSecSuccess else {
+                note(label,Int(status)); completionHandler(.cancelAuthenticationChallenge, nil); return
+            }
+        }
+        var error: CFError?
+        guard SecTrustEvaluateWithError(trust, &error) else {
+            note("certificate evaluation",error.map { CFErrorGetCode($0) })
+            completionHandler(.cancelAuthenticationChallenge, nil); return
+        }
+        note("certificate accepted")
         completionHandler(.useCredential, URLCredential(trust: trust))
     }
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
@@ -173,7 +215,19 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
     private func receive(_ req: URLRequest, authenticated: Bool) async throws -> Data {
         try Task.checkCancellation()
-        let (bytes, response) = try await session.bytes(for: req)
+        trust.resetDiagnostic()
+        let bytes: URLSession.AsyncBytes
+        let response: URLResponse
+        do { (bytes, response) = try await session.bytes(for: req) }
+        catch let error as URLError {
+            try Task.checkCancellation()
+            switch error.code {
+            case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot,
+                 .serverCertificateNotYetValid, .secureConnectionFailed, .cancelled:
+                throw trust.failure(error)
+            default: throw error
+            }
+        }
         try Task.checkCancellation()
         guard let http = response as? HTTPURLResponse else { throw BridgeFailure.invalidResponse }
         if http.statusCode == 401 {
