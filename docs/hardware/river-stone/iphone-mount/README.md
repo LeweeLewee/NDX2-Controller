@@ -1,6 +1,6 @@
 # iPhone 11 / stone mounting proposal
 
-25 September 2026. **Active hardware: iPhone 11 and the user-selected UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030).** The Waveshare enclosure and slices are [parked fallback work](../fallback-waveshare.md). This document proposes the mechanical interface for agreement; it does not release new CAD, select an aperture finally, or authorize an app implementation.
+25 September 2026. **Active hardware: iPhone 11 and the user-selected UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030).** The Waveshare enclosure and slices are [parked fallback work](../fallback-waveshare.md). This document proposes the mechanical interface for agreement; it records the accepted paper aperture but does not release fit CAD or authorize an app implementation.
 
 ## Reference and intended appearance
 
@@ -22,7 +22,7 @@ The user repeated the selected bank name, UGREEN Nexode 20000mAh PD 20W QC Power
 | Phone angle | 50 degrees from the table |
 | Lower phone glass edge | 36 mm above underside datum |
 | Visible aperture | 138.9 × 63.7 mm bounds; size passed by user; 6 mm inset from every outer phone edge |
-| Aperture corner radius | R3 mm all four corners, proposed trial; not yet physically passed |
+| Aperture corner radius | R3 mm all four corners; user passed the rounded aperture trial |
 | Local glass recess | 1.2 mm trial target |
 | Bank bay | 151 × 76 × 32 mm, around the 147 × 72 × 28 envelope |
 | Rear-of-phone reserve | 6 mm beyond nominal phone body, not a measured camera dimension |
@@ -50,7 +50,7 @@ Use a shallow local glass recess, initially around 1–1.5 mm for a physical moc
 
 Apple specifies the iPhone 11 body as **150.9 × 75.7 × 8.3 mm**, 194 g, with a 1792 × 828 LCD. These are nominal product dimensions, not a mounting drawing: measure the actual phone, camera projection, buttons and cable plug before fit CAD. [Apple specifications](https://support.apple.com/en-gb/111865).
 
-**26 September revision:** the user rejected the 118 × 54 mm opening as too small and subsequently reduced the proposed overlap to **6 mm measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 12) × (75.7 − 12) = **138.9 × 63.7 mm**, centred on the phone body. This is approximately **38.9% more rectangular opening area**, not a claim about active pixel area. The width and height subsequently passed the user’s physical trial; corner geometry and any local microphone relief remain to be verified.
+**26 September revision:** the user rejected the 118 × 54 mm opening as too small and subsequently reduced the proposed overlap to **6 mm measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 12) × (75.7 − 12) = **138.9 × 63.7 mm**, centred on the phone body. This is approximately **38.9% more rectangular opening area**, not a claim about active pixel area. The width and height subsequently passed the user’s physical trial; R3 corner geometry also passed on 27 September; any local microphone relief remains to be verified.
 
 Maximise display exposure within this baseline. A uniform overlap does not prove that the notch is hidden or that the front microphone is clear. Check registration on the actual phone; use local lip relief and an interrupted gasket wherever needed to leave the inlet and a short, broad path to room air open. Do not shrink the whole aperture again merely to hide the notch. Exact relief dimensions await microphone mapping; the rounded paper template is a visual registration aid only. The earlier 755 × 346 pt/1048 × 480 design-unit mapping is superseded for this aperture and must be recalculated from actual screen registration before UI work.
 
@@ -66,12 +66,14 @@ A concealed USB-to-Lightning lead is the simplest first charging proposal. Reser
 
 Bank automatic shutoff/restart, concurrent charging/output, charge-window switching, low-load behaviour and total runtime remain unproven. The bridge's D029 charge advice is software evidence only: it does not make this commercial power bank remotely switchable. The older draft MCU/load-switch/pack-gauge architecture and runtime estimates are not adopted by selecting this bank.
 
-## Partial physical pass — 27 September 2026
+## Accepted paper aperture — 27 September 2026
 
-The user reports that the window size passes, but square corners expose a small amount outside the display at all four corners. Retain the **138.9 × 63.7 mm bounds and 6 mm edge overlap**. Introduce **R3 mm circular internal aperture corners** as an engineering trial, not a measured iPhone screen radius or a user-approved radius. This rounds the opening in its own plane; it does not specify a bevel or fillet through the lip thickness. The updated paper template carries the actual R3 geometry. Check all four corners with the mask centred, then at seated and oblique angles; adjust only the radius if needed. Size acceptance does not establish microphone, touch, recess or cradle performance. Preserve open microphone paths and interrupted gasket.
+The user passed the window size and subsequently passed the R3 corner revision. The accepted aperture baseline is **138.9 × 63.7 mm, 6 mm overlap from each outer phone edge, and R3 mm circular corners on all four corners**. Preserve these dimensions in subsequent mounting CAD. The radius is in the opening plane; it does not specify a bevel or fillet through the lip thickness. This records the user's paper-template fit result, not independent measurement of the iPhone screen radius.
+
+Next develop the small aperture-and-cradle sample around this accepted opening. Recess, edge touch access, retention, exact microphone passages and mounted acoustic performance remain unverified. Preserve open microphone paths and interrupted gasket.
 
 ## Agreement and next physical proof
 
-Recommended agreement: **rear-loaded intact phone; serviceable padded cradle; opaque stone lip; hidden black light seal; original phone glass exposed; shallow local recess.** The user suggested rear/inside mounting; this is the developed proposal for review, not a recorded final approval of its dimensions.
+Recommended agreement: **rear-loaded intact phone; serviceable padded cradle; opaque stone lip; hidden black light seal; original phone glass exposed; shallow local recess.** The user suggested rear/inside mounting; the aperture dimensions above are accepted; cradle and recess dimensions remain proposals.
 
 Before detailed CAD: verify the UGREEN variant; register a removable 138.9 × 63.7 mm paper/card mask with 6 mm overlap on each edge over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.

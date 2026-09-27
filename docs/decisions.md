@@ -155,3 +155,5 @@ This resumes physical mounting/interface design under the revised brief, not aut
 **D030 further aperture revision — 26 September 2026.** User reduced overlap to 6 mm on all four outer phone edges, superseding the 6.5 mm trial. Current nominal aperture is 138.9 × 63.7 mm. Microphone clearance and physical registration requirements remain unchanged.
 
 **D030 partial aperture acceptance — 27 September 2026.** User passes the 138.9 × 63.7 mm window size, requests small radii because square corners expose areas outside the iPhone screen. Preserve 6 mm overlap and aperture bounds. R3 mm on all four corners is the next engineering trial, not an accepted or measured radius. Microphone clearance remains mandatory.
+
+**D030 aperture acceptance — 27 September 2026.** User passed the R3 corner trial following the earlier size pass. Accepted paper aperture: 138.9 × 63.7 mm, 6 mm overlap on every outer edge, R3 mm in-plane corners. Carry this geometry into mounting development. This does not accept untested cradle, recess or acoustic performance.

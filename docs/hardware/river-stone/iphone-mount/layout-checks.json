@@ -16,7 +16,7 @@
   ],
   "per_edge_overlap_mm": 6.0,
   "window_corner_radius_mm": 3.0,
-  "window_validation": "user passed width and height; R3 corners await physical trial",
+  "window_validation": "user passed width, height and R3 corner paper trial; mounting/acoustics unverified",
   "nominal_glass_recess_mm": 1.2,
   "bank_working_envelope_mm": [
     147,

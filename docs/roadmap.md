@@ -175,3 +175,5 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 - 26 September follow-up: current aperture baseline is 138.9 × 63.7 mm with 6 mm overlap per outer edge; supersedes the 6.5 mm trial.
 
 - 27 September: user passes aperture width/height; corner fit remains open. R3 mm rounded paper template prepared for next trial; retain 138.9 × 63.7 mm and 6 mm overlap.
+
+- 27 September: rounded paper aperture passed by user (138.9 × 63.7 mm, 6 mm overlap, R3 corners). Next: small mounting/interface sample, microphone path mapping and physical acoustic checks.
