@@ -1,0 +1,77 @@
+{
+  "aperture-frame": {
+    "sha256": "25df41ebcd24abed7db8b3d3d56ae3baf615144c5136d25c4db913dda0323365",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 12.192209033863202,
+    "bounds_mm": [
+      [
+        -85.0,
+        -47.5,
+        0.0
+      ],
+      [
+        85.0,
+        47.5,
+        5.199999809265137
+      ]
+    ],
+    "size_mm": [
+      170.0,
+      95.0,
+      5.199999809265137
+    ],
+    "within_256mm_cube": true
+  },
+  "spacer-0.4mm": {
+    "sha256": "392f1345463d63141625045cd6d24ae6bd6ccc1217034ae53cc2af859b6d636e",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 0.01440000021457672,
+    "bounds_mm": [
+      [
+        -6.0,
+        -1.5,
+        0.0
+      ],
+      [
+        6.0,
+        1.5,
+        0.4000000059604645
+      ]
+    ],
+    "size_mm": [
+      12.0,
+      3.0,
+      0.4000000059604645
+    ],
+    "within_256mm_cube": true
+  },
+  "spacer-0.8mm": {
+    "sha256": "d5c24787fb11091f32a8e98ad9ca2e9ec35b572c0d7d2357c7601f8900f85614",
+    "watertight": true,
+    "consistent_winding": true,
+    "single_component": true,
+    "volume_cm3": 0.02880000042915344,
+    "bounds_mm": [
+      [
+        -6.0,
+        -1.5,
+        0.0
+      ],
+      [
+        6.0,
+        1.5,
+        0.800000011920929
+      ]
+    ],
+    "size_mm": [
+      12.0,
+      3.0,
+      0.800000011920929
+    ],
+    "within_256mm_cube": true
+  }
+}

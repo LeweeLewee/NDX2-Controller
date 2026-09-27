@@ -77,3 +77,7 @@ Next develop the small aperture-and-cradle sample around this accepted opening. 
 Recommended agreement: **rear-loaded intact phone; serviceable padded cradle; opaque stone lip; hidden black light seal; original phone glass exposed; shallow local recess.** The user suggested rear/inside mounting; the aperture dimensions above are accepted; cradle and recess dimensions remain proposals.
 
 Before detailed CAD: verify the UGREEN variant; register a removable 138.9 × 63.7 mm paper/card mask with 6 mm overlap on each edge over the actual phone; display alignment marks at the intended UI corners; check notch/edge concealment from sofa and oblique angles, touch at the lip, wake/unlock and voice. Then measure the phone/plug/camera/bank and make a small aperture-and-cradle sample. No need to print the old Waveshare coupons to advance this architecture. Keep printer constraints (P1S, 0.4 mm nozzle, minimal finishing) and the luxury living-room appearance as design gates.
+
+## First printable interface sample — 27 September 2026
+
+[Sample v1: STL, STEP, preview and trial instructions](sample-v1/README.md) preserves the passed aperture and adds an open frame plus loose recess gauges. This is a hand-supported fit sample, not a retaining cradle. CAD and mesh checks passed; slicing, printing and acoustic validation remain outstanding.
