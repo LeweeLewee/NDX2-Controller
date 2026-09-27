@@ -18,9 +18,12 @@ def command(*args):
 def prepare():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     runtimes = json.loads(command('xcrun', 'simctl', 'list', 'runtimes', '-j'))['runtimes']
-    candidates = [r for r in runtimes if r.get('isAvailable') and r['name'].startswith('iOS 18.')]
+    major = os.environ.get('IOS_SIMULATOR_MAJOR', '18')
+    if major not in ('18', '26'):
+        raise SystemExit('Unsupported simulator test generation')
+    candidates = [r for r in runtimes if r.get('isAvailable') and r['name'].startswith(f'iOS {major}.')]
     if not candidates:
-        raise SystemExit('No compatible iOS 18 runtime installed; inspect the pinned runner image.')
+        raise SystemExit(f'No compatible iOS {major} runtime installed; inspect the pinned runner image.')
     runtime = max(candidates, key=lambda r: tuple(map(int, r['version'].split('.'))))
     kind = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11'
     device = command('xcrun', 'simctl', 'create', 'Still Water iPhone 11', kind, runtime['identifier']).strip()

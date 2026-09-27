@@ -11,6 +11,7 @@ import ssl
 import subprocess
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 
 
 def prepare(directory):
@@ -19,8 +20,9 @@ def prepare(directory):
     os.chmod(directory, 0o700)
 
     def openssl(*args):
+        print('Generating synthetic certificate:', args[0], flush=True)
         subprocess.run(['openssl', *args], cwd=directory, check=True,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=20)
 
     root_config = '''[req]
 distinguished_name = dn
@@ -77,6 +79,15 @@ class Peer(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 
+class LoopbackServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # HTTPServer normally does reverse DNS here, which is unnecessary for
+        # an IP-only fixture and can stall on an isolated cloud runner.
+        TCPServer.server_bind(self)
+        self.server_name = '127.0.0.1'
+        self.server_port = self.socket.getsockname()[1]
+
+
 def serve(directory, metadata):
     peers = []
     values = {'available': True}
@@ -84,7 +95,8 @@ def serve(directory, metadata):
         der = ssl.PEM_cert_to_DER_cert((directory / (name + '.pem')).read_text())
         values[name] = base64.b64encode(der).decode('ascii')
     for name in ('valid', 'wrong-host'):
-        peer = ThreadingHTTPServer(('127.0.0.1', 0), Peer)
+        print('Starting synthetic peer:', name, flush=True)
+        peer = LoopbackServer(('127.0.0.1', 0), Peer)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.minimum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(directory / (name + '-chain.pem'), directory / (name + '.key'))
