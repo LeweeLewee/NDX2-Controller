@@ -80,7 +80,7 @@ struct Preview {
         self.transport = transport; self.clock = clock; fixture = transport is FixtureTransport
         if restore { unknownAction = UserDefaults.standard.string(forKey: "uncertain-command") }
     }
-    var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && inFlight == nil }
+    var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation }
     var touched: Bool { rest == .touched }
     var artworkReference: String? { context.screen == .detail ? context.selected.artwork : player.artwork }
     func replaceTransport(_ value: BridgeTransport) {
@@ -145,7 +145,7 @@ struct Preview {
         // iOS owns actual lock. Releasing the idle timer cannot force a hardware sleep deadline.
         let idleHold = now - lastTouch < Double(preferences.timeout) && (rest == .touched || (context.screen == .ask && voiceState == "recording"))
         applyIdlePolicy?(idleHold)
-        guard inFlight == nil else { return }
+        guard inFlight == nil, pendingAction == nil else { return }
         if now >= nextPoll {
             nextPoll = now + 2
             readTask = Task { await self.refresh() }
@@ -161,7 +161,7 @@ struct Preview {
         }
     }
     func perform(_ request: BridgeRequest) async -> BridgeReply? {
-        guard active, inFlight == nil else { return nil }
+        guard active, !Task.isCancelled, inFlight == nil else { return nil }
         let token = UUID(), gen = generation
         inFlight = token; flightDeadline = clock() + 8; flightMutation = request.isMutation
         if request.isMutation {
@@ -234,7 +234,7 @@ struct Preview {
     func search() { noteContact(); keyboardVisible = false; context.cursor = nil; context.pageCursor = nil; context.nextOffset = nil; context.resultID = nil; loadPage() }
     func filter(_ kind: String) { context.kind = kind; search() }
     private func cancelReadForInteraction() -> Bool {
-        guard !flightMutation else { status = "Command in progress"; return false }
+        guard !flightMutation, pendingAction == nil else { status = "Command in progress"; return false }
         generation += 1; transport.cancel(); inFlight = nil
         readTask?.cancel(); artTask?.cancel(); artTask = nil
         return true
@@ -333,9 +333,13 @@ struct Preview {
         }
     }
     func mutate(_ action: String, _ args: [String: JSONValue], target: String? = nil) {
-        guard controlsAvailable, inFlight == nil, unknownAction != action else { return }
-        noteContact(); pendingTarget = target
+        guard controlsAvailable, unknownAction != action, cancelReadForInteraction() else { return }
+        // Reserve synchronously so two taps cannot dispatch before the task starts.
+        noteContact(); pendingTarget = target; pendingAction = action
+        let gen = generation
         readTask = Task {
+            defer { if self.generation == gen && self.inFlight == nil { self.pendingAction = nil; self.pendingTarget = nil } }
+            guard self.generation == gen, !Task.isCancelled else { return }
             guard let r = await self.perform(BridgeRequest(action, args)) else { return }
             if r.outcome == "submitted" { self.status = "Request sent; checking player" }
             await self.refresh()

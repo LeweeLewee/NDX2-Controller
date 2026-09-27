@@ -7,16 +7,62 @@ import XCTest
         var requests: [String] = []
         var artworkSides: [Int] = []
         var loseMutation = false
+        var holdNextAction: String?
+        var held: CheckedContinuation<Void, Never>?
+        func release() { let continuation = held; held = nil; continuation?.resume() }
         var afterReply: ((BridgeRequest) -> Void)?
         func cancel() {}
         func send(_ request: BridgeRequest) async throws -> BridgeReply {
             requests.append(request.action)
             if request.action == "artwork" { artworkSides.append(request.args["side"]?.number ?? 80) }
             let reply = try await fixture.send(request)
+            if holdNextAction == request.action {
+                holdNextAction = nil
+                await withCheckedContinuation { held = $0 }
+            }
             afterReply?(request)
             if loseMutation && request.isMutation { throw BridgeFailure.unavailable }
             return reply
         }
+    }
+    func testControlsPreemptSlowReadsAndReserveOneMutationBeforeTaskStarts() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        t.holdNextAction = "library_state"
+        let oldRead = Task { await m.currentMembership() }
+        await settle()
+        XCTAssertNotNil(t.held); XCTAssertNotNil(m.inFlight)
+        XCTAssertTrue(m.controlsAvailable, "Optional reads must not flash or block fresh controls")
+        t.holdNextAction = "transport"
+        m.mutate("transport",["command":.string("pause")])
+        XCTAssertFalse(m.controlsAvailable)
+        m.mutate("transport",["command":.string("pause")])
+        // Release the cancelled read late, while a new command owns the flight.
+        t.release()
+        await oldRead.value; await settle()
+        XCTAssertEqual(t.fixture.mutations,["transport"])
+        XCTAssertFalse(m.controlsAvailable)
+        XCTAssertEqual(m.pendingAction,"transport")
+        m.mutate("transport",["command":.string("resume")])
+        t.release(); await settle()
+        XCTAssertEqual(t.fixture.mutations,["transport"])
+        XCTAssertNil(m.unknownAction)
+        XCTAssertTrue(m.controlsAvailable)
+        m.deactivate()
+    }
+    func testSlowReadDoesNotPermitControlAfterSnapshotExpires() async {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        t.holdNextAction = "queue"
+        let read = Task { await m.perform(BridgeRequest("queue")) }
+        await settle(); XCTAssertTrue(m.controlsAvailable)
+        now += 5
+        XCTAssertFalse(m.controlsAvailable)
+        m.mutate("transport",["command":.string("pause")])
+        XCTAssertTrue(t.fixture.mutations.isEmpty)
+        t.release(); _ = await read.value
+        m.deactivate()
     }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
         var now = 100.0

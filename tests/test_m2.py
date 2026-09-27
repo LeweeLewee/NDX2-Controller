@@ -166,6 +166,29 @@ class M2Tests(unittest.TestCase):
         self.contract=Contract(self.service,self.vault)
         self.assertEqual(self.req('play',{'reference':'inputs/tidal/albums/2'},rid='b'*32)['outcome'],'unknown')
         self.assertEqual(len(self.service.naim.calls),2)
+    def test_optional_membership_failure_preserves_but_never_renews_snapshot(self):
+        original = self.service.request
+        def without_library(action, args):
+            if action == 'library_state': raise RuntimeError('PRIVATE')
+            return original(action, args)
+        self.service.request = without_library
+        self.client.request('snapshot')
+        timestamp = self.contract.fresh['device']
+        self.time[0] += 1
+        result = self.client.request('library_state', {'reference':'inputs/tidal/tracks/101'})
+        self.assertEqual(result['data']['saved_state'], 'unknown')
+        self.assertNotIn('PRIVATE', json.dumps(result))
+        self.assertEqual(self.contract.fresh['device'], timestamp)
+        self.assertEqual(self.client.request('transport', {'command':'pause'})['outcome'], 'submitted')
+        self.client.request('snapshot')
+        self.time[0] += 6
+        self.client.request('library_state', {'reference':'inputs/tidal/tracks/101'})
+        self.assertEqual(self.client.request('transport', {'command':'resume'})['error']['code'], 'STATE_STALE')
+        self.client.request('snapshot')
+        with patch.object(self.service.naim, 'status', side_effect=TimeoutError()):
+            self.client.request('snapshot')
+        self.assertEqual(self.client.request('transport', {'command':'resume'})['error']['code'], 'STATE_STALE')
+
     def test_stale_and_unavailable_disable_mutations(self):
         self.assertEqual(self.req('amplifier',{'direction':'up'})['error']['code'],'STATE_STALE')
         self.req('snapshot'); self.time[0]+=6

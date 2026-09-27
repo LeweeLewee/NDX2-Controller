@@ -1,5 +1,6 @@
 """Bounded in-memory cache for artwork URLs returned by native TIDAL metadata."""
 from collections import OrderedDict
+import re
 import urllib.parse
 import urllib.request
 from naim_native_probe import NoRedirect
@@ -18,6 +19,15 @@ def validate_artwork_url(url):
     return url
 
 
+def preview_source_url(url):
+    """Keep returned identity; fetch a bounded rendition only for canonical TIDAL covers."""
+    validate_artwork_url(url)
+    match = re.fullmatch(r'(https://resources\.tidal\.com/images/[0-9a-f]{8}/[0-9a-f]{4}/[0-9a-f]{4}/[0-9a-f]{4}/[0-9a-f]{12}/)([0-9]{1,4})x([0-9]{1,4})\.jpg', url)
+    if match and max(int(match[2]), int(match[3])) > 1024:
+        return match[1] + '320x320.jpg'
+    return url
+
+
 class ArtworkCache:
     def __init__(self, opener=None, capacity=8):
         if type(capacity) is not int or not 1 <= capacity <= 16:
@@ -31,7 +41,7 @@ class ArtworkCache:
         if url in self.images:
             self.images.move_to_end(url)
             return self.images[url]
-        with self.opener.open(urllib.request.Request(url, headers={'Accept': 'image/jpeg'}), timeout=8) as response:
+        with self.opener.open(urllib.request.Request(preview_source_url(url), headers={'Accept': 'image/jpeg'}), timeout=8) as response:
             data = response.read(MAX_IMAGE_BYTES + 1)
         if len(data) > MAX_IMAGE_BYTES or not data.startswith(b'\xff\xd8\xff'):
             raise ValueError('Artwork is oversized or not JPEG')

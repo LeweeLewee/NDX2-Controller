@@ -283,9 +283,11 @@ class Contract:
                 self.fresh.pop(device, None)
             return response
         except Exception as exc:
+            # Optional collection membership cannot invalidate a recent player observation.
+            # Keep its original timestamp: this fallback never renews freshness.
+            if action == 'library_state': return self.envelope(rid, 'observed', {'saved_state': 'unknown'})
             self.fresh.pop(device, None)
             if mutation: return self.envelope(rid, 'unknown', error='OUTCOME_UNKNOWN')
-            if action == 'library_state': return self.envelope(rid, 'observed', {'saved_state': 'unknown'})
             raise ContractError(exc.code if isinstance(exc, ContractError) else 'SERVICE_UNAVAILABLE') from None
 
 
