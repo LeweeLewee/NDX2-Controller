@@ -220,13 +220,17 @@ struct OutlineMark: Shape {
 }
 
 extension Preview {
-    var uiImage: UIImage? {
+    func uiImage(palette name: String) -> UIImage? {
+        let palette = FieldPalette.fallback(name)
         let input = [UInt8](pixels)
         guard input.count == side*side*2 else { return nil }
         var rgb = Data(capacity: side*side*4)
         for i in stride(from: 0, to: input.count, by: 2) {
             let v = UInt16(input[i])<<8 | UInt16(input[i+1])
-            rgb.append(UInt8(((v>>11)&31)*255/31)); rgb.append(UInt8(((v>>5)&63)*255/63)); rgb.append(UInt8((v&31)*255/31)); rgb.append(255)
+            // Map brightness into the selected app palette; retain detail, discard source hue.
+            let luma = 0.2126*Double((v>>11)&31)/31 + 0.7152*Double((v>>5)&63)/63 + 0.0722*Double(v&31)/31
+            let tone = luma < 0.5 ? palette.dark.mix(palette.mid,luma*2) : palette.mid.mix(palette.light,(luma-0.5)*2)
+            rgb.append(UInt8((tone.r*255).rounded())); rgb.append(UInt8((tone.g*255).rounded())); rgb.append(UInt8((tone.b*255).rounded())); rgb.append(255)
         }
         guard let provider = CGDataProvider(data: rgb as CFData), let image = CGImage(width: side, height: side,
             bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side*4, space: CGColorSpaceCreateDeviceRGB(),

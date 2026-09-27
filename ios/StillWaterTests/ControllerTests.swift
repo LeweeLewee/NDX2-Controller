@@ -64,6 +64,40 @@ import XCTest
         t.release(); _ = await read.value
         m.deactivate()
     }
+    func testCompletedArtworkSurvivesNavigationWithoutRenewingExpiry() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        m.active = true; m.snapshotMode = true
+        await m.refresh(); await m.loadArtwork()
+        let original = try XCTUnwrap(m.artwork)
+        let field = try XCTUnwrap(m.colorPreview)
+        m.navigate(.settings); m.back()
+        XCTAssertEqual(m.artwork?.pixels, original.pixels)
+        XCTAssertEqual(m.artwork?.deadline, original.deadline)
+        XCTAssertEqual(m.colorPreview?.deadline, field.deadline)
+        // A different detail must never borrow NOW's cover.
+        m.navigate(.detail)
+        m.context.selected = MusicItem(.object(["reference":.string("inputs/tidal/albums/2")]))
+        XCTAssertNil(m.artwork)
+        m.back(); XCTAssertEqual(m.artwork?.reference, original.reference)
+        m.navigate(.settings)
+        now = original.deadline
+        await m.refresh() // Fresh player state does not extend an old image's deadline.
+        m.back(); XCTAssertNil(m.artwork)
+        XCTAssertNil(m.colorPreview)
+        m.deactivate()
+    }
+    func testArtworkReuseIsClearedOnDisconnect() async throws {
+        let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.active = true; m.snapshotMode = true
+        await m.refresh(); await m.loadArtwork()
+        XCTAssertNotNil(m.artwork)
+        m.navigate(.settings); m.invalidate()
+        await m.refresh(); m.back()
+        XCTAssertNil(m.artwork)
+        XCTAssertNil(m.colorPreview)
+        m.deactivate()
+    }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
         var now = 100.0
         let transport = FaultTransport()

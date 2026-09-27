@@ -4,6 +4,35 @@ import UIKit
 @testable import StillWater
 
 @MainActor final class SnapshotTests: XCTestCase {
+    func testArtworkRenderingUsesSelectedPaletteAndKeepsBrightnessDetail() throws {
+        // Black, white and saturated red/green/blue RGB565 input.
+        let source = Data([0,0, 255,255, 248,0, 7,224, 0,31, 0,0, 255,255, 248,0, 7,224])
+        let preview = Preview(reference:"test",pixels:source,side:3,deadline:160)
+        var rendered: [Data] = []
+        for name in ["sage","sand","slate"] {
+            let image = try XCTUnwrap(preview.uiImage(palette:name)?.cgImage)
+            XCTAssertEqual(image.width,3); XCTAssertEqual(image.height,3)
+            let bytes = try XCTUnwrap(image.dataProvider?.data) as Data
+            rendered.append(bytes)
+            let p = FieldPalette.fallback(name)
+            for pixel in 0..<9 {
+                for (channel,range) in [min(p.dark.r,p.mid.r,p.light.r)...max(p.dark.r,p.mid.r,p.light.r),
+                                        min(p.dark.g,p.mid.g,p.light.g)...max(p.dark.g,p.mid.g,p.light.g),
+                                        min(p.dark.b,p.mid.b,p.light.b)...max(p.dark.b,p.mid.b,p.light.b)].enumerated() {
+                    let value = Double(bytes[pixel*4+channel])/255
+                    XCTAssertGreaterThanOrEqual(value,range.lowerBound-1/255)
+                    XCTAssertLessThanOrEqual(value,range.upperBound+1/255)
+                }
+            }
+            func brightness(_ pixel: Int) -> Int { (0..<3).reduce(0) { $0 + Int(bytes[pixel*4+$1]) } }
+            XCTAssertLessThan(brightness(0),brightness(4))
+            XCTAssertLessThan(brightness(4),brightness(2))
+            XCTAssertLessThan(brightness(2),brightness(3))
+            XCTAssertLessThan(brightness(3),brightness(1))
+        }
+        XCTAssertNotEqual(rendered[0],rendered[1]); XCTAssertNotEqual(rendered[1],rendered[2])
+        XCTAssertEqual(preview.pixels,source)
+    }
     func testEveryNativeStateGeometryFontsContrastAndCapture() async throws {
         for state in ReviewStates.all where state != "keyboard" { // real system keyboard is covered by the UI test target
             let model = await ReviewStates.make(state)

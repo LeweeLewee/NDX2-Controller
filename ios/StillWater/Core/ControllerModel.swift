@@ -44,6 +44,7 @@ struct Preview {
     @Published var colorPreview: Preview?
     @Published var queueArtwork: [String:Preview] = [:]
     @Published private(set) var libraryFirstIndex = 0
+    private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
     private var missingArtUntil: [String:Double] = [:]
     var fieldPreview: Preview? {
         guard context.screen == .library else { return colorPreview }
@@ -109,7 +110,7 @@ struct Preview {
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        artwork = nil; colorPreview = nil; queueArtwork = [:]; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:]; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -131,7 +132,7 @@ struct Preview {
         guard active, !snapshotMode else { return }
         let now = clock()
         if inFlight != nil && now >= flightDeadline { invalidate(); online = false; status = "Connection unavailable"; nextPoll = now + retry }
-        if now >= freshUntil { online = false; artwork = nil; colorPreview = nil; queueArtwork = [:]; if voiceState == "recording" { cancelVoice() } }
+        if now >= freshUntil { online = false; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:]; if voiceState == "recording" { cancelVoice() } }
         if let art = artwork, now >= art.deadline { artwork = nil }
         if let art = colorPreview, now >= art.deadline { colorPreview = nil }
         if queueArtwork.values.contains(where:{ now >= $0.deadline }) { queueArtwork = queueArtwork.filter { now < $0.value.deadline } }
@@ -214,19 +215,39 @@ struct Preview {
         account = r.data["account"].text ?? "disconnected"
         if context.screen == .now { await currentMembership() }
     }
+    private func rememberArtwork() {
+        guard online, clock() < freshUntil else { recentArtwork = []; return }
+        recentArtwork = recentArtwork.filter { clock() < $0.deadline }
+        for preview in [artwork, colorPreview].compactMap({ $0 }) where clock() < preview.deadline {
+            recentArtwork.removeAll { $0.reference == preview.reference && $0.side == preview.side }
+            recentArtwork.append(preview)
+        }
+        recentArtwork = Array(recentArtwork.suffix(4))
+    }
+    private func restoreArtwork() {
+        artwork = nil; colorPreview = nil
+        guard active, online, clock() < freshUntil, let ref = artworkReference else { return }
+        recentArtwork = recentArtwork.filter { clock() < $0.deadline }
+        artwork = recentArtwork.last { $0.reference == ref && $0.side == 320 }
+        colorPreview = recentArtwork.last { $0.reference == ref && $0.side == 80 }
+    }
     func navigate(_ screen: Screen) {
+        rememberArtwork()
         noteContact(); cancelVoice(); generation += 1; transport.cancel(); inFlight = nil
         readTask?.cancel(); artTask?.cancel(); artTask = nil; artwork = nil; colorPreview = nil; nextArtAttempt = 0; loading = false
         if pendingAction != nil { markUnknown(); pendingAction = nil; flightMutation = false }
         history.append(context); if history.count > 4 { history.removeFirst() }
         context = BrowseContext(screen: screen)
+        restoreArtwork()
         if [.library, .queue].contains(screen) { loadPage() }
     }
     func back(toNow: Bool = false) {
+        rememberArtwork()
         cancelVoice(); generation += 1; transport.cancel(); inFlight = nil
         if pendingAction != nil { markUnknown(); pendingAction = nil; flightMutation = false }
         readTask?.cancel(); artTask?.cancel(); artTask = nil; artwork = nil; colorPreview = nil; nextArtAttempt = 0; loading = false
         context = toNow ? BrowseContext() : history.popLast() ?? BrowseContext()
+        restoreArtwork()
         if toNow { history.removeAll() }
         if context.screen == .ask { context.query = ""; context.typing = false }
         noteContact()
@@ -272,20 +293,21 @@ struct Preview {
     func details(_ item: MusicItem) {
         guard !item.reference.isEmpty else { return }
         let old = context
-        navigate(.detail); context.selected = item
+        navigate(.detail); context.selected = item; restoreArtwork()
         let gen = generation
         readTask = Task {
             guard let r = await self.perform(BridgeRequest("browse", ["reference": .string(item.reference)])), r.outcome == "observed", self.generation == gen else {
                 if self.generation == gen { self.context = old; _ = self.history.popLast() }
                 return
             }
-            self.context.selected = MusicItem(r.data["item"]); self.context.playable = r.data["playable"].flag == true
+            self.context.selected = MusicItem(r.data["item"]); self.restoreArtwork(); self.context.playable = r.data["playable"].flag == true
             self.context.items = r.data["items"].values.map(MusicItem.init); self.context.nextOffset = r.data["next_offset"].number
             if item.kind == "artists" || item.reference.contains("/artists/") {
                 if let bio = await self.perform(BridgeRequest("artist_bio",["reference":.string(item.reference)])),
                    bio.outcome == "observed", bio.data["reference"].text == item.reference, self.generation == gen {
                     self.context.selected.biography = bio.data["biography"].text
                     self.context.selected.artwork = bio.data["artwork"].text
+                    self.restoreArtwork()
                 }
             }
             guard self.generation == gen else { return }

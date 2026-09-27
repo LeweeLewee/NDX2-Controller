@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor enum ReviewStates {
-    static let all = ["still-fallback", "still-artwork", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "library-albums", "library-tracks", "library-artists", "library-playlists", "artist-following", "artist-tracks", "artist-about", "artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
+    static let all = ["still-fallback", "still-artwork", "still-artwork-sand", "still-artwork-slate", "touched", "now-liked", "paused", "stopped", "longtitle", "noart", "offline", "pending", "unknown", "wake", "queue", "find", "keyboard", "detail", "library", "library-albums", "library-tracks", "library-artists", "library-playlists", "artist-following", "artist-tracks", "artist-about", "artist-missing", "artist-no-bio", "artist-no-portrait", "artist-no-albums", "artist-long-name", "track-liked", "album-saved", "ask-idle", "ask-typing", "ask-unavailable", "ask-recording", "ask-stopped", "ask-empty", "volume-pending", "settings", "display", "connection", "device", "wifi", "pairing"]
     static func make(_ state: String) async -> ControllerModel {
         let transport = FixtureTransport()
         if ["paused","stopped","longtitle","noart"].contains(state) { transport.state = state }
@@ -16,6 +16,8 @@ import Foundation
         if !["still-fallback","noart","stopped"].contains(state) { await model.loadArtwork() }
         model.rest = ["touched","now-liked","paused","offline","pending","unknown"].contains(state) ? .touched : .still
         switch state {
+        case "still-artwork-sand": model.preferences.palette = "sand"
+        case "still-artwork-slate": model.preferences.palette = "slate"
         case "now-liked": model.player.current.saved = "saved"
         case "paused": model.player.state = "paused"
         case "stopped": model.player.state = "stopped"; model.player.title = ""; model.artwork = nil

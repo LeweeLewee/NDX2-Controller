@@ -98,7 +98,7 @@ struct StillWaterView: View {
         withAnimation(reduceMotion ? nil : .easeOut(duration:0.4)) { wakeMask = 0 }
     }
     private func updateArt() {
-        cover = model.artwork?.uiImage
+        cover = model.artwork?.uiImage(palette:model.preferences.palette)
         let key = (model.fieldPreview?.reference ?? "fallback") + ":" + model.preferences.palette
         guard key != paletteKey else { return }
         paletteKey = key
@@ -296,7 +296,7 @@ struct StillWaterView: View {
             .position(x:403,y:330)
     }
     @ViewBuilder private func collectionCover(_ item: MusicItem) -> some View {
-        let image = model.queueArtwork[item.reference]?.uiImage
+        let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette)
         if model.context.kind == "artists" {
             if let image {
                 Image(uiImage:image).resizable().interpolation(.high).scaledToFill()
@@ -324,7 +324,7 @@ struct StillWaterView: View {
                         HStack(spacing:8) {
                             Button { model.details(item) } label: {
                                 HStack(spacing:16) {
-                                    if !tracks, let image = model.queueArtwork[item.reference]?.uiImage {
+                                    if !tracks, let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette) {
                                         Image(uiImage:image).resizable().interpolation(.high).scaledToFill()
                                             .frame(width:56,height:56).clipShape(RoundedRectangle(cornerRadius:3))
                                     } else if !tracks && item.artwork != nil {
@@ -460,7 +460,7 @@ struct StillWaterView: View {
                             ForEach(albums) { album in
                                 Button { model.details(album) } label: {
                                     Group {
-                                        if let image = model.queueArtwork[album.reference]?.uiImage { Image(uiImage:image).resizable().interpolation(.high) }
+                                        if let image = model.queueArtwork[album.reference]?.uiImage(palette:model.preferences.palette) { Image(uiImage:image).resizable().interpolation(.high) }
                                         else { Text(album.title).font(Design.font(18,serif:true)).lineLimit(3) }
                                     }.frame(width:96,height:96).clipped().contentShape(Rectangle())
                                 }.buttonStyle(.plain).accessibilityIdentifier("artist-album-"+album.id).accessibilityLabel(album.title).audit("artist-album-"+album.id,tap:true,scroll:true).id(album.id)
@@ -484,7 +484,7 @@ struct StillWaterView: View {
                 HStack(alignment:.top,spacing:22) {
                     ForEach(Array(items.enumerated()),id:\.offset) { i,item in
                         let side = sizes[min(i,6)]
-                        let image = model.queueArtwork[item.reference]?.uiImage
+                        let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette)
                         ZStack(alignment:.topLeading) {
                             Button { model.context.queueSelection = i; model.noteContact() } label: {
                                 ZStack {
