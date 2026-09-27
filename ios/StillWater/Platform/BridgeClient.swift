@@ -143,6 +143,14 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        evaluate(challenge, completionHandler:completionHandler)
+    }
+    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge,
+                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        evaluate(challenge, completionHandler:completionHandler)
+    }
+    private func evaluate(_ challenge: URLAuthenticationChallenge,
+                          completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         note("trust callback reached")
         guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
               challenge.protectionSpace.host.lowercased() == record.origin.host?.lowercased(),
@@ -218,7 +226,9 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
         trust.resetDiagnostic()
         let bytes: URLSession.AsyncBytes
         let response: URLResponse
-        do { (bytes, response) = try await session.bytes(for: req) }
+        // AsyncBytes owns a task-level delegate path. Bind the same verifier
+        // explicitly so this request cannot fall back to system-only trust.
+        do { (bytes, response) = try await session.bytes(for: req, delegate: trust) }
         catch let error as URLError {
             try Task.checkCancellation()
             switch error.code {
