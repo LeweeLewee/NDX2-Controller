@@ -8,7 +8,7 @@
 
 **User clarification, 25 September 2026: original 01 River Stone is the sole visual reference for both the body and screen-to-stone interface.** Preserve its low asymmetric pebble, soft shoulders, inset landscape screen and mineral finish while adapting the internals for iPhone 11 and the selected UGREEN bank. The supplied “04 Tide pool” image is retained only as superseded reference history; do not use its bowl/rim geometry to drive the design. The section diagram below explains mounting layers only and does not prescribe the exterior contour.
 
-## Mounting layout — revised 26 September 2026
+## Mounting layout — revised 27 September 2026
 
 ![Front, section, underside and acoustic reservations](mounting-layout.svg)
 
@@ -21,7 +21,8 @@ The user repeated the selected bank name, UGREEN Nexode 20000mAh PD 20W QC Power
 | Overall planning bounds | 240 W × 170 D × 105 H mm |
 | Phone angle | 50 degrees from the table |
 | Lower phone glass edge | 36 mm above underside datum |
-| Visible aperture | 138.9 × 63.7 mm nominal rectangle; 6 mm inset from every outer phone edge |
+| Visible aperture | 138.9 × 63.7 mm bounds; size passed by user; 6 mm inset from every outer phone edge |
+| Aperture corner radius | R3 mm all four corners, proposed trial; not yet physically passed |
 | Local glass recess | 1.2 mm trial target |
 | Bank bay | 151 × 76 × 32 mm, around the 147 × 72 × 28 envelope |
 | Rear-of-phone reserve | 6 mm beyond nominal phone body, not a measured camera dimension |
@@ -49,9 +50,9 @@ Use a shallow local glass recess, initially around 1–1.5 mm for a physical moc
 
 Apple specifies the iPhone 11 body as **150.9 × 75.7 × 8.3 mm**, 194 g, with a 1792 × 828 LCD. These are nominal product dimensions, not a mounting drawing: measure the actual phone, camera projection, buttons and cable plug before fit CAD. [Apple specifications](https://support.apple.com/en-gb/111865).
 
-**26 September revision:** the user rejected the 118 × 54 mm opening as too small and subsequently reduced the proposed overlap to **6 mm measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 12) × (75.7 − 12) = **138.9 × 63.7 mm**, centred on the phone body. This is approximately **38.9% more rectangular opening area**, not a claim about active pixel area. Rounded corners and any local microphone relief remain to be measured.
+**26 September revision:** the user rejected the 118 × 54 mm opening as too small and subsequently reduced the proposed overlap to **6 mm measured inward from the outer phone edge**. Apply this to all four edges as the next trial baseline: (150.9 − 12) × (75.7 − 12) = **138.9 × 63.7 mm**, centred on the phone body. This is approximately **38.9% more rectangular opening area**, not a claim about active pixel area. The width and height subsequently passed the user’s physical trial; corner geometry and any local microphone relief remain to be verified.
 
-Maximise display exposure within this baseline. A uniform overlap does not prove that the notch is hidden or that the front microphone is clear. Check registration on the actual phone; use local lip relief and an interrupted gasket wherever needed to leave the inlet and a short, broad path to room air open. Do not shrink the whole aperture again merely to hide the notch. Exact relief dimensions await microphone mapping; the rectangular paper template is a visual registration aid only. The earlier 755 × 346 pt/1048 × 480 design-unit mapping is superseded for this aperture and must be recalculated from actual screen registration before UI work.
+Maximise display exposure within this baseline. A uniform overlap does not prove that the notch is hidden or that the front microphone is clear. Check registration on the actual phone; use local lip relief and an interrupted gasket wherever needed to leave the inlet and a short, broad path to room air open. Do not shrink the whole aperture again merely to hide the notch. Exact relief dimensions await microphone mapping; the rounded paper template is a visual registration aid only. The earlier 755 × 346 pt/1048 × 480 design-unit mapping is superseded for this aperture and must be recalculated from actual screen registration before UI work.
 
 Propose notch left and Lightning connector right when viewed from the front. The notch is at a short end in landscape; the home indicator is along the bottom long edge, not the opposite short end. A physically masked display cannot rely on normal edge gestures for everyday controls. Preserve underside service access for unlocking, exiting the app, restarting and reconnecting; hiding sensors may prevent Face ID and alter automatic brightness. These operating choices need a real phone trial, not assumptions from the concept image.
 
@@ -64,6 +65,10 @@ The user's product name is the selection. SKU 25683 is a possible match, **not a
 A concealed USB-to-Lightning lead is the simplest first charging proposal. Reserve room beyond the phone's connector end and route without trapping the cable beneath the phone. Phone and bank should be removable independently. **Firm user constraint: mounting must not obstruct the iPhone microphones.** Map the actual microphone openings before fixing the cradle, gasket or masking lip; preserve their acoustic paths, including around the connector end. Provide concealed acoustic openings where the stone would otherwise enclose them. Revise the masking rather than sacrifice microphone access. Validate voice pickup in the assembled enclosure; no acoustic performance is claimed yet.
 
 Bank automatic shutoff/restart, concurrent charging/output, charge-window switching, low-load behaviour and total runtime remain unproven. The bridge's D029 charge advice is software evidence only: it does not make this commercial power bank remotely switchable. The older draft MCU/load-switch/pack-gauge architecture and runtime estimates are not adopted by selecting this bank.
+
+## Partial physical pass — 27 September 2026
+
+The user reports that the window size passes, but square corners expose a small amount outside the display at all four corners. Retain the **138.9 × 63.7 mm bounds and 6 mm edge overlap**. Introduce **R3 mm circular internal aperture corners** as an engineering trial, not a measured iPhone screen radius or a user-approved radius. This rounds the opening in its own plane; it does not specify a bevel or fillet through the lip thickness. The updated paper template carries the actual R3 geometry. Check all four corners with the mask centred, then at seated and oblique angles; adjust only the radius if needed. Size acceptance does not establish microphone, touch, recess or cradle performance. Preserve open microphone paths and interrupted gasket.
 
 ## Agreement and next physical proof
 

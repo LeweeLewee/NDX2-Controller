@@ -274,3 +274,5 @@ Created a 118 × 54 mm paper aperture registration template with a 50 mm scale. 
 User-proposed 6.5 mm overlap on each outer phone edge gives a 137.9 × 62.7 mm nominal opening, 35.7% larger rectangular area than 118 × 54 mm. Updated layout generator, JSON, interface diagram and 1:1 paper template. Dimensions/centring and SVG XML checked offline; microphone paths remain a firm constraint, not a tested result. Notch registration, corner/relief geometry and physical acoustic comparison remain open.
 
 **26 September aperture follow-up:** reduced every edge overlap to 6 mm per user instruction. Nominal aperture is 138.9 × 63.7 mm; updated generated layout, JSON, interface schematic and paper mask. Checked SVG parsing and all four paper-template offsets; no physical fit or acoustic proof.
+
+**27 September 2026 — user physical feedback:** aperture size passes; square corners expose a small amount outside the screen at each corner. Updated template and schematics to provisional R3 mm in-plane corner radii without altering bounds or overlap. SVG geometry checked offline. Corner fit and microphone performance remain unverified.
