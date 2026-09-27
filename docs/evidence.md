@@ -403,3 +403,12 @@ Apple processing and existing-group assignment await restored browser sign-in; t
 
 
 **TLS-fix beta available — 27 September 2026:** Apple processed **0.1.0 (12.1.0)**, build `c677d11b-745c-4f41-8288-0fab577d0e1c`. After restored sign-in, it was assigned to the existing **Naim NDX2 Controller TestFlight** group and verified **Testing**. This supersedes the pending-processing/assignment note. No tester or permission expansion. Phone installation and physical pairing acceptance remain pending; reuse the corrected v2 trust file after clearing the failed local enrollment only when the bridge confirms no phone enrollment. No NDX mutations.
+
+
+**Physical iPhone TLS verified — 27 September 2026:** after the 12.1.0 TLS fix, the bridge logged an accepted TLS connection from the trial phone and receipt of its pairing request. The one-use code was rejected; the log does not distinguish invalid input, expiry, cancellation or exhausted attempts. No phone enrollment was created. This proves physical TLS/request reachability, not completed pairing or live control. No NDX mutations.
+
+
+**Private trial pairing window — 27 September 2026:** user requested a longer window because response delays may consume the code lifetime. The ignored Windows trial launcher now issues ten-minute codes. Six offline tests pass, including acceptance at599seconds, rejection at600seconds, one-use behavior, five-attempt lockout, reissue/cancel and leading zeros. Production defaults and authenticated routes are unchanged. Restarted read-only bridge passes authenticated snapshot/queue self-check; ephemeral self-check enrollment revoked. No live mutations.
+
+
+**Physical phone pairing confirmed — 27 September 2026:** with TestFlight12.1.0 and the user-authorized ten-minute private trial code, the phone reported “Paired. Verifying an authoritative snapshot.” The bridge independently logged PAIR accepted, exactly one enrolled phone and subsequent accepted TLS connections. Preserve this enrollment; do not forget/re-pair. The pairing view's success text is static and does not itself prove snapshot display. Next gate is phone NOW/queue readback matching the NDX. Read-only trial restrictions remain; no playback, volume or collection mutations.

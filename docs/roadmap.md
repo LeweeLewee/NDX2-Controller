@@ -226,3 +226,6 @@ Apple processing and existing-group assignment await restored browser sign-in; t
 
 
 **TLS-fix beta available — 27 September 2026:** Apple processed **0.1.0 (12.1.0)**, build `c677d11b-745c-4f41-8288-0fab577d0e1c`. After restored sign-in, it was assigned to the existing **Naim NDX2 Controller TestFlight** group and verified **Testing**. This supersedes the pending-processing/assignment note. No tester or permission expansion. Phone installation and physical pairing acceptance remain pending; reuse the corrected v2 trust file after clearing the failed local enrollment only when the bridge confirms no phone enrollment. No NDX mutations.
+
+
+**Physical phone pairing confirmed — 27 September 2026:** with TestFlight12.1.0 and the user-authorized ten-minute private trial code, the phone reported “Paired. Verifying an authoritative snapshot.” The bridge independently logged PAIR accepted, exactly one enrolled phone and subsequent accepted TLS connections. Preserve this enrollment; do not forget/re-pair. The pairing view's success text is static and does not itself prove snapshot display. Next gate is phone NOW/queue readback matching the NDX. Read-only trial restrictions remain; no playback, volume or collection mutations.
