@@ -53,7 +53,7 @@ class Bridge:
                     'library': bool(self.library and self.library.connected)}
         if action.startswith('library_'):
             if not self.library:
-                raise LibraryError('Configure this project’s TIDAL app before connecting your library.')
+                raise LibraryError('Configure this projectÃ¢â‚¬â„¢s TIDAL app before connecting your library.')
             if action == 'library_connect':
                 return {'url': self.library.begin(self.oauth_redirect)}
             if action == 'library_disconnect':
@@ -145,8 +145,11 @@ class Bridge:
                 playable = False
             if playable:
                 self.resolved.add(reference)
+            # Native totalCount is a decimal string on real Naim responses.
+            raw_total = str(data.get('totalCount', ''))
+            total = int(raw_total) if raw_total.isascii() and raw_total.isdecimal() and len(raw_total) <= 8 else None
             return {'item': item, 'playable': playable,
-                    'items': [native_item(i) for i in data.get('children', [])], 'total': data.get('totalCount')}
+                    'items': [native_item(i) for i in data.get('children', [])], 'total': total}
         if action == 'play':
             reference = args.get('reference')
             if reference not in self.resolved:
