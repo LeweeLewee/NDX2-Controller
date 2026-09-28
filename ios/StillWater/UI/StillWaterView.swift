@@ -406,7 +406,7 @@ struct StillWaterView: View {
             label(item.title,id:"detail-title",x:336,y:88,w:664,h:72,size:32,serif:true,lines:2)
             label(facts,id:"detail-facts",x:336,y:168,w:664,h:28,size:18,alpha:0.55)
             if model.context.playable {
-                button("Play",id:"play-detail",x:336,y:212,w:140,enabled:model.controlsAvailable,filled:true) { model.mutate("play",["reference":.string(item.reference)]) }
+                button(model.detailPlayLabel,id:"play-detail",x:336,y:212,w:140,enabled:model.controlsAvailable && !model.selectedIsPlaying && model.unknownAction != "play",filled:true) { model.mutate("play",["reference":.string(item.reference)],target:"play-detail") }
             }
             if item.kind == "tracks" {
                 icon(.heart,id:"membership-write",label:model.membershipAction,x:488,y:212,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }

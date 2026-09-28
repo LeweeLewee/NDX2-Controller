@@ -116,6 +116,49 @@ import XCTest
         XCTAssertTrue(transport.artworkSides.allSatisfy { $0 == 320 })
         model.deactivate()
     }
+    func testBackToGridKeepsValidCoversWithoutRefetching() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        m.context.items = [1,2].map { MusicItem(.object(["reference":.string("inputs/tidal/albums/\($0)"),"kind":.string("albums")])) }
+        for _ in 0..<2 { await m.loadQueueArtwork() }
+        let original = m.queueArtwork
+        m.navigate(.detail)
+        m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/3"),"kind":.string("albums")]))]
+        await m.loadQueueArtwork()
+        m.back(); t.requests = []
+        await m.loadQueueArtwork()
+        for (ref,preview) in original {
+            XCTAssertEqual(m.queueArtwork[ref]?.renderID,preview.renderID)
+            XCTAssertEqual(m.queueArtwork[ref]?.deadline,preview.deadline)
+        }
+        XCTAssertTrue(t.requests.isEmpty, "Back reuses completed grid covers until their original deadline")
+        m.deactivate()
+    }
+    func testArtworkCacheStaysBoundedAcrossDifferentPages() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        for i in 1...30 {
+            m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/\(i)"),"kind":.string("albums")]))]
+            await m.loadQueueArtwork()
+            XCTAssertLessThanOrEqual(m.queueArtwork.count,24)
+            XCTAssertNotNil(m.queueArtwork[m.context.items[0].reference])
+        }
+        m.deactivate()
+    }
+    func testPlayLabelRequiresFreshMatchingPlayerObservation() async throws {
+        var now = 100.0
+        let m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh()
+        m.context.selected = m.player.current
+        XCTAssertEqual(m.detailPlayLabel,"Playing")
+        m.pendingAction = "play"; XCTAssertEqual(m.detailPlayLabel,"Starting…")
+        m.pendingAction = nil; m.unknownAction = "play"; XCTAssertEqual(m.detailPlayLabel,"Check player")
+        m.unknownAction = nil; now = 106; XCTAssertFalse(m.selectedIsPlaying)
+        XCTAssertEqual(m.detailPlayLabel,"Play")
+        m.deactivate()
+    }
     func testDisconnectedLibraryIsNotReportedAsEmptyCollection() {
         let m = ControllerModel(transport:FixtureTransport(),restore:false)
         m.online = true; m.account = "disconnected"

@@ -166,7 +166,7 @@ struct Preview {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
         } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
-            nextQueueArtAttempt = now + 5
+            nextQueueArtAttempt = now + 0.2
             artTask = Task { await self.loadQueueArtwork(); self.artTask = nil }
         }
     }
@@ -369,6 +369,16 @@ struct Preview {
         default: return saved ? "Remove from library" : "Add to library"
         }
     }
+    var selectedIsPlaying: Bool {
+        guard online, clock() < freshUntil, player.state == "playing" else { return false }
+        let ref = context.selected.reference
+        return !ref.isEmpty && (ref == player.current.reference || ref == player.current.albumReference)
+    }
+    var detailPlayLabel: String {
+        if pendingAction == "play" { return "Starting…" }
+        if unknownAction == "play" { return "Check player" }
+        return selectedIsPlaying ? "Playing" : "Play"
+    }
     func mutate(_ action: String, _ args: [String: JSONValue], target: String? = nil) {
         guard controlsAvailable, unknownAction != action, cancelReadForInteraction() else { return }
         // Reserve synchronously so two taps cannot dispatch before the task starts.
@@ -440,13 +450,24 @@ struct Preview {
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
         let candidates = Array(items.prefix(24))
-        let candidateRefs = Set(candidates.map(\.reference))
-        missingArtUntil = missingArtUntil.filter { candidateRefs.contains($0.key) }
+        missingArtUntil = missingArtUntil.filter { clock() < $0.value }
         let screen = context.screen
-        guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ (queueArtwork[$0.reference] == nil || (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5) && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
+        let start = screen == .library ? min(libraryFirstIndex, candidates.count) : 0
+        let ordered = Array(candidates.dropFirst(start)) + Array(candidates.prefix(start))
+        let eligible = ordered.filter { clock() >= (missingArtUntil[$0.reference] ?? 0) }
+        let missing = eligible.first { queueArtwork[$0.reference] == nil }
+        let expiring = eligible.first { (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5 }
+        guard [.queue,.detail,.library,.find].contains(screen), let item = missing ?? expiring else { return }
         let gen = generation
-        let renewing = missingArtUntil[item.reference] != nil
-        missingArtUntil[item.reference] = clock() + 30
+        let renewing = queueArtwork[item.reference] != nil || item.artwork != nil
+        var completed = false
+        defer {
+            // Navigation cancellation is not evidence that artwork is missing.
+            if generation == gen && !Task.isCancelled && !completed {
+                missingArtUntil[item.reference] = clock() + 30
+                if missingArtUntil.count > 48 { missingArtUntil = [item.reference:clock() + 30] }
+            }
+        }
         // Queue identities are not catalogue browse references. Use artwork registered
         // by the authenticated queue read, retaining browse fallback for catalogue cards.
         var reference = item.artwork
@@ -469,11 +490,21 @@ struct Preview {
               generation == gen else { return }
         guard let preview = await fetchPreview(ref), online, clock() < freshUntil,
               generation == gen, context.screen == screen else { return }
-        let currentRefs = Set(candidates.map(\.reference))
-        queueArtwork = queueArtwork.filter { currentRefs.contains($0.key) }
+        queueArtwork = queueArtwork.filter { clock() < $0.value.deadline }
         queueArtwork[item.reference] = preview
         // One authenticated image can serve every track that references that exact cover.
         for sibling in candidates where sibling.artwork == ref { queueArtwork[sibling.reference] = preview }
+        let currentRefs = Set(candidates.map(\.reference))
+        while queueArtwork.count > 24 {
+            let victim = queueArtwork.keys.sorted {
+                let left = currentRefs.contains($0), right = currentRefs.contains($1)
+                if left != right { return !left }
+                let a = queueArtwork[$0]!.deadline, b = queueArtwork[$1]!.deadline
+                return a == b ? $0 < $1 : a < b
+            }.first!
+            queueArtwork.removeValue(forKey:victim)
+        }
+        completed = true; missingArtUntil.removeValue(forKey:item.reference)
         nextQueueArtAttempt = clock() + 0.2
     }
     func startVoice() {
