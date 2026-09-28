@@ -122,3 +122,9 @@ Assessment validation: source `5b741b5` passes all 156 offline Python tests. Rea
 
 
 **Integrated beta release started — 28 September 2026:** `b7b1742` is committed/pushed; all 165 Python tests, five navigation tests and six silent TLS fixture stages pass. Nine private pairing/gate tests pass. The running bridge loaded the corrected count normalization and passed authenticated startup reads with original trust/enrollment preserved. Separate live reads verify both exact current Artist and Album destinations, and two distinct 20-album provider pages. Internal release tag `ios-preview-live-2026-09-28-integrated` started [run36445069246](https://github.com/LeweeLewee/NDX2-Controller/actions/runs/36445069246). Validation/upload and Apple availability remain pending; installed build15.1.0 does not yet contain the compressed-artwork/render-cache client changes. Do not re-pair or claim physical performance/control acceptance.
+
+
+**Integrated release uploaded — 28 September 2026:** run36445069246 attempt2 at b7b1742 passed all 47 simulator tests, four modern TLS tests and the device archive; signing/upload job109015628325 succeeded. Build0.1.0(16.2.0) is Processing in Apple. The first attempt timed out waiting for keyboard disappearance; its captured results screen showed the keyboard dismissed. One unchanged-source rerun passed, without weakening the test or changing app code. Existing-group assignment and physical acceptance remain pending.
+
+
+**Integrated beta available — 28 September 2026:** Apple processed 0.1.0(16.2.0), build30f4b246-d494-4b61-be3c-99a2b466bb8d. Assigned to the existing Naim NDX2 Controller TestFlight internal group and verified Testing. No added testers or permissions. Update over the paired app; preserve v2 trust/enrollment. Physical checks remain: collection pages, exact Artist/Album links, cover reuse across NOW/Up Next and user-initiated pause/resume. No assistant-issued playback mutation.
