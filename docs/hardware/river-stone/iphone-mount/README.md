@@ -81,3 +81,7 @@ Before detailed CAD: verify the UGREEN variant; register a removable 138.9 × 63
 ## First printable interface sample — 27 September 2026
 
 [Sample v1: STL, STEP, preview and trial instructions](sample-v1/README.md) preserves the passed aperture and adds an open frame plus loose recess gauges. This is a hand-supported fit sample, not a retaining cradle. CAD and mesh checks passed; slicing, printing and acoustic validation remain outstanding.
+
+## Revised fit sample — 28 September 2026
+
+Use [sample v2](sample-v2/README.md) for the next print. It adds four short end-locating tabs with nominal 1 mm end clearance and 36 mm central end openings, preserving the accepted aperture and existing rails/spacers. No clamping or snap fit. CAD body-clearance and exported mesh checks passed; actual microphone, camera, button and insertion checks remain physical work. V1 is preserved.

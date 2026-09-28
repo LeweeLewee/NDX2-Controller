@@ -1,0 +1,83 @@
+{
+  "status": "unprinted fit sample; not a retaining cradle or acoustic validation",
+  "aperture_mm": [
+    138.9,
+    63.7
+  ],
+  "corner_radius_mm": 3,
+  "overlap_mm": 6,
+  "front_lip_thickness_mm": 1.2,
+  "spacer_options_mm": [
+    0.4,
+    0.8
+  ],
+  "resulting_glass_recess_mm": [
+    1.6,
+    2.0
+  ],
+  "stiffener_inner_gap_mm": 79,
+  "nominal_phone_width_mm": 75.7,
+  "parts": {
+    "aperture-frame": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "volume_mm3": 12960.317605270146,
+      "bounds_mm": [
+        170.00542146346834,
+        95.00542146346835,
+        9.202710831734189
+      ]
+    },
+    "spacer-0.4mm": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "volume_mm3": 14.400000000000002,
+      "bounds_mm": [
+        12.0000002,
+        3.0000002,
+        0.4000002000000001
+      ]
+    },
+    "spacer-0.8mm": {
+      "valid_solid": true,
+      "solid_count": 1,
+      "volume_mm3": 28.800000000000004,
+      "bounds_mm": [
+        12.0000002,
+        3.0000002,
+        0.8000002
+      ]
+    }
+  },
+  "end_tab_inner_gap_mm": 152.9,
+  "nominal_phone_length_mm": 150.9,
+  "end_clearance_each_mm": 1.0,
+  "end_tab_width_length_height_mm": [
+    2,
+    12,
+    8
+  ],
+  "end_tab_centres_xy_mm": [
+    [
+      -77.45,
+      -24
+    ],
+    [
+      -77.45,
+      24
+    ],
+    [
+      77.45,
+      -24
+    ],
+    [
+      77.45,
+      24
+    ]
+  ],
+  "central_end_opening_mm": 36,
+  "end_tab_top_z_mm": 9.2,
+  "nominal_body_interference_mm3": 0.0,
+  "central_end_openings_clear_above_lip": true,
+  "aperture_solid_intersection_mm3": 0
+}

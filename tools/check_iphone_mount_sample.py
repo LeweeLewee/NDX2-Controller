@@ -1,10 +1,10 @@
 """Check exported study meshes. Requires trimesh; does not slice or certify printing."""
 from pathlib import Path
 import argparse,sys,json,hashlib
-p=argparse.ArgumentParser();p.add_argument('--deps');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--deps');p.add_argument('--revision',choices=['v1','v2'],default='v2');args=p.parse_args()
 if args.deps:sys.path.insert(0,str(Path(args.deps).resolve()))
 import trimesh
-out=Path(__file__).resolve().parents[1]/'docs/hardware/river-stone/iphone-mount/sample-v1'
+out=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/iphone-mount/sample-'+args.revision)
 report={}
 for name in ['aperture-frame','spacer-0.4mm','spacer-0.8mm']:
     f=out/(name+'.stl');m=trimesh.load_mesh(f,process=True)
