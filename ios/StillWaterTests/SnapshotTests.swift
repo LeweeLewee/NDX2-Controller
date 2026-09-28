@@ -4,6 +4,15 @@ import UIKit
 @testable import StillWater
 
 @MainActor final class SnapshotTests: XCTestCase {
+    func testArtworkRenderingTimingBaseline() async throws {
+        let model = await ReviewStates.make("still-artwork")
+        let preview = try XCTUnwrap(model.artwork)
+        let start = ProcessInfo.processInfo.systemUptime
+        for _ in 0..<12 { XCTAssertNotNil(preview.uiImage(palette:"sage")) }
+        let elapsed = ProcessInfo.processInfo.systemUptime - start
+        print("ARTWORK_RENDER_BASELINE twelve_320_palette_renders_ms=\(elapsed*1000)")
+        // Diagnostic only: simulator timing is not an iPhone acceptance threshold.
+    }
     func testArtworkRenderingUsesSelectedPaletteAndKeepsBrightnessDetail() throws {
         // Black, white and saturated red/green/blue RGB565 input.
         let source = Data([0,0, 255,255, 248,0, 7,224, 0,31, 0,0, 255,255, 248,0, 7,224])
@@ -87,6 +96,16 @@ import UIKit
                     XCTAssertEqual(cover.frame.minX,48+CGFloat(index)*120,accuracy:1)
                     XCTAssertEqual(cover.frame.width,104,accuracy:1)
                     XCTAssertEqual(cover.frame.height,104,accuracy:1)
+                }
+            }
+            if state == "queue" {
+                let titles = visible.filter { $0.id.hasPrefix("queue-track-title-") }
+                XCTAssertFalse(titles.isEmpty)
+                for title in titles {
+                    XCTAssertFalse(title.text.isEmpty)
+                    XCTAssertEqual(title.fontSize,15)
+                    XCTAssertGreaterThanOrEqual(title.frame.minY,340)
+                    XCTAssertLessThanOrEqual(title.frame.maxY,392)
                 }
             }
             if state == "artist-following" {

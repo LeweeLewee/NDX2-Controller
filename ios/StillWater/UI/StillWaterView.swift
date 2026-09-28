@@ -498,11 +498,16 @@ struct StillWaterView: View {
                                 .audit("queue-\(i)",tap:true,scroll:true).position(x:max(72,side)/2,y:204-side/2)
                             if let image {
                                 Image(uiImage:image).resizable().interpolation(.high).frame(width:side,height:side).scaleEffect(x:1,y:-1)
-                                    .frame(width:side,height:side*0.4,alignment:.top).clipped()
+                                    .frame(width:side,height:20,alignment:.top).clipped()
                                     .mask(LinearGradient(colors:[.black,.clear],startPoint:.top,endPoint:.bottom))
-                                    .opacity(0.22*alphas[min(i,6)]).position(x:max(72,side)/2,y:204+side*0.2)
+                                    .opacity(0.22*alphas[min(i,6)]).position(x:max(72,side)/2,y:214)
                                     .allowsHitTesting(false)
                             }
+                            DesignText(value:item.title,units:15,lines:2)
+                                .frame(width:max(72,side),height:44,alignment:.topLeading)
+                                .foregroundStyle(Design.ink).opacity(0.7)
+                                .audit("queue-track-title-\(i)",font:15,opacity:0.7,scroll:true,truncates:true,text:item.title,lines:2)
+                                .position(x:max(72,side)/2,y:255)
                         }.frame(width:max(72,side),height:284)
                     }
                 }.padding(.horizontal,4)
