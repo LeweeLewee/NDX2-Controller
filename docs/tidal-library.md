@@ -32,3 +32,5 @@ Still planned: playlist creation and editing, queue editing in the UI, shuffle/r
 Offline checks: `python -m unittest discover -s tests -v` and `node tests/test_navigation.cjs`. Save/remove round trips for all four types passed live with original test states restored. Live account evidence is recorded separately in [the evidence ledger](evidence.md).
 
 Sources: [official TIDAL API reference](https://tidal-music.github.io/tidal-api-reference/), [machine-readable specification](https://tidal-music.github.io/tidal-api-reference/tidal-api-oas.json), and [TIDAL's favourite-content guide](https://support.tidal.com/hc/en-us/articles/115005843325-Web-Player-How-to-Favorite-and-Delete-Content). Inspected 20 September 2026.
+
+Read-only deployments may construct `TidalLibrary(..., read_only=True)`. This requests only `collection.read`, accepts that grant, and blocks all collection writes before making a provider request. The legacy prototype defaults retain their existing read/write behavior.

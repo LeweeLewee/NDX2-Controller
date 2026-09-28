@@ -23,8 +23,10 @@ class LibraryError(CatalogError):
 
 
 class TidalLibrary:
-    def __init__(self, catalog, clock=time.monotonic, sleep=time.sleep):
+    def __init__(self, catalog, clock=time.monotonic, sleep=time.sleep, *, read_only=False):
         self.catalog, self.clock = catalog, clock
+        self.read_only = read_only
+        self.scopes = "collection.read" if read_only else SCOPES
         self.pending = None
         self.token = self.refresh_token = None
         self.expires = 0
@@ -43,7 +45,7 @@ class TidalLibrary:
         challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('=')
         return 'https://login.tidal.com/authorize?' + urllib.parse.urlencode({
             'response_type': 'code', 'client_id': self.catalog._client_id,
-            'redirect_uri': redirect, 'scope': SCOPES, 'state': state,
+            'redirect_uri': redirect, 'scope': self.scopes, 'state': state,
             'code_challenge': challenge, 'code_challenge_method': 'S256'})
 
     def _tokens(self, fields):
@@ -57,8 +59,8 @@ class TidalLibrary:
             lifetime = 0
         if not isinstance(token, str) or not token or '\r' in token or '\n' in token or not math.isfinite(lifetime) or lifetime <= 0:
             raise LibraryError('TIDAL returned invalid authorization metadata')
-        if not set(SCOPES.split()).issubset(set(data.get('scope', '').split())):
-            raise LibraryError('TIDAL did not grant collection read and write access')
+        if not set(self.scopes.split()).issubset(set(data.get('scope', '').split())):
+            raise LibraryError('TIDAL did not grant the requested collection access')
         self.token, self.expires = token, self.clock() + lifetime * .9
         self.refresh_token = data.get('refresh_token', self.refresh_token)
 
@@ -83,6 +85,8 @@ class TidalLibrary:
         self.cache.clear()
 
     def _request(self, kind, method='GET', params=None, item_id=None):
+        if self.read_only and method != 'GET':
+            raise LibraryError('Collection writes are disabled for this connection')
         if kind not in KINDS:
             raise ValueError('Unsupported collection type')
         if not self.connected:
@@ -158,6 +162,8 @@ class TidalLibrary:
         return parts[2], parts[3]
 
     def save(self, reference, saved):
+        if self.read_only:
+            raise LibraryError("Collection writes are disabled for this connection")
         kind, item_id = self.parse(reference)
         if type(saved) is not bool:
             raise ValueError('Expected saved boolean')

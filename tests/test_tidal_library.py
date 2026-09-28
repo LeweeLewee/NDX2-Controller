@@ -48,6 +48,19 @@ class LibraryTests(unittest.TestCase):
         self.library.finish({'state': params['state'], 'code': ['code']})
         return params
 
+    def test_read_only_consent_accepts_read_scope_and_blocks_writes(self):
+        from unittest.mock import patch
+        self.library = TidalLibrary(self.catalog,clock=lambda:100,sleep=lambda _:None,read_only=True)
+        with patch.object(self.catalog,'_json',return_value={'access_token':'read-token','expires_in':3600,'scope':'collection.read'}):
+            params = self.connect()
+        self.assertEqual(params['scope'],['collection.read'])
+        self.assertTrue(self.library.connected)
+        self.assertTrue(self.library.page('albums')['items'])
+        count = len(self.catalog.calls)
+        with self.assertRaises(LibraryError): self.library.save('inputs/tidal/albums/1',True)
+        with self.assertRaises(LibraryError): self.library._request('albums','POST',item_id='1')
+        self.assertEqual(len(self.catalog.calls),count)
+
     def test_pkce_state_and_single_use_callback(self):
         url = self.library.begin('http://127.0.0.1:8990/oauth/callback')
         params = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
