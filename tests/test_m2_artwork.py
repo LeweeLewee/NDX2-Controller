@@ -16,6 +16,63 @@ class ArtworkTests(unittest.TestCase):
         self.delivery = ArtworkDelivery(self.service, lambda: self.now[0])
         self.reference = next(iter(self.service.fixture_images))
 
+    def test_compressed_preview_cache_identity_and_envelope(self):
+        import base64, hashlib
+        from PIL import Image
+        class Vault:
+            data = {'commands': {}}
+        contract = Contract(self.service, Vault(), lambda: self.now[0])
+        def request(action, args=None):
+            return contract.handle('fixture', {'version': 1, 'request_id': 'a'*32,
+                                              'action': action, 'args': args or {}})
+        ref = request('snapshot')['data']['player']['artwork']
+        args = {'reference': ref, 'side': 320, 'encoding': 'jpeg-base64'}
+        with patch.object(self.service, 'image', wraps=self.service.image) as fetch:
+            first = request('artwork', args)
+            self.assertEqual(request('artwork', args), first)
+            self.assertEqual(fetch.call_count, 1)
+        data = first['data']; raw = base64.b64decode(data['image'], validate=True)
+        self.assertLessEqual(len(raw), 23040)
+        self.assertLess(len(json.dumps(first).encode()), MAX_RESPONSE)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), data['image_id'])
+        self.assertEqual(Image.open(io.BytesIO(raw)).size, (320, 320))
+        for bad in ({'encoding': 'png'}, {'pixel_offset': 6400}):
+            self.assertEqual(request('artwork', {**args, **bad})['outcome'], 'rejected')
+        self.assertEqual(request('artwork', {'reference': ref})['data']['format'], 'rgb565be-hex')
+        self.assertEqual(self.service.naim.calls, [])
+
+    def test_compressed_preview_revalidation_expiry_and_revocation(self):
+        self.assertFalse(self.delivery.get_jpeg(self.reference)['available'])
+        self.delivery.register(self.reference)
+        with patch.object(self.service, 'image', wraps=self.service.image) as fetch:
+            first = self.delivery.get_jpeg(self.reference)
+            self.now[0] += 51
+            self.delivery.register(self.reference)
+            renewed = self.delivery.get_jpeg(self.reference)
+            self.assertEqual(fetch.call_count, 2)
+            self.assertEqual(first['image_id'], renewed['image_id'])
+            self.assertEqual(renewed['valid_for_ms'], 60000)
+            self.now[0] += 60
+            self.assertFalse(self.delivery.get_jpeg(self.reference)['available'])
+            self.delivery.register(self.reference)
+            self.service.artwork_refs.clear()
+            self.assertFalse(self.delivery.get_jpeg(self.reference)['available'])
+
+    def test_compressed_preview_corruption_and_shared_cache_bound(self):
+        self.delivery.register(self.reference)
+        with patch.object(self.service, 'image', return_value=b'bad') as fetch:
+            self.assertFalse(self.delivery.get_jpeg(self.reference)['available'])
+            self.assertFalse(self.delivery.get_jpeg(self.reference)['available'])
+            self.assertEqual(fetch.call_count, 1)
+        self.delivery.cache.clear()
+        for side in (80, 160, 240, 320):
+            self.delivery.get(self.reference, side)
+            self.delivery.get_jpeg(self.reference, side)
+            self.assertLessEqual(len(self.delivery.cache), 4)
+        from m2_artwork import normalize_jpeg
+        for raw in (b'bad', fixture_jpeg()[:40], b'x' * (1024*1024+1)):
+            with self.assertRaises((ValueError, OSError)): normalize_jpeg(raw, 320)
+
     def test_live_queue_artwork_is_registered_without_browsing_queue_ids(self):
         class Vault:
             data = {'commands': {}}

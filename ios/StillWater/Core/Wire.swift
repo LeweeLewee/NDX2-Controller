@@ -1,4 +1,7 @@
 import Foundation
+import ImageIO
+import CoreGraphics
+import CryptoKit
 
 enum BridgeFailure: Error, Equatable {
     case invalidResponse, oversized, unauthenticated, unavailable, expired, busy, notConfigured
@@ -35,7 +38,7 @@ enum JSONValue: Codable, Equatable {
         guard depth < 12 else { throw BridgeFailure.invalidResponse }
         switch self {
         case .string(let s):
-            let limit = key == "pixels" ? 25_600 : key == "cursor" ? 4_096 : key == "biography" ? 8_000 : 256
+            let limit = key == "image" ? 30_720 : key == "pixels" ? 25_600 : key == "cursor" ? 4_096 : key == "biography" ? 8_000 : 256
             guard s.utf8.count <= limit, key != "biography" || s.unicodeScalars.count <= 2000 else { throw BridgeFailure.oversized }
         case .array(let a):
             guard a.count <= 12 else { throw BridgeFailure.oversized }
@@ -152,6 +155,38 @@ struct ArtworkAssembly {
     var complete: Bool { offset == side * side }
     mutating func append(_ reply: BridgeReply, started: Double, now: Double) throws {
         let d = reply.data
+        if d["format"].text == "jpeg-base64" {
+            guard offset == 0, reply.outcome == "observed", d["available"].flag == true,
+                  d["reference"].text == reference, (1...320).contains(side),
+                  d["width"].number == side, d["height"].number == side,
+                  let valid = d["valid_for_ms"].number, (1...60000).contains(valid),
+                  now < started + Double(valid)/1000,
+                  let encoded = d["image"].text, encoded.utf8.count <= 30720,
+                  let raw = Data(base64Encoded:encoded), raw.count <= 23040,
+                  SHA256.hash(data:raw).map({ String(format:"%02x",$0) }).joined() == d["image_id"].text,
+                  let source = CGImageSourceCreateWithData(raw as CFData,nil),
+                  CGImageSourceGetType(source) as String? == "public.jpeg",
+                  CGImageSourceGetCount(source) == 1,
+                  let props = CGImageSourceCopyPropertiesAtIndex(source,0,nil) as? [CFString:Any],
+                  (props[kCGImagePropertyPixelWidth] as? Int) == side,
+                  (props[kCGImagePropertyPixelHeight] as? Int) == side,
+                  let image = CGImageSourceCreateImageAtIndex(source,0,nil) else { throw BridgeFailure.invalidResponse }
+            var rgba = [UInt8](repeating:0,count:side*side*4)
+            let drawn = rgba.withUnsafeMutableBytes { buffer -> Bool in
+                guard let ctx = CGContext(data:buffer.baseAddress,width:side,height:side,bitsPerComponent:8,
+                    bytesPerRow:side*4,space:CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo:CGImageAlphaInfo.noneSkipLast.rawValue) else { return false }
+                ctx.draw(image,in:CGRect(x:0,y:0,width:side,height:side)); return true
+            }
+            guard drawn else { throw BridgeFailure.invalidResponse }
+            var decoded = Data(capacity:side*side*2)
+            for i in stride(from:0,to:rgba.count,by:4) {
+                let pixel = (UInt16(rgba[i] >> 3) << 11) | (UInt16(rgba[i+1] >> 2) << 5) | UInt16(rgba[i+2] >> 3)
+                decoded.append(UInt8(pixel >> 8)); decoded.append(UInt8(pixel & 255))
+            }
+            bytes = decoded; offset = side*side; deadline = started + Double(valid)/1000
+            return
+        }
         guard reply.outcome == "observed", d["available"].flag == true,
               d["reference"].text == reference, d["width"].number == side, d["height"].number == side,
               d["format"].text == "rgb565be-hex", let valid = d["valid_for_ms"].number,

@@ -246,10 +246,16 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
         }
         guard http.statusCode == 200, http.expectedContentLength <= 32768,
               http.mimeType == "application/json" else { throw BridgeFailure.invalidResponse }
-        var raw = Data()
+        // Consume the bounded body on the generic executor, away from UI updates.
+        // The task-level trust delegate above and cancellation remain unchanged.
+        do { return try await Self.collect(bytes) }
+        catch { cancel(); throw error }
+    }
+    nonisolated private static func collect(_ bytes: URLSession.AsyncBytes) async throws -> Data {
+        var raw = Data(); raw.reserveCapacity(32768)
         for try await byte in bytes {
             try Task.checkCancellation()
-            guard raw.count < 32768 else { cancel(); throw BridgeFailure.oversized }
+            guard raw.count < 32768 else { throw BridgeFailure.oversized }
             raw.append(byte)
         }
         return raw

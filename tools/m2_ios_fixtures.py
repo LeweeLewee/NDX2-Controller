@@ -74,6 +74,7 @@ def vectors():
     service.saved['inputs/tidal/albums/1'] = True
     record('membership-saved', 'library_state', {'reference': 'inputs/tidal/albums/1'})
     record('artwork-80', 'artwork', {'reference': reference})
+    record('artwork-jpeg', 'artwork', {'reference': reference, 'side': 320, 'encoding': 'jpeg-base64'})
     for offset in range(0, 320 * 320, 6400):
         record('artwork-' + str(offset), 'artwork', {'reference': reference, 'side': 320, 'pixel_offset': offset})
     for index, ref in enumerate(service.sleeves):

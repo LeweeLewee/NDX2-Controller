@@ -22,7 +22,7 @@ FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 
           'library_state': {'reference'}, 'library_save': {'reference', 'saved'},
           'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command'},
           'voice_review': {'fixture'}, 'suggest': {'prompt'},
-          'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference', 'side', 'pixel_offset'},
+          'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference', 'side', 'pixel_offset', 'encoding'},
           'battery_report': {'level', 'charging', 'client_id'}, 'charge?': set()}
 
 
@@ -192,6 +192,8 @@ class Contract:
             raise ContractError('INVALID_ARGUMENT')
         if action == 'artwork':
             side, offset = args.get('side', SIDE), args.get('pixel_offset', 0)
+            if args.get('encoding', 'rgb565be-hex') not in ('rgb565be-hex', 'jpeg-base64'): raise ContractError('INVALID_ARGUMENT')
+            if args.get('encoding') == 'jpeg-base64' and offset != 0: raise ContractError('INVALID_ARGUMENT')
             if side < 1 or offset >= side * side or offset % CHUNK_PIXELS:
                 raise ContractError('INVALID_ARGUMENT')
         return rid, action, args
@@ -222,7 +224,10 @@ class Contract:
             self.vault.update(lambda d: d['commands'].update({key: {'fingerprint': fingerprint, 'outcome': 'unknown'}}))
         try:
             if action == 'artwork':
-                data = self.artwork.get(args['reference'], args.get('side', SIDE), args.get('pixel_offset', 0))
+                if args.get('encoding') == 'jpeg-base64':
+                    data = self.artwork.get_jpeg(args['reference'], args.get('side', SIDE))
+                else:
+                    data = self.artwork.get(args['reference'], args.get('side', SIDE), args.get('pixel_offset', 0))
             elif action == 'artist_bio':
                 data = self.service.request(action, args)
                 self.artwork.register(data.get('artwork'))

@@ -20,7 +20,9 @@ struct RGB: Equatable {
 
 struct FieldPalette: Equatable {
     var mid: RGB, dark: RGB, light: RGB, shade = 1.0
-    static func fallback(_ name: String) -> Self {
+    private static let presets = ["sage": makeFallback("sage"), "sand": makeFallback("sand"), "slate": makeFallback("slate")]
+    static func fallback(_ name: String) -> Self { presets[name] ?? presets["sage"]! }
+    private static func makeFallback(_ name: String) -> Self {
         let p: Self
         switch name {
         case "sand": p = Self(mid: RGB(0x7A6858), dark: RGB(0x231A16), light: RGB(0xE2CFAF))
@@ -219,8 +221,26 @@ struct OutlineMark: Shape {
     }
 }
 
+private final class RenderedArtworkCache: @unchecked Sendable {
+    static let shared = RenderedArtworkCache()
+    private let lock = NSLock()
+    private var entries: [(String,UIImage)] = []
+    func get(_ key: String) -> UIImage? {
+        lock.lock(); defer { lock.unlock() }
+        guard let index = entries.firstIndex(where: { $0.0 == key }) else { return nil }
+        let entry = entries.remove(at:index); entries.append(entry); return entry.1
+    }
+    func put(_ key: String, _ image: UIImage) {
+        lock.lock(); defer { lock.unlock() }
+        entries.removeAll { $0.0 == key }; entries.append((key,image))
+        if entries.count > 12 { entries.removeFirst(entries.count-12) }
+    }
+}
+
 extension Preview {
     func uiImage(palette name: String) -> UIImage? {
+        let key = renderID.uuidString + ":" + name
+        if let cached = RenderedArtworkCache.shared.get(key) { return cached }
         let palette = FieldPalette.fallback(name)
         let input = [UInt8](pixels)
         guard input.count == side*side*2 else { return nil }
@@ -236,7 +256,9 @@ extension Preview {
             bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side*4, space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), provider: provider,
             decode: nil, shouldInterpolate: true, intent: .defaultIntent) else { return nil }
-        return UIImage(cgImage: image)
+        let result = UIImage(cgImage: image)
+        RenderedArtworkCache.shared.put(key,result)
+        return result
     }
 }
 

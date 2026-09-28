@@ -23,6 +23,7 @@ struct DisplayPreferences: Codable {
 }
 struct Preview {
     let reference: String, pixels: Data, side: Int, deadline: Double
+    let renderID = UUID()
 }
 
 @MainActor final class ControllerModel: ObservableObject {
@@ -153,7 +154,7 @@ struct Preview {
         } else if now >= nextBattery, let reportBattery {
             nextBattery = now + 900
             readTask = Task { await reportBattery() }
-        } else if artwork == nil && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
+        } else if (artwork == nil || (artwork?.deadline ?? 0) - now <= 5) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
         } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
@@ -229,7 +230,7 @@ struct Preview {
         guard active, online, clock() < freshUntil, let ref = artworkReference else { return }
         recentArtwork = recentArtwork.filter { clock() < $0.deadline }
         artwork = recentArtwork.last { $0.reference == ref && $0.side == 320 }
-        colorPreview = recentArtwork.last { $0.reference == ref && $0.side == 80 }
+        colorPreview = recentArtwork.last { $0.reference == ref }
     }
     func navigate(_ screen: Screen) {
         rememberArtwork()
@@ -394,32 +395,41 @@ struct Preview {
         }
         guard let ref = artworkReference, ref.range(of: "^/artwork/[0-9a-f]{64}\\.jpg$", options: .regularExpression) != nil else { return }
         let gen = generation
-        let paletteStart = clock()
-        if let reply = await perform(BridgeRequest("artwork",["reference":.string(ref)])), generation == gen {
-            var small = ArtworkAssembly(reference:ref,side:80)
-            if (try? small.append(reply,started:paletteStart,now:clock())) != nil, small.complete,
-               active, artworkReference == ref, clock() < freshUntil {
-                colorPreview = Preview(reference:ref,pixels:small.bytes,side:80,deadline:small.deadline)
-            }
-        }
-        var image = ArtworkAssembly(reference: ref, side: 320)
-        while !image.complete && active && generation == gen && artworkReference == ref && !Task.isCancelled {
-            if clock() >= nextPoll { nextPoll = clock() + 2; await refresh() }
-            guard online else { return }
-            let start = clock()
-            guard let reply = await perform(BridgeRequest("artwork", ["reference": .string(ref), "side": .int(320), "pixel_offset": .int(image.offset)])) else { return }
-            do { try image.append(reply, started: start, now: clock()) } catch { return }
-        }
-        guard active, generation == gen, artworkReference == ref, image.complete, clock() < freshUntil, clock() < image.deadline else { return }
-        artwork = Preview(reference: ref, pixels: image.bytes, side: 320, deadline: image.deadline)
+        guard let preview = await fetchPreview(ref), active, generation == gen,
+              artworkReference == ref, clock() < freshUntil else { return }
+        artwork = preview; colorPreview = preview
+        rememberArtwork()
     }
+    private func fetchPreview(_ ref: String) async -> Preview? {
+        let gen = generation
+        if let cached = (recentArtwork + Array(queueArtwork.values)).last(where: {
+            $0.reference == ref && $0.side == 320 && $0.deadline - clock() > 5
+        }) { return cached }
+        var image = ArtworkAssembly(reference:ref,side:320)
+        while !image.complete && active && generation == gen && !Task.isCancelled {
+            if clock() >= nextPoll { nextPoll = clock() + 2; await refresh() }
+            guard online else { return nil }
+            let start = clock()
+            var args: [String:JSONValue] = ["reference":.string(ref),"side":.int(320),"pixel_offset":.int(image.offset)]
+            if image.offset == 0 { args["encoding"] = .string("jpeg-base64") }
+            guard let reply = await perform(BridgeRequest("artwork",args)), generation == gen else { return nil }
+            do { try image.append(reply,started:start,now:clock()) } catch { return nil }
+        }
+        guard image.complete, generation == gen, !Task.isCancelled, clock() < freshUntil,
+              clock() < image.deadline else { return nil }
+        let preview = Preview(reference:ref,pixels:image.bytes,side:320,deadline:image.deadline)
+        recentArtwork.removeAll { $0.reference == ref }
+        recentArtwork.append(preview); recentArtwork = Array(recentArtwork.suffix(4))
+        return preview
+    }
+
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
         let candidates = Array(items.prefix(24))
         let candidateRefs = Set(candidates.map(\.reference))
         missingArtUntil = missingArtUntil.filter { candidateRefs.contains($0.key) }
         let screen = context.screen
-        guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
+        guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ (queueArtwork[$0.reference] == nil || (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5) && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
         let gen = generation
         missingArtUntil[item.reference] = clock() + 30
         // Queue identities are not catalogue browse references. Use artwork registered
@@ -436,18 +446,13 @@ struct Preview {
         guard let ref = reference,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
               generation == gen else { return }
-        let side = 320
-        var image = ArtworkAssembly(reference:ref,side:side)
-        while !image.complete && active && generation == gen && !Task.isCancelled {
-            if clock() >= nextPoll { nextPoll = clock() + 2; await refresh() }
-            let started = clock()
-            guard let reply = await perform(BridgeRequest("artwork",["reference":.string(ref),"side":.int(side),"pixel_offset":.int(image.offset)])), generation == gen else { return }
-            do { try image.append(reply,started:started,now:clock()) } catch { return }
-        }
-        guard image.complete, online, clock() < freshUntil, clock() < image.deadline, generation == gen, context.screen == screen else { return }
+        guard let preview = await fetchPreview(ref), online, clock() < freshUntil,
+              generation == gen, context.screen == screen else { return }
         let currentRefs = Set(candidates.map(\.reference))
         queueArtwork = queueArtwork.filter { currentRefs.contains($0.key) }
-        queueArtwork[item.reference] = Preview(reference:ref,pixels:image.bytes,side:side,deadline:image.deadline)
+        queueArtwork[item.reference] = preview
+        // One authenticated image can serve every track that references that exact cover.
+        for sibling in candidates where sibling.artwork == ref { queueArtwork[sibling.reference] = preview }
         nextQueueArtAttempt = clock() + 0.2
     }
     func startVoice() {

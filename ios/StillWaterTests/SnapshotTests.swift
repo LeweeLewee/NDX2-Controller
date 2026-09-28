@@ -7,6 +7,8 @@ import UIKit
     func testArtworkRenderingTimingBaseline() async throws {
         let model = await ReviewStates.make("still-artwork")
         let preview = try XCTUnwrap(model.artwork)
+        let cached = try XCTUnwrap(preview.uiImage(palette:"sage"))
+        XCTAssertTrue(preview.uiImage(palette:"sage") === cached)
         let start = ProcessInfo.processInfo.systemUptime
         for _ in 0..<12 { XCTAssertNotNil(preview.uiImage(palette:"sage")) }
         let elapsed = ProcessInfo.processInfo.systemUptime - start

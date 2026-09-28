@@ -1,5 +1,6 @@
 """Bounded bridge-only JPEG normalization. No controller-supplied URLs."""
 from collections import OrderedDict
+import base64
 import hashlib
 import io
 import re
@@ -38,6 +39,27 @@ def normalize(raw, side=SIDE, offset=0, *, with_digest=False):
         return (pixels.hex(), digest) if with_digest else pixels.hex()
 
 
+MAX_JPEG_BYTES = 23040  # base64 <= 30720; leave room inside the 32-KiB envelope.
+
+
+def normalize_jpeg(raw, side):
+    from PIL import Image
+    if len(raw) > MAX_SOURCE_BYTES or type(side) is not int or not 1 <= side <= MAX_SIDE:
+        raise ValueError('Artwork size')
+    with Image.open(io.BytesIO(raw)) as image:
+        if image.format != 'JPEG' or not (0 < image.width <= MAX_SOURCE_SIDE and 0 < image.height <= MAX_SOURCE_SIDE):
+            raise ValueError('Artwork dimensions or format')
+        image.load()
+        small = image.convert('RGB').resize((side, side), Image.Resampling.LANCZOS)
+        for quality in (80, 65, 50, 35, 20):
+            output = io.BytesIO()
+            small.save(output, format='JPEG', quality=quality, optimize=True)
+            encoded = output.getvalue()
+            if len(encoded) <= MAX_JPEG_BYTES:
+                return encoded, hashlib.sha256(encoded).hexdigest()
+    raise ValueError('Artwork exceeds compressed response budget')
+
+
 class ArtworkDelivery:
     def __init__(self, service, clock=time.monotonic):
         self.service, self.clock = service, clock
@@ -63,6 +85,37 @@ class ArtworkDelivery:
         for key, (expiry, _) in list(self.cache.items()):
             if expiry <= now or key[0] not in self.registered:
                 del self.cache[key]
+
+    def get_jpeg(self, reference, side=MAX_SIDE):
+        self.prune()
+        if reference not in self.registered or reference not in self.service.artwork_refs:
+            return {'available': False}
+        now = self.clock()
+        key = (reference, side, 'jpeg')
+        # Early revalidation performs a new source read; it never extends old bytes locally.
+        if key in self.cache and self.cache[key][0] - now <= 10 and self.cache[key][1] is not None:
+            del self.cache[key]
+        if key not in self.cache:
+            url = self.service.artwork_refs[reference]
+            self.service.artwork.images.pop(url, None)
+            try:
+                image = normalize_jpeg(self.service.image(reference), side)
+            except Exception:
+                image = None
+            finally:
+                self.service.artwork.images.pop(url, None)
+            self.cache[key] = (now + TTL, image)
+            while len(self.cache) > 4:
+                self.cache.popitem(last=False)
+        expiry, image = self.cache[key]
+        self.cache.move_to_end(key)
+        valid = max(0, int((min(expiry, self.registered[reference]) - self.clock()) * 1000))
+        if image is None or valid == 0:
+            return {'available': False}
+        encoded, digest = image
+        return {'available': True, 'reference': reference, 'width': side, 'height': side,
+                'format': 'jpeg-base64', 'image': base64.b64encode(encoded).decode('ascii'),
+                'image_id': digest, 'valid_for_ms': valid}
 
     def get(self, reference, side=SIDE, offset=0):
         self.prune()

@@ -57,6 +57,26 @@ final class WireTests: XCTestCase {
         let changed = try BridgeReply.decode(JSONEncoder().encode(JSONValue.object(root)),for:request)
         XCTAssertThrowsError(try fresh.append(changed,started:100,now:102))
     }
+    func testCompressedArtworkIdentityDimensionsExpiryAndBounds() throws {
+        let v = try XCTUnwrap(vectors()["artwork-jpeg"])
+        let req = try JSONDecoder().decode(BridgeRequest.self,from:JSONEncoder().encode(v["request"]))
+        let reply = try BridgeReply.decode(JSONEncoder().encode(v["reply"]),for:req)
+        let ref = try XCTUnwrap(req.args["reference"]?.text)
+        var image = ArtworkAssembly(reference:ref,side:320)
+        try image.append(reply,started:100,now:101)
+        XCTAssertTrue(image.complete); XCTAssertEqual(image.bytes.count,204800)
+        guard case .object(let base) = v["reply"], case .object(let fields) = base["data"] else { return XCTFail() }
+        for (key,value) in [("image_id",JSONValue.string(String(repeating:"0",count:64))),
+                            ("width",.int(1025)),("image",.string("invalid")),("valid_for_ms",.int(0))] {
+            var root = base, data = fields; data[key] = value; root["data"] = .object(data)
+            let bad = try BridgeReply.decode(JSONEncoder().encode(JSONValue.object(root)),for:req)
+            var empty = ArtworkAssembly(reference:ref,side:320)
+            XCTAssertThrowsError(try empty.append(bad,started:100,now:101))
+        }
+        var expired = ArtworkAssembly(reference:ref,side:320)
+        XCTAssertThrowsError(try expired.append(reply,started:100,now:160))
+        XCTAssertThrowsError(try JSONValue.object(["image":.string(String(repeating:"a",count:30721))]).bounded())
+    }
     func testOriginRefusesCredentialsAndInsecureRoutes() throws {
         for text in ["http://localhost", "https://user:pass@host", "https://host/path", "https://host?key=value", "https://host#trust"] {
             XCTAssertThrowsError(try Enrollment.origin(text))

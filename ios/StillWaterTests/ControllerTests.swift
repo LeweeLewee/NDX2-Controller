@@ -116,6 +116,22 @@ import XCTest
         XCTAssertTrue(transport.artworkSides.allSatisfy { $0 == 320 })
         model.deactivate()
     }
+    func testSharedQueueCoverIsLoadedOnceAndKeepsOriginalExpiry() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.snapshotMode = true
+        let ref = try XCTUnwrap(m.player.artwork)
+        m.context.screen = .queue
+        m.context.items = (0..<12).map { MusicItem(.object(["reference":.string("inputs/playqueue/\($0)"),"artwork":.string(ref)])) }
+        t.requests = []
+        await m.loadQueueArtwork()
+        XCTAssertEqual(m.queueArtwork.count,12)
+        let requests = t.requests.filter { $0 == "artwork" }.count
+        await m.loadQueueArtwork()
+        XCTAssertEqual(t.requests.filter { $0 == "artwork" }.count,requests)
+        XCTAssertEqual(Set(m.queueArtwork.values.map(\.renderID)).count,1)
+        XCTAssertEqual(Set(m.queueArtwork.values.map(\.deadline)).count,1)
+        m.deactivate()
+    }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
         var now = 100.0
         let transport = FaultTransport()

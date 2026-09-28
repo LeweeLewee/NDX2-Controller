@@ -230,3 +230,8 @@ D036 delivery checkpoint: live-mode TestFlight 0.1.0 (9.1.0) is Testing in the e
 ## D037 — Render artwork in the selected app palette
 
 On 27 September the user rejected full-colour album artwork and explicitly selected the app palette (sage/sand/slate), rather than an album-derived tint. Map source brightness to the selected palette's dark, mid and light tones, preserving detail. Apply consistently to NOW/detail artwork, collection and result thumbnails, artist portraits and queue covers/reflections. Keep authenticated source pixels unchanged for identity checks and existing field extraction. This supersedes full-colour sleeve rendering; layout and safe areas are unchanged. Completed valid previews may be reused across navigation within a four-preview cache; retain their original expiry and clear them on disconnect/boot invalidation/stale player state. Never reuse partial assemblies or extend freshness.
+
+
+## D038 — Integrated live-beta artwork and collection remediation
+
+On 28 September the user authorized proceeding after the performance assessment and explicitly chose a separate TIDAL My Collection connection. Keep native Naim playback and the existing staged pause/resume-only trial; do not substitute Naim favourites or expand mutation permissions. Add optional bounded compressed images to the existing authenticated artwork action, preserving the default legacy protocol, route/authentication/response limits and expiry. Reuse shared covers and rendered palette images within explicit cache limits. Connect the project's own TIDAL developer app through account consent; no credentials in source or chat. Preserve pairing and the last distributed beta. Offline/native checks and physical integrated acceptance remain distinct gates.
