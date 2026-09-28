@@ -61,3 +61,12 @@ Use distinct and repeated covers, a full queue/library page, screen changes duri
 - Added track names beneath Up Next covers. Shortened the decorative reflection to leave a separate two-line title band without changing the outer safe area.
 - Added offline diagnostic coverage, a queue-label geometry assertion and a native rendering timing baseline. Native validation is recorded in evidence when complete.
 - No production artwork codec, account setup, transport security, bridge route, firmware or live write capability was changed. Do not present this assessment/label change as a fix for all reported failures.
+
+
+## Remediation measurements — 28 September
+
+An isolated authenticated loopback TLS run of the implemented `jpeg-base64` path against the same live cover measured **98.6 ms cold / 12.6 ms repeat**, **15,568 response bytes** per whole cover and **1 / 0 source downloads**, compared with the earlier 1,225 / 1,156 ms, 417,993 bytes and 16 / 16 source downloads. Response traffic fell about 96%. Snapshot median remained 93.5 ms. This was read-only; the running trial bridge and physical phone enrollment were unchanged. Private results: `local/ios/live-trial/artwork-performance-compressed-tls.json`.
+
+The completed pre-cache native baseline measured 488.2 ms for twelve 320px palette render calls on the simulator. The remediation reuses rendered images by immutable preview identity and selected palette, bounded to twelve entries (at most 4.9 MB of RGBA pixels), and memoizes the three fallback palettes. Native post-change results are pending. Shared queue covers reuse the original preview/deadline; expired or invalidated images remain unusable. These host/simulator observations do not establish physical-phone acceptance.
+
+TIDAL My Collection is now the user-selected Library source. It is not configured yet: project developer credentials and account consent are required. Empty/disconnected/error states must not be conflated. Artist/Album links and integrated transport behavior remain acceptance work; no replacement release has been distributed.

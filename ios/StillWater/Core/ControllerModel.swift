@@ -6,6 +6,7 @@ enum Rest: String { case waking, still, touched }
 struct BrowseContext {
     var screen: Screen = .now, query = "", kind = "albums", items: [MusicItem] = []
     var cursor: String?, pageCursor: String?, nextOffset: Int?, resultID: String?, scrollID: String?
+    var pageOffset = 0
     var artistTab = "albums", artistScroll: [String:String] = [:]
     var typing = false, biographyExpanded = false
     var selected = MusicItem(), playable = false, membership = "unknown", queueSelection = 1
@@ -37,6 +38,13 @@ struct Preview {
     @Published var rest: Rest = .still
     @Published var status = ""
     @Published var account = "disconnected"
+    @Published var pageError: String?
+    var libraryEmptyMessage: String {
+        if loading { return "Looking…" }
+        if !online { return "Library unavailable while disconnected" }
+        if account == "disconnected" { return "Connect TIDAL My Collection" }
+        return pageError ?? "Nothing saved here yet"
+    }
     @Published var pendingAction: String?
     @Published var unknownAction: String?
     @Published var pendingTarget: String?
@@ -265,7 +273,7 @@ struct Preview {
         guard cancelReadForInteraction() else { return }
         if context.screen == .find && context.query.utf8.count > 256 { status = "Search text too long; use fewer words."; return }
         let gen = generation, old = context
-        loading = true
+        loading = true; pageError = nil
         readTask = Task {
             defer { if self.generation == gen { self.loading = false } }
             var args: [String: JSONValue] = [:]
@@ -283,9 +291,15 @@ struct Preview {
                 else if let cursor = old.cursor { args["cursor"] = .string(cursor) }
                 else { return }
             }
-            guard let r = await self.perform(BridgeRequest(action, args)), r.outcome == "observed", self.generation == gen else { return }
+            let response = await self.perform(BridgeRequest(action, args))
+            guard self.generation == gen else { return }
+            guard let r = response, r.outcome == "observed" else {
+                self.pageError = "Library unavailable. Check Connection in Settings."
+                return
+            }
             self.context.items = r.data["items"].values.map(MusicItem.init)
             self.context.scrollID = nil; self.libraryFirstIndex = 0; self.missingArtUntil = [:]
+            self.context.pageOffset = args["offset"]?.number ?? 0
             self.context.pageCursor = args["cursor"]?.text
             self.context.nextOffset = r.data["next_offset"].number; self.context.cursor = r.data["cursor"].text
             self.context.resultID = r.data["result_id"].text
@@ -431,11 +445,18 @@ struct Preview {
         let screen = context.screen
         guard [.queue,.detail,.library,.find].contains(screen), let item = candidates.first(where:{ (queueArtwork[$0.reference] == nil || (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5) && clock() >= (missingArtUntil[$0.reference] ?? 0) }) else { return }
         let gen = generation
+        let renewing = missingArtUntil[item.reference] != nil
         missingArtUntil[item.reference] = clock() + 30
         // Queue identities are not catalogue browse references. Use artwork registered
         // by the authenticated queue read, retaining browse fallback for catalogue cards.
         var reference = item.artwork
-        if reference == nil {
+        if renewing && item.reference.hasPrefix("inputs/playqueue/") {
+            guard let page = await perform(BridgeRequest("queue",["offset":.int(context.pageOffset)])),
+                  page.outcome == "observed", generation == gen else { return }
+            reference = page.data["items"].values.map(MusicItem.init).first { $0.reference == item.reference }?.artwork
+            guard reference != nil else { return }
+        }
+        if reference == nil || (renewing && !item.reference.hasPrefix("inputs/playqueue/")) {
             let action = item.kind == "artists" ? "artist_bio" : "browse"
             guard let detail = await perform(BridgeRequest(action,["reference":.string(item.reference)])),
                   detail.outcome == "observed", generation == gen else { return }

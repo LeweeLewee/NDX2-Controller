@@ -19,3 +19,11 @@ class PerformanceDiagnosticTests(unittest.TestCase):
         self.assertGreater(cover['json_bytes'],409600)
         self.assertGreater(result['experimental_jpeg_bytes'],0)
         self.assertGreater(result['experimental_base64_bytes'],result['experimental_jpeg_bytes'])
+    def test_compressed_cover_uses_one_request_and_no_repeat_source_fetch(self):
+        service = FixtureService()
+        result = assess(service, rounds=2, encoding='jpeg-base64')
+        self.assertEqual(service.naim.calls, [])
+        self.assertEqual([c['source_fetches'] for c in result['covers']], [1, 0])
+        for cover in result['covers']:
+            self.assertEqual(len(cover['chunk_ms']), 1)
+            self.assertLess(cover['json_bytes'], MAX_RESPONSE)

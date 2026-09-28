@@ -287,7 +287,7 @@ struct StillWaterView: View {
                     Color.clear.preference(key:CollectionOffsetKey.self,value:g.frame(in:.named("collection")).minY)
                 })
             if model.context.items.isEmpty {
-                Text(model.loading ? "Looking…" : "Nothing saved here yet").font(Design.font(26,serif:true,italic:true))
+                Text(model.libraryEmptyMessage).font(Design.font(26,serif:true,italic:true))
                     .opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
             }
         }.coordinateSpace(name:"collection").scrollPosition(id:$model.context.scrollID,anchor:.top)
@@ -358,7 +358,7 @@ struct StillWaterView: View {
                             .font(Design.font(22)).frame(width:140,height:56).audit("more",font:22,tap:true,pill:true,scroll:true).padding(.top,4)
                     }
                     if contents.isEmpty {
-                        Text(model.loading ? "Looking…" : model.context.screen == .library ? "Nothing saved here yet" : model.context.screen == .detail && tracks ? "No tracks available yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
+                        Text(model.loading ? "Looking…" : model.context.screen == .library ? model.libraryEmptyMessage : model.context.screen == .detail && tracks ? "No tracks available yet" : model.context.query.isEmpty ? "" : "Nothing found for “\(model.context.query)”")
                             .font(Design.font(26,serif:true,italic:true)).opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
                     }
                 }.scrollTargetLayout()

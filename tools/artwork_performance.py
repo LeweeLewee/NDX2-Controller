@@ -11,7 +11,7 @@ from naim_client import NaimClient
 from m2_artwork import normalize, CHUNK_PIXELS
 
 
-def assess(service, rounds=2, requester=None):
+def assess(service, rounds=2, requester=None, encoding="rgb565be-hex"):
     class Vault:
         data = {'commands': {}}
     contract = Contract(service, Vault())
@@ -41,14 +41,15 @@ def assess(service, rounds=2, requester=None):
     with patch.object(service, 'image', side_effect=timed_image):
         for _ in range(rounds):
             chunk_times=[]; total=0; calls=len(fetches); begin=time.perf_counter()
-            for offset in range(0,320*320,CHUNK_PIXELS):
-                start=time.perf_counter(); reply=request('artwork',{'reference':ref,'side':320,'pixel_offset':offset})
+            for offset in ([0] if encoding == 'jpeg-base64' else range(0,320*320,CHUNK_PIXELS)):
+                start=time.perf_counter(); reply=request('artwork',{'reference':ref,'side':320,'pixel_offset':offset,'encoding':encoding})
                 chunk_times.append((time.perf_counter()-start)*1000)
                 if not (reply.get('data') or {}).get('available'): raise RuntimeError('Artwork unavailable')
                 total+=len(json.dumps(reply).encode())
             report['covers'].append({'total_ms':(time.perf_counter()-begin)*1000,'chunk_ms':chunk_times,
                                      'json_bytes':total,'source_fetches':len(fetches)-calls})
     report['source_fetch_ms']=fetches
+    report['encoding']=encoding
     # Isolated format experiment only: not a production codec or protocol change.
     from PIL import Image
     raw=original(ref); start=time.perf_counter(); normalize(raw,320,0,with_digest=True)
@@ -66,6 +67,7 @@ def main():
     parser.add_argument('--ndx',help='Explicitly enable read-only native/CDN assessment at this private IPv4 address')
     parser.add_argument('--tls',action='store_true',help='Use an isolated authenticated loopback TLS bridge; never changes the running bridge or enrollment')
     parser.add_argument('--output',required=True)
+    parser.add_argument('--encoding', choices=('rgb565be-hex','jpeg-base64'), default='rgb565be-hex')
     args=parser.parse_args()
     service=Bridge(NaimClient(args.ndx,timeout=3)) if args.ndx else FixtureService()
     if args.tls:
@@ -83,11 +85,11 @@ def main():
             try:
                 client=Client('https://127.0.0.1:'+str(host.server_port),root/'tls/trust.pem')
                 client.pair(pairing.issue())
-                result=assess(service,requester=client.request)
+                result=assess(service,requester=client.request,encoding=args.encoding)
             finally:
                 host.shutdown();host.server_close();worker.join();vault.close()
     else:
-        result=assess(service)
+        result=assess(service,encoding=args.encoding)
     result['mode']='live-native-read-only' if args.ndx else 'offline-fixture'
     result['transport']='authenticated-loopback-TLS' if args.tls else 'in-process'
     from pathlib import Path

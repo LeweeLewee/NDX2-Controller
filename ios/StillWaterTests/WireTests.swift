@@ -65,6 +65,22 @@ final class WireTests: XCTestCase {
         var image = ArtworkAssembly(reference:ref,side:320)
         try image.append(reply,started:100,now:101)
         XCTAssertTrue(image.complete); XCTAssertEqual(image.bytes.count,204800)
+        var legacy = ArtworkAssembly(reference:ref,side:320)
+        let all = try vectors()
+        for offset in stride(from:0,to:102400,by:6400) {
+            let chunk = try XCTUnwrap(all["artwork-\(offset)"])
+            let request = try JSONDecoder().decode(BridgeRequest.self,from:JSONEncoder().encode(chunk["request"]))
+            try legacy.append(BridgeReply.decode(JSONEncoder().encode(chunk["reply"]),for:request),started:100,now:101)
+        }
+        let a = [UInt8](image.bytes), b = [UInt8](legacy.bytes)
+        var error = 0.0
+        for i in stride(from:0,to:a.count,by:2) {
+            let x = Int(a[i])*256+Int(a[i+1]), y = Int(b[i])*256+Int(b[i+1])
+            error += Double(abs((x>>11)-(y>>11)))/31
+            error += Double(abs(((x>>5)&63)-((y>>5)&63)))/63
+            error += Double(abs((x&31)-(y&31)))/31
+        }
+        XCTAssertLessThan(error/Double(320*320*3),0.05,"JPEG must retain orientation and source detail")
         guard case .object(let base) = v["reply"], case .object(let fields) = base["data"] else { return XCTFail() }
         for (key,value) in [("image_id",JSONValue.string(String(repeating:"0",count:64))),
                             ("width",.int(1025)),("image",.string("invalid")),("valid_for_ms",.int(0))] {

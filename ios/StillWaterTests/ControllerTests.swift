@@ -116,9 +116,21 @@ import XCTest
         XCTAssertTrue(transport.artworkSides.allSatisfy { $0 == 320 })
         model.deactivate()
     }
+    func testDisconnectedLibraryIsNotReportedAsEmptyCollection() {
+        let m = ControllerModel(transport:FixtureTransport(),restore:false)
+        m.online = true; m.account = "disconnected"
+        XCTAssertEqual(m.libraryEmptyMessage,"Connect TIDAL My Collection")
+        m.account = "connected"; m.pageError = "Library unavailable"
+        XCTAssertEqual(m.libraryEmptyMessage,"Library unavailable")
+        m.pageError = nil
+        XCTAssertEqual(m.libraryEmptyMessage,"Nothing saved here yet")
+        m.online = false
+        XCTAssertNotEqual(m.libraryEmptyMessage,"Nothing saved here yet")
+    }
     func testSharedQueueCoverIsLoadedOnceAndKeepsOriginalExpiry() async throws {
-        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
-        m.replaceTransport(t); await settle(); await m.refresh(); m.snapshotMode = true
+        let t = FaultTransport()
+        let m = ControllerModel(transport:t,clock:{100},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh()
         let ref = try XCTUnwrap(m.player.artwork)
         m.context.screen = .queue
         m.context.items = (0..<12).map { MusicItem(.object(["reference":.string("inputs/playqueue/\($0)"),"artwork":.string(ref)])) }
@@ -126,10 +138,26 @@ import XCTest
         await m.loadQueueArtwork()
         XCTAssertEqual(m.queueArtwork.count,12)
         let requests = t.requests.filter { $0 == "artwork" }.count
+        XCTAssertEqual(requests,1)
         await m.loadQueueArtwork()
         XCTAssertEqual(t.requests.filter { $0 == "artwork" }.count,requests)
         XCTAssertEqual(Set(m.queueArtwork.values.map(\.renderID)).count,1)
         XCTAssertEqual(Set(m.queueArtwork.values.map(\.deadline)).count,1)
+        m.deactivate()
+    }
+    func testCollectionCoverRenewalReadsMetadataAndPreservesDeadlineUntilReply() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        let item = MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))
+        m.context.items = [item]
+        await m.loadQueueArtwork()
+        let first = try XCTUnwrap(m.queueArtwork[item.reference])
+        now = 155; await m.refresh(); t.requests = []
+        await m.loadQueueArtwork()
+        XCTAssertTrue(t.requests.contains("browse"))
+        XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,first.deadline)
         m.deactivate()
     }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {

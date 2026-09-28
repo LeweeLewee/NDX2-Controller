@@ -34,6 +34,9 @@ import Foundation
             let portrait = request.args["reference"]?.text == sample("artist-bio")["data"]["artwork"].text
             name = request.args["side"]?.number == 320 ? (portrait ? "portrait-" : "artwork-") + String(request.args["pixel_offset"]?.number ?? 0) : (portrait ? "portrait-80" : "artwork-80")
                     if let variant { name = "sleeve-\(variant)-" + (request.args["side"]?.number == 320 ? String(request.args["pixel_offset"]?.number ?? 0) : "80") }
+            if request.args["encoding"]?.text == "jpeg-base64", request.args["side"]?.number == 320 {
+                name = variant.map { "sleeve-\($0)-jpeg" } ?? (portrait ? "portrait-jpeg" : "artwork-jpeg")
+            }
         case "artist_bio": name = "artist-bio"
         case "voice_review": name = "voice"
         case "battery_report":
