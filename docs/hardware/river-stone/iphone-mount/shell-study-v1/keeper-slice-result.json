@@ -1,0 +1,44 @@
+{
+  "status": "offline provisional P1S/0.4/PLA/0.2 slice only; no print",
+  "input_sha256": "c6ee365053271ff0d504deb93bf4b4a1105ebf0aa7988befb065cacd4b60021a",
+  "gcode_sha256": "e7efc692c09f1fe7be704f0ec4043319b6bfa742c89bcab61af764a86a31c5eb",
+  "profile_sha256": {
+    "process.json": "3d79a8fcb5e4d5aae3ab22346eb29180ec2fb1d1c9836cea3d95a74a7f57031d",
+    "machine.json": "8abcc786f19decaaabee6604a92c8b4f966952be8a352bb7df3e4a6b493c2ea0",
+    "filament.json": "941ec2ee3b64ed906004338c921690ebf373f2feba1f8194a93a1f449684e09f"
+  },
+  "summary": [
+    "; model printing time: 11m 20s; total estimated time: 17m 36s",
+    "; total layer number: 62",
+    "; max_z_height: 12.40",
+    "; filament used [mm] = 957.26",
+    "; filament used [cm3] = 2.30",
+    "; filament used [g] = 2.86"
+  ],
+  "warnings": [],
+  "embedded_warnings": [
+    {
+      "msg": "bed_temperature_too_high_than_filament",
+      "level": "3",
+      "error_code": "1000C001"
+    }
+  ],
+  "plate_metadata": {
+    "index": "1",
+    "extruder_type": "0",
+    "nozzle_volume_type": "0",
+    "printer_model_id": "",
+    "nozzle_diameters": "0.4",
+    "timelapse_type": "0",
+    "prediction": "1056",
+    "weight": "2.86",
+    "first_layer_time": "488609981745782452981584734715904.000000",
+    "outside": "false",
+    "support_used": "false",
+    "label_object_enabled": "true",
+    "enable_filament_dynamic_map": "false",
+    "has_filament_switcher": "false",
+    "filament_maps": "1",
+    "limit_filament_maps": "0"
+  }
+}

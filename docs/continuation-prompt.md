@@ -1,4 +1,6 @@
-> **Physical update � 10 October 2026:** UGREEN 25683 confirmed; v3 0p20 body fit passed. Printed R3 exposed inactive corners: adopt derived R6.5, preserving aperture bounds. See hardware/river-stone/iphone-mount/README.md for current files and packaging status. Later physical evidence supersedes older R3 acceptance.
+> **Working shell checkpoint:** See hardware/river-stone/iphone-mount/shell-study-v1/README.md. Exported shell STL has a nonmanifold edge; do not print or claim a phone-removal pass. Cable dimensions and passed-fit spacer choice pending.
+
+> **Physical update — 10 October 2026:** UGREEN 25683 confirmed; v3 0p20 body fit passed. Printed R3 exposed inactive corners: adopt derived R6.5, preserving aperture bounds. See hardware/river-stone/iphone-mount/README.md for current files and packaging status. Later physical evidence supersedes older R3 acceptance.
 
 # Continuation prompt — Still Water Brief A/A.1 complete; screen selection open
 

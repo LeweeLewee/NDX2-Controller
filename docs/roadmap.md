@@ -183,3 +183,6 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 - 28 September: sample v2 adds loose end locators for the next print; v1 preserved. Next physical checks: insertion, movement, aperture centring, recess/touch and actual hardware/microphone clearance.
 
 - 10 October: integrate confirmed UGREEN 25683 and passed v3 0p20 fit. Preserve printed R3 history; carry R6.5 derived corners into new geometry. Compact packaging study progresses independently of unmeasured cable/plug dimensions. Final curved shell, retention, acoustic and thermal tests remain open.
+
+
+**10 October — shell study checkpoint:** Curved shell and retention checkpoint saved; resolve STL topology, run actual-phone/service-path and wall-depth checks, then finalize cable and pad dimensions from user measurements before full-shell slicing.

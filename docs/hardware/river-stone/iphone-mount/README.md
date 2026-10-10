@@ -17,6 +17,10 @@ Updated 10 October 2026 from the user’s 28 September handover and confirmed pr
 
 The earlier R3 paper pass is superseded by the later printed corner observation. R6.5 follows a circular approximation to the display corner, not an Apple mechanical drawing. The source assumes centred display registration. Manufacturing/fit play and display offset can consume the calculated margin; do not treat the handover’s 0.2 mm offset analysis as a complete tolerance stack. No repeated body-fit print is required, but corner concealment must still be observed on the eventual enclosure.
 
+## Current working shell
+
+[Curved shell checkpoint](shell-study-v1/README.md): rear keeper bars, bank cover and small M3 hardware coupon prepared. Full shell export has a nonmanifold edge; phone collision/removal, wall thickness and print release checks remain incomplete. Cable dimensions and passed-fit spacer choice are pending.
+
 ## Files and provenance
 
 - [Printed v3 source models](sample-v3/README.md): original R3 STL/STEP and imported validation, preserved as history.

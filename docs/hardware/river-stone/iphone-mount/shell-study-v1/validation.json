@@ -1,0 +1,179 @@
+{
+  "status": "engineering study, not released for printing",
+  "profiles": [
+    [
+      0,
+      101,
+      68,
+      0,
+      0,
+      3.3
+    ],
+    [
+      6,
+      104,
+      71,
+      0,
+      0,
+      3.3
+    ],
+    [
+      22,
+      105,
+      72.5,
+      0,
+      0,
+      3.2
+    ],
+    [
+      45,
+      105,
+      70,
+      -1,
+      2,
+      3
+    ],
+    [
+      65,
+      104,
+      62,
+      -1,
+      5,
+      2.8
+    ],
+    [
+      86,
+      101,
+      50,
+      -2,
+      8,
+      2.7
+    ],
+    [
+      96,
+      94,
+      39,
+      -2,
+      10,
+      2.6
+    ],
+    [
+      102,
+      70,
+      23,
+      -3,
+      14,
+      2.4
+    ],
+    [
+      105,
+      35,
+      10,
+      -3,
+      16,
+      2.2
+    ]
+  ],
+  "aperture_mm": [
+    138.9,
+    63.7
+  ],
+  "aperture_radius_mm": 6.5,
+  "integral_passed_fit": "Mesh Boolean union using source fit STL; editable outer/inner STEP loft sources; no fused final STEP",
+  "spacer_assumption_mm": 0.4,
+  "keeper_hardstop_local_z_mm": 11.5,
+  "pad_gap_mm": 1.58,
+  "proposed_foam_uncompressed_mm": 2,
+  "base_fasteners_xy_mm": [
+    [
+      -83,
+      -43
+    ],
+    [
+      -83,
+      43
+    ],
+    [
+      83,
+      -43
+    ],
+    [
+      83,
+      43
+    ]
+  ],
+  "fasteners": "M3 clearance 3.4; nut pockets 6.8 circumscribed diameter; actual hardware trial pending",
+  "checks": {
+    "shell": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 212066.1474930036,
+      "exported_stl_watertight": false,
+      "exported_stl_is_volume": false
+    },
+    "cover": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 67562.8375620962,
+      "exported_stl_watertight": true,
+      "exported_stl_is_volume": true
+    },
+    "keeper--35": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3473.5391496154334,
+      "exported_stl_watertight": true,
+      "exported_stl_is_volume": true
+    },
+    "keeper-0": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3473.539140610059,
+      "exported_stl_watertight": true,
+      "exported_stl_is_volume": true
+    },
+    "bank_shell_overlap": 0.0,
+    "bank_bay_shell_overlap": 0.0,
+    "cover_shell_overlap": 0.0,
+    "camera_shell_overlap": 0.0,
+    "nominal_phone_box_shell_overlap": 555.1624764874492,
+    "keeper--35_shell_overlap": 8.246449023944478e-05,
+    "keeper--35_bank_overlap": 0.0,
+    "keeper--35_phone_box_overlap": 0.0,
+    "keeper--35_outside_outer_volume": 0.0,
+    "keeper-0_shell_overlap": 5.693155163206655e-05,
+    "keeper-0_bank_overlap": 0.0,
+    "keeper-0_phone_box_overlap": 0.0,
+    "keeper-0_outside_outer_volume": 0.0,
+    "front-notch_channel_shell_overlap": 0.0002804317137907464,
+    "lightning-end_channel_shell_overlap": 0.00040552508264069437,
+    "rear-camera_channel_shell_overlap": 1.0616246917209375e-05,
+    "combined_shell": {
+      "watertight": true,
+      "consistent_winding": true,
+      "components": 1,
+      "volume_mm3": 212066.1474930036,
+      "bounds_mm": [
+        [
+          -106.03543853759766,
+          -72.38619995117188,
+          0.0
+        ],
+        [
+          105.10852813720703,
+          72.87920379638672,
+          105.0
+        ]
+      ]
+    }
+  },
+  "limits": [
+    "Cable assumptions unresolved",
+    "Microphone route geometry is not acoustic proof",
+    "Inner loft is not a constant normal wall offset",
+    "Numerical isolated components below 0.00001 mm3 are discarded",
+    "Camera location is conservative community-model estimate",
+    "Retainer pad pressure and service access untested",
+    "Exported shell STL is nonmanifold; actual phone collision, removal and print checks blocked"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "status": "BLOCKED: exported shell mesh is not a closed volume; collision and removal checks incomplete",
+  "checks": {
+    "shell": {
+      "watertight": false,
+      "is_volume": false
+    }
+  }
+}
