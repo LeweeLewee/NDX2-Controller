@@ -17,7 +17,7 @@ The frozen reference is tagged `software-feasibility-v1`. Start the next phase f
 ## The product
 
 - Compact form with flexible proportions, bespoke touch interface and a substantial, well-finished 3D-printed enclosure.
-- Selected hardware: iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030). Concealed mounting and exact bank variant/fit are being resolved; physical validation is outstanding.
+- Selected hardware: iPhone 11 and UGREEN Nexode 20000mAh PD 20W QC Power Bank (D030). Concealed mounting and bank model is confirmed as 25683 and v3 0p20 body fit has passed; final enclosure details are being resolved; physical validation is outstanding.
 - Large rechargeable battery and deliberate weight; cable-free use on the coffee table.
 - Weeks of standby is a target, not a measured specification.
 - Full TIDAL browsing and native playback; other sources can follow.

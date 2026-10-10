@@ -1,3 +1,5 @@
+> **Physical update � 10 October 2026:** UGREEN 25683 confirmed; v3 0p20 body fit passed. Printed R3 exposed inactive corners: adopt derived R6.5, preserving aperture bounds. See hardware/river-stone/iphone-mount/README.md for current files and packaging status. Later physical evidence supersedes older R3 acceptance.
+
 # Continuation prompt — Still Water Brief A/A.1 complete; screen selection open
 
 > **Current override — 25 September 2026, D030:** iPhone 11 and the selected UGREEN Nexode 20000mAh PD 20W QC Power Bank are the active hardware. Waveshare CAD/slicing is parked fallback. Resume physical mounting/interface discussion from [the proposal](hardware/river-stone/iphone-mount/README.md); dimensions remain provisional. Original **01 River Stone** alone governs both body and screen/stone interface; do not use the superseded Tide pool image. Phone mounting must not obstruct microphone acoustic paths. The following Brief A closeout is historical. Do not execute Brief B or implement an iOS UI solely because screen selection is now closed.

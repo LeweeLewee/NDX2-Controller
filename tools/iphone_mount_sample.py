@@ -1,7 +1,11 @@
 """Open iPhone aperture fit sample. CadQuery 2.8; millimetres. Not a finished cradle."""
 import argparse,json,sys
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--deps',required=True);p.add_argument('--revision',choices=['v1','v2'],default='v2');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--deps',required=True);p.add_argument('--revision',choices=['v1','v2','v3r1'],default='v3r1');a=p.parse_args()
+if a.revision=='v3r1':
+ import subprocess
+ subprocess.run([sys.executable,str(Path(__file__).with_name('iphone_mount_v3r1.py')),'--deps',a.deps],check=True)
+ raise SystemExit(0)
 sys.path.insert(0,str(Path(a.deps).resolve()))
 import cadquery as cq
 out=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/iphone-mount/sample-'+a.revision)

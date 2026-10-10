@@ -1,0 +1,67 @@
+{
+  "status": "packaging study only; bounding box is not a curved shell",
+  "old_bounds_mm": [
+    240,
+    170,
+    105
+  ],
+  "candidate_bounds_mm": [
+    210,
+    145,
+    102
+  ],
+  "phone_angle_deg": 50,
+  "spacer_assumption_mm": 0.4,
+  "bank_model": "UGREEN 25683",
+  "bank_mm": [
+    147,
+    72,
+    28
+  ],
+  "plug_length_assumption_mm": 15,
+  "cable_turn_box_mm": [
+    23,
+    20,
+    16
+  ],
+  "camera_reserve": "5 mm behind the entire nominal body; conservative for local camera",
+  "frame_reference": "passed body wall with unprinted R6.5 aperture correction",
+  "checks": {
+    "phone-envelope": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "camera-rear-reserve": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "frame-r6p5": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "bank": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "bank-bay": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "phone-plug-reservation": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "cable-turn-reservation": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "bank-port-reservation": {
+      "outside_candidate_box_mm3": 0.0
+    },
+    "phone_versus_bank_bay_mm3": 0.0,
+    "camera_versus_bank_bay_mm3": 0.0,
+    "frame_versus_bank_bay_mm3": 0.0,
+    "plug_versus_bank_bay_mm3": 0.0,
+    "turn_versus_bank_bay_mm3": 0.0
+  },
+  "limits": [
+    "No enclosure solid, wall-thickness or curved-shell fit claim",
+    "Cable dimensions, connector pose and bend radius unmeasured",
+    "Bank port reservation is worst-side placeholder, not actual port map",
+    "No retention, fastener, thermal or acoustic validation"
+  ],
+  "bounding_volume_reduction_percent": 27.500000000000004
+}

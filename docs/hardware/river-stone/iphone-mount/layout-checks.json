@@ -15,15 +15,15 @@
     63.7
   ],
   "per_edge_overlap_mm": 6.0,
-  "window_corner_radius_mm": 3.0,
-  "window_validation": "user passed width, height and R3 corner paper trial; mounting/acoustics unverified",
+  "window_corner_radius_mm": 6.5,
+  "window_validation": "straight size and 0p20 body fit passed; printed R3 exposed inactive corners; R6.5 derived, unprinted",
   "nominal_glass_recess_mm": 1.2,
   "bank_working_envelope_mm": [
     147,
     72,
     28
   ],
-  "bank_model_mapping": "user product name retained; manufacturer 25683 envelope used provisionally",
+  "bank_model_mapping": "UGREEN 25683 confirmed by supplied user handover",
   "bank_bay_mm": [
     151,
     76,

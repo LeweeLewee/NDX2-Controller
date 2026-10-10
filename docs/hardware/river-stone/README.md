@@ -1,3 +1,5 @@
+> **10 October physical update:** UGREEN 25683 confirmed; v3 0p20 body fit passed. Current aperture is derived R6.5 with accepted 138.9 × 63.7 mm bounds. [Current mounting and compact packaging](iphone-mount/README.md) supersedes older fit/aperture proposals below.
+
 # Original 01 River Stone: stationary enclosure
 
 > **Visual reference confirmed: original 01 River Stone only**, for both body and screen interface. Concealed iPhone mounting must preserve microphone acoustic paths.

@@ -1,0 +1,168 @@
+{
+  "status": "CAD-derived measurements of a community model; not Apple-certified; not yet compared with the physical phone",
+  "source": {
+    "url": "https://grabcad.com/library/iphone-11-6",
+    "title": "iPhone 11",
+    "author": "Leonid (GrabCAD, Armenia)",
+    "published": "2020-06-30",
+    "author_claim": "Accurate model of iPhone 11 according to Apple datasheet. Created in SolidWorks 2020.",
+    "licence": "GrabCAD Website Terms of Use; no per-model licence stated",
+    "file": "iPhone 11.STEP",
+    "bytes": 28909433,
+    "sha256": "ab204f6316407f9c7d9d6a7ec7a97fdd5a2abde12e56e619c3cbceff6474a561",
+    "format": "STEP AP214 (SolidWorks 2020 export)",
+    "units": "millimetre (declared in file)"
+  },
+  "topology": {
+    "solids": 1,
+    "faces": 114,
+    "valid": true
+  },
+  "frame": "X = width, Y = length (top end Y=0, Lightning end Y=-150.96), Z = thickness (front glass +Z)",
+  "body": {
+    "apple_nominal_mm": [
+      75.7,
+      150.9,
+      8.3
+    ],
+    "model_widest_section_excluding_buttons_mm": [
+      75.72,
+      150.91,
+      8.32
+    ],
+    "widest_section_at_phone_z_mm": -0.2,
+    "delta_mm": [
+      0.02,
+      0.01,
+      0.02
+    ],
+    "correction": "Earlier 75.74 x 150.98 figures were B-spline bounding boxes, not true extents; replaced by exact sections",
+    "overall_mesh_bounds_including_buttons_and_camera_mm": [
+      76.52,
+      150.96,
+      9.02
+    ],
+    "side_profile": "Rounded aluminium band: widest at z=-0.2, about 1.8 mm narrower per side at 3.5 mm from mid-thickness",
+    "plan_corner": "B-spline blend spanning about 14 x 14.7 mm, not a single arc radius",
+    "front_flat_glass_mm": {
+      "x": [
+        4.57,
+        71.15
+      ],
+      "y": [
+        -146.36,
+        -4.56
+      ]
+    }
+  },
+  "camera_bump": {
+    "plateau_mm": [
+      25.06,
+      28.26
+    ],
+    "plateau_corner_radius_mm": 6.985,
+    "protrusion_beyond_back_mm": 0.7,
+    "position_mm": {
+      "x": [
+        44.95,
+        70.01
+      ],
+      "y": [
+        -33.75,
+        -5.49
+      ]
+    },
+    "limitation": "Lens rings are not modelled proud of the plateau. Treat protrusion as under-modelled until measured."
+  },
+  "lightning_opening": {
+    "size_mm": [
+      8.54,
+      2.8
+    ],
+    "end_radius_mm": 1.4,
+    "centre_x_mm": 37.87,
+    "centre_z_mm": -0.41,
+    "modelled_depth_mm": 10.9,
+    "limitation": "Simplified blind slot; no receptacle or plug engagement geometry"
+  },
+  "bottom_openings": {
+    "grille_groups": "Two groups of six 1.45 mm holes, X 14.48 to 27.21 and X 48.51 to 61.24",
+    "other_holes": "Two 1.5 mm holes at X 30.72 to 32.22 and 43.51 to 45.01, either side of Lightning (likely screw positions)",
+    "limitation": "Which grille is microphone and which is speaker is not identified by the model; holes are simplified blind cylinders"
+  },
+  "buttons_mm_from_top_end": {
+    "ring_silent_switch": {
+      "edge": "-X",
+      "y": [
+        20.58,
+        26.2
+      ],
+      "protrusion": 0.42
+    },
+    "volume_up": {
+      "edge": "-X",
+      "y": [
+        30.63,
+        41.55
+      ],
+      "protrusion": 0.38
+    },
+    "volume_down": {
+      "edge": "-X",
+      "y": [
+        43.74,
+        54.66
+      ],
+      "protrusion": 0.38
+    },
+    "side_button": {
+      "edge": "+X",
+      "y": [
+        34.1,
+        51.2
+      ],
+      "protrusion": 0.37
+    },
+    "sim_tray": {
+      "edge": "+X",
+      "y": [
+        104.23,
+        120.57
+      ],
+      "protrusion": "flush"
+    }
+  },
+  "front_sensor_marks": {
+    "extent_mm": {
+      "x": [
+        22.09,
+        53.41
+      ],
+      "y": [
+        -8.57,
+        -4.59
+      ]
+    },
+    "limitation": "Flat outlines engraved in the front glass plane, not true openings. Display active area and notch boundary are NOT modelled."
+  },
+  "accepted_aperture_check": {
+    "aperture_mm": [
+      138.9,
+      63.7
+    ],
+    "corner_radius_mm": 3.0,
+    "overlap_mm": 6.0,
+    "all_76_boundary_samples_on_flat_front_glass": true,
+    "flat_glass_beyond_aperture_edge_mm": {
+      "long_edges": 1.44,
+      "lightning_end": 1.42,
+      "corner_diagonal": 0.21
+    },
+    "sensor_marks_inside_aperture_by_mm": 2.55,
+    "notes": [
+      "The earpiece and sensor marks intrude up to 2.55 mm into the aperture at the top end, consistent with the notch remaining visible.",
+      "The R3 corners cannot be checked against the display boundary because the model has no display active area."
+    ]
+  },
+  "orientation": "Sensors at Y=0 end, Lightning at Y=-150.96 end. With notch left in landscape, Lightning is on the right, matching the repo proposal."
+}

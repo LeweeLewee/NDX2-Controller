@@ -1,0 +1,20 @@
+{
+  "status": "unprinted R6.5 aperture correction; source 0p20 body fit passed by user",
+  "source_step_sha256": "e6778818179e85036629c1efb2f39578fd872907a56b81b91de73dcd371441c9",
+  "clearance_per_side_mm": 0.2,
+  "aperture_mm": [
+    138.9,
+    63.7
+  ],
+  "corner_radius_mm": 6.5,
+  "valid_single_solid": true,
+  "removed_original_volume_mm3": 0.0,
+  "added_corner_volume_mm3": 34.25045312179692,
+  "upper_wall_volume_unchanged": true,
+  "aperture_intersection_mm3": 0,
+  "limits": [
+    "No new physical corner test",
+    "No microphone, retention or thermal acceptance",
+    "Existing body fit imported; source validation not independently reproduced"
+  ]
+}

@@ -3,7 +3,7 @@ from pathlib import Path
 import json,math,argparse
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
-p=argparse.ArgumentParser();p.add_argument('--revision',choices=['v1','v2'],default='v2');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--revision',choices=['v1','v2','v3r1'],default='v3r1');args=p.parse_args()
 OUT=Path(__file__).resolve().parents[1]/('docs/hardware/river-stone/iphone-mount/sample-'+args.revision)
 data=json.loads((OUT/'preview-meshes.json').read_text())
 im=Image.new('RGB',(1600,1100),'#f3f0e9')
@@ -33,9 +33,9 @@ def render(items,origin,scale,az,el):
     im.paste(Image.fromarray(pixels))
 
 label(45,30,f'iPhone aperture / open fit sample {args.revision}',32)
-label(45,82,'Accepted 138.9 x 63.7 mm opening, R3 corners | Geometry preview; not the stone exterior',20)
+label(45,82,'138.9 x 63.7 mm opening; see revision for corner status | Geometry preview; not the stone exterior',20)
 render([('aperture-frame',(192,184,163),(0,0,0))],(790,375),4.7,-12,65)
-label(60,695,'Rear view: four end tabs; 36 mm central end gaps; back open.' if args.revision=='v2' else 'Rear view: two outboard stiffeners; short ends and back remain open.',22)
+label(60,695,'Passed 0.20 mm body-fit geometry / R6.5 corner correction unprinted.' if args.revision=='v3r1' else 'Rear view: four end tabs; 36 mm central end gaps; back open.' if args.revision=='v2' else 'Rear view: two outboard stiffeners; short ends and back remain open.',22)
 label(60,745,'Loose 0.4 / 0.8 mm spacer gauges set 1.6 / 2.0 mm nominal glass recess.',22)
 label(60,795,'Phone must be supported by hand: no clips, back plate or retention.',22)
 label(60,845,'Do not place gauges across microphones, sensors or active display.',22)

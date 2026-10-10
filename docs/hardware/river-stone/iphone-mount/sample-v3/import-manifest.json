@@ -1,0 +1,54 @@
+{
+  "source": "user supplied Downloads/iPhone fit sample v3",
+  "imported": "2026-10-10",
+  "source_hashes": {
+    "iphone11-reference-check.json": {
+      "bytes": 4667,
+      "sha256": "f21329fb3454569c8a157c252759ea4ab90d4c96fb7c6185f6987ecd181c602c"
+    },
+    "iphone_mount_sample_v3.py": {
+      "bytes": 7046,
+      "sha256": "9ff851799d3de4b659061352da9bfcb3715ddf6484bcc4c875c4cbaef72940a1"
+    },
+    "outline_pts.py": {
+      "bytes": 708,
+      "sha256": "a1da9380231a2167b0eb19c53179f71cecda3edc6ab44280155db6546ad27691"
+    },
+    "README.md": {
+      "bytes": 3737,
+      "sha256": "fa2f8953825501f9604283fcf5fdfb122d8b5aed21d291f22e691f78b5dfa43c"
+    },
+    "sample-v3-preview.png": {
+      "bytes": 201619,
+      "sha256": "04b26b8be4bd1e9d5f611dc59c79a0efa8c6816760e2cbe840e5cc09e9ec54d3"
+    },
+    "snug-frame-0p15.step": {
+      "bytes": 10039778,
+      "sha256": "6c8660bf077ae6104cd42f22e4b6332ad629b2d033ae50e818628844072bf479"
+    },
+    "snug-frame-0p15.stl": {
+      "bytes": 871484,
+      "sha256": "ed2bd452489644107ab6e50fa0e13865d68f0c45956b558c0577177a4e4b6d8d"
+    },
+    "snug-frame-0p20.step": {
+      "bytes": 10037319,
+      "sha256": "e6778818179e85036629c1efb2f39578fd872907a56b81b91de73dcd371441c9"
+    },
+    "snug-frame-0p20.stl": {
+      "bytes": 871484,
+      "sha256": "6e5bde09f24e77ee67f183d0cec800ac42bec98735ea6a13eee06deb2fd17833"
+    },
+    "snug-frame-0p25.step": {
+      "bytes": 10040588,
+      "sha256": "1df17683cc25c7bfa0881d17caf4bc64d575782bf36c0fb39d4abf081dbb390d"
+    },
+    "snug-frame-0p25.stl": {
+      "bytes": 871484,
+      "sha256": "8f1d7c07283324486694112a03e4e529c656c1f81e430a72b73ed2cbfd774a77"
+    },
+    "validation.json": {
+      "bytes": 5523,
+      "sha256": "362e76f8b0970471b913cbc738c439aa4c17df5bdf6cdb43880b41cc1d361c64"
+    }
+  }
+}

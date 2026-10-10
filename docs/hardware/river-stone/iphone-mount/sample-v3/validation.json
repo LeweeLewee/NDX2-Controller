@@ -1,0 +1,198 @@
+{
+  "status": "unprinted snug-fit sample v3; CAD/mesh checks only; not retention, acoustic or production validation",
+  "phone_reference": {
+    "file": "iPhone 11.STEP",
+    "url": "https://grabcad.com/library/iphone-11-6",
+    "sha256": "ab204f6316407f9c7d9d6a7ec7a97fdd5a2abde12e56e619c3cbceff6474a561",
+    "widest_body_section_mm": [
+      150.91,
+      75.72
+    ],
+    "at_phone_z_mm": -0.2
+  },
+  "parameters": {
+    "fit_clearance_per_side": 0.2,
+    "fit_clearance_variants": [
+      0.15,
+      0.2,
+      0.25
+    ],
+    "wall_thickness": 2.4,
+    "lip_thickness": 1.2,
+    "aperture": [
+      138.9,
+      63.7
+    ],
+    "aperture_corner_r": 3.0,
+    "overlap": 6.0,
+    "spacer_options": [
+      0.4,
+      0.8
+    ],
+    "wall_top_z": 8.0,
+    "lead_in_height": 0.8,
+    "lead_in_extra": 0.5,
+    "button_relief_margin_each_end": 3.0,
+    "lightning_end_opening": 52.8,
+    "top_end_opening": 36.0,
+    "camera_keepout_margin": 3.0,
+    "camera_keepout_depth_behind_back": 5.0
+  },
+  "relief_sample_x_ranges_mm": {
+    "ring_volume": [
+      17.8,
+      57.88,
+      "-Y"
+    ],
+    "side_button": [
+      21.26,
+      44.36,
+      "+Y"
+    ]
+  },
+  "check_method": "Phone STEP tessellated at 0.01 mm; frame tessellated at 0.01 mm; containment and closest-point queries",
+  "variants": {
+    "0p15": {
+      "valid_solid": true,
+      "bounds_mm": [
+        155.88,
+        80.86,
+        8.0
+      ],
+      "stl_watertight": true,
+      "stl_bodies": 1,
+      "aperture_intersection_mm3": 0.0,
+      "spacer_0.4": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.149,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.532,
+        "min_clearance_lightning_opening_and_grilles": 2.435,
+        "min_clearance_side_band_snug": 0.162,
+        "min_clearance_corners_snug": 0.149,
+        "min_clearance_front_glass": 0.4,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      },
+      "spacer_0.8": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.149,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.75,
+        "min_clearance_lightning_opening_and_grilles": 2.435,
+        "min_clearance_side_band_snug": 0.162,
+        "min_clearance_corners_snug": 0.149,
+        "min_clearance_front_glass": 0.8,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      }
+    },
+    "0p20": {
+      "valid_solid": true,
+      "bounds_mm": [
+        155.98,
+        80.96,
+        8.0
+      ],
+      "stl_watertight": true,
+      "stl_bodies": 1,
+      "aperture_intersection_mm3": 0.0,
+      "spacer_0.4": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.199,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.575,
+        "min_clearance_lightning_opening_and_grilles": 2.437,
+        "min_clearance_side_band_snug": 0.212,
+        "min_clearance_corners_snug": 0.199,
+        "min_clearance_front_glass": 0.4,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      },
+      "spacer_0.8": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.199,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.792,
+        "min_clearance_lightning_opening_and_grilles": 2.437,
+        "min_clearance_side_band_snug": 0.212,
+        "min_clearance_corners_snug": 0.199,
+        "min_clearance_front_glass": 0.8,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      }
+    },
+    "0p25": {
+      "valid_solid": true,
+      "bounds_mm": [
+        156.08,
+        81.06,
+        8.0
+      ],
+      "stl_watertight": true,
+      "stl_bodies": 1,
+      "aperture_intersection_mm3": 0.0,
+      "spacer_0.4": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.249,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.618,
+        "min_clearance_lightning_opening_and_grilles": 2.44,
+        "min_clearance_side_band_snug": 0.262,
+        "min_clearance_corners_snug": 0.249,
+        "min_clearance_front_glass": 0.4,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      },
+      "spacer_0.8": {
+        "phone_vertices_inside_frame": 0,
+        "frame_vertices_inside_phone": 0,
+        "min_clearance_overall": 0.249,
+        "min_clearance_buttons": 3.0,
+        "min_clearance_camera_bump": 6.833,
+        "min_clearance_lightning_opening_and_grilles": 2.44,
+        "min_clearance_side_band_snug": 0.262,
+        "min_clearance_corners_snug": 0.249,
+        "min_clearance_front_glass": 0.8,
+        "closest_point_phone_coords": [
+          68.42,
+          -149.89,
+          -0.22
+        ]
+      }
+    }
+  },
+  "camera_keepout_for_enclosure": {
+    "modelled_plateau_mm": [
+      25.06,
+      28.26
+    ],
+    "modelled_protrusion_mm": 0.7,
+    "keepout_footprint_mm": [
+      31.06,
+      34.260000000000005
+    ],
+    "keepout_depth_behind_back_glass_mm": 5.0,
+    "note": "No contact anywhere in this volume; lens rings not modelled, so depth is deliberately generous"
+  }
+}
