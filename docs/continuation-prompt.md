@@ -1,4 +1,4 @@
-> **Working shell checkpoint:** See hardware/river-stone/iphone-mount/shell-study-v1/README.md. Exported shell STL has a nonmanifold edge; do not print or claim a phone-removal pass. Cable dimensions and passed-fit spacer choice pending.
+> **Working shell checkpoint:** See hardware/river-stone/iphone-mount/shell-study-v1/README.md. Exported shell STL has a nonmanifold edge; do not print or claim a phone-removal pass. Plug dimensions recorded (18 L × 8.25 W × 5.25 H mm); generator updated but exports predate measurements. Cable diameter, bank port and passed-fit spacer choice pending.
 
 > **Physical update — 10 October 2026:** UGREEN 25683 confirmed; v3 0p20 body fit passed. Printed R3 exposed inactive corners: adopt derived R6.5, preserving aperture bounds. See hardware/river-stone/iphone-mount/README.md for current files and packaging status. Later physical evidence supersedes older R3 acceptance.
 

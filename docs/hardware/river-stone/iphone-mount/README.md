@@ -19,7 +19,7 @@ The earlier R3 paper pass is superseded by the later printed corner observation.
 
 ## Current working shell
 
-[Curved shell checkpoint](shell-study-v1/README.md): rear keeper bars, bank cover and small M3 hardware coupon prepared. Full shell export has a nonmanifold edge; phone collision/removal, wall thickness and print release checks remain incomplete. Cable dimensions and passed-fit spacer choice are pending.
+[Curved shell checkpoint](shell-study-v1/README.md): rear keeper bars, bank cover and small M3 hardware coupon prepared. Full shell export has a nonmanifold edge; phone collision/removal, wall thickness and print release checks remain incomplete. Plug dimensions are recorded; cable diameter, bank-port routing and passed-fit spacer choice are pending.
 
 ## Files and provenance
 
@@ -51,7 +51,7 @@ The supplied v3 coordinates put the top end at local +X, unlike the earlier scre
 
 Use the UGREEN 25683 intact in a separate serviceable restraint. The handover reports 435 g ±5 g, two USB-A outputs and one USB-C bidirectional port; these are supplied manufacturer-reference data, not measurements repeated here. Keep a heat escape path and separation from the phone. Charging behaviour, runtime, temperature and any concurrent charging/output remain untested.
 
-Route the lead behind the phone after its plug exits. The old 25 mm per-end allocations are historical guesses, not design requirements. The compact study exposes an adjustable plug-length parameter and clearly labelled cable-turn/bank-port boxes. Required before final cable-channel geometry: Lightning plug length/width/thickness, cable diameter/bend requirement and actual bank port position. No selected cable or native Fusion design is claimed.
+Route the lead behind the phone after its plug exits. The old 25 mm per-end allocations are historical guesses, not design requirements. The compact study exposes an adjustable plug-length parameter and clearly labelled cable-turn/bank-port boxes. User-measured Lightning plug: 18 mm length × 8.25 mm width × 5.25 mm height, interpreting length as plugged-in phone-edge to flexible cable. See cable-measurements.json. Shell generator parameters are updated; existing study exports predate the measurements. Cable diameter/bend requirement and actual bank port position remain required before final cable-channel geometry. No native Fusion design is claimed.
 
 ## Next physical work
 

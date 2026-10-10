@@ -289,3 +289,6 @@ User-proposed 6.5 mm overlap on each outer phone edge gives a 137.9 × 62.7 mm n
 
 
 **10 October — shell study checkpoint:** Curved-shell working checkpoint: internal mesh validity does not survive STL reload (nonmanifold edge). Actual-phone collision/removal checks blocked; no full-shell release. Bank/bay/cover/camera internal intersections are zero. M3 coupon sliced at 17m36s / 2.86g, with embedded bed-temperature warning; no physical hardware test. See hardware/river-stone/iphone-mount/shell-study-v1/README.md.
+
+
+**10 October — Lightning plug measured:** User reports 18 mm L, 5.25 mm H, 8.25 mm W following the plugged-in projection request. Recorded in cable-measurements.json; shell generator updated with explicit provisional clearances. Existing shell exports are not regenerated or newly validated. Cable diameter/bend, bank port and passed-fit spacer remain unresolved.

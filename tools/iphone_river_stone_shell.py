@@ -111,14 +111,22 @@ channels={
  'rear-camera':pose(box(90,24,9,x=85,y=22,z=15.5)),
 }
 for name,ch in channels.items():shell=shell.cut(ch)
-# Preserve cable adjustment until actual plug dimensions arrive.
-plug=pose(box(15,14,12,x=-82.95,z=7.6));turn=pose(box(23,20,16,x=-82.95,z=21.6))
+# User measured plug, with separate provisional manufacturing allowances.
+cable=json.loads((BASE/'cable-measurements.json').read_text(encoding='utf-8'))
+plug_dims=cable['lightning_plug_mm'];allow=cable['provisional_clearance_mm']
+plug_length=plug_dims['length']+allow['beyond_plug_end']+allow['cut_overlap_into_phone_end']
+plug_x=-75.45+allow['cut_overlap_into_phone_end']-plug_length/2
+plug=pose(box(plug_length,plug_dims['width']+2*allow['radial_each_side'],plug_dims['height']+2*allow['radial_each_side'],x=plug_x,z=7.6))
+# Turn space remains a placeholder, centred at the measured flexible-cable start.
+turn=pose(box(23,20,16,x=-75.45-plug_dims['length'],z=21.6))
 shell=shell.cut(plug).cut(turn)
 shell=shell.clean();log('Shell operations complete')
 phone=pose(box(150.9,75.7,8.3,z=5.75))
 camera=pose(box(34.3,31.1,5,x=55.836,y=19.62,z=12.42))
 parts={'shell':shell,'cover':cover,**keepers}
 report={'status':'engineering study, not released for printing','profiles':profiles,'aperture_mm':[138.9,63.7],'aperture_radius_mm':6.5,'integral_passed_fit':'Mesh Boolean union using source fit STL; editable outer/inner STEP loft sources; no fused final STEP','spacer_assumption_mm':.4,'keeper_hardstop_local_z_mm':11.5,'pad_gap_mm':1.58,'proposed_foam_uncompressed_mm':2,'base_fasteners_xy_mm':base_fasteners,'fasteners':'M3 clearance 3.4; nut pockets 6.8 circumscribed diameter; actual hardware trial pending','checks':{},'limits':['Cable assumptions unresolved','Microphone route geometry is not acoustic proof','Inner loft is not a constant normal wall offset','Numerical isolated components below 0.00001 mm3 are discarded','Camera location is conservative community-model estimate','Retainer pad pressure and service access untested']}
+report['cable_inputs']=cable
+report['plug_cut_mm']=[plug_length,plug_dims['width']+2*allow['radial_each_side'],plug_dims['height']+2*allow['radial_each_side']]
 for name,sh in parts.items():
  report['checks'][name]={'valid':sh.isValid(),'solids':len(sh.Solids()),'volume_mm3':sh.Volume()}
  log(name+': '+str(report['checks'][name]))

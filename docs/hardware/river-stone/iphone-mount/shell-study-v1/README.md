@@ -22,9 +22,15 @@ Final shell/cover/keeper geometry is mesh-based STL/GLB. The two STEP files cont
 
 The embedded 3MF reports `bed_temperature_too_high_than_filament` (1000C001) from the inherited 55 °C Generic PLA profile. Review the actual filament/bed settings in the slicer before printing. No printer was contacted and no physical nut fit is claimed.
 
+## Cable measurement update
+
+User supplied **18 mm L × 8.25 mm W × 5.25 mm H** on 10 October. Length is interpreted against the preceding request: plugged-in phone edge to flexible cable, including strain relief. The source generator now reads `../cable-measurements.json` and reserves a 20 × 10.25 × 7.25 mm plug cut (1 mm clearance beyond the end and around the sides, plus 1 mm cut overlap into the phone-end reservation). The bend-space placeholder follows the measured cable start; cable diameter and bend behaviour remain unknown.
+
+**Existing STL/GLB/STEP study outputs and validation predate this measurement and have not been regenerated.** Resolve the export defect and regenerate/check the model before relying on the new cable geometry. The historical compact-layout outputs retain their original assumptions.
+
 ## Inputs still required
 
-- Lightning plug projection from the plugged-in phone edge to flexible cable, maximum housing width/thickness and cable diameter. User has supplied a photo; it has no reliable measurement scale.
+- Cable diameter and bend space.
 - Bank port being used and cable exit position.
 - Whether 0.4 mm, 0.8 mm or no spacers were used in the passed fit.
 
