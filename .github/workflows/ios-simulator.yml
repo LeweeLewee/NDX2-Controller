@@ -47,14 +47,21 @@ jobs:
           python3 tools/ios_tls_probe.py > local/ios-ci/tls-probe.log 2>&1 &
           echo $! > local/ios-ci/tls-probe.pid
           python3 - <<'PY'
-          import json, time
+          import json, os, time
           from pathlib import Path
-          for _ in range(60):
+          deadline = time.monotonic() + 180
+          pid = int(Path('local/ios-ci/tls-probe.pid').read_text())
+          while time.monotonic() < deadline:
+              try:
+                  os.kill(pid, 0)
+              except ProcessLookupError:
+                  raise SystemExit(Path('local/ios-ci/tls-probe.log').read_text())
               if json.loads(Path('ios/StillWaterTests/TLSProbe.json').read_text()).get('available'):
                   break
               time.sleep(1)
           else:
-              raise SystemExit('Synthetic TLS peer did not start')
+              print(Path('local/ios-ci/tls-probe.log').read_text())
+              raise SystemExit('Synthetic TLS peer did not start within 180 seconds')
           PY
       - name: Build and test unsigned simulator app
         run: |
@@ -117,14 +124,21 @@ jobs:
           python3 tools/ios_tls_probe.py > local/ios-ci/tls-probe.log 2>&1 &
           echo $! > local/ios-ci/tls-probe.pid
           python3 - <<'PY'
-          import json, time
+          import json, os, time
           from pathlib import Path
-          for _ in range(60):
+          deadline = time.monotonic() + 180
+          pid = int(Path('local/ios-ci/tls-probe.pid').read_text())
+          while time.monotonic() < deadline:
+              try:
+                  os.kill(pid, 0)
+              except ProcessLookupError:
+                  raise SystemExit(Path('local/ios-ci/tls-probe.log').read_text())
               if json.loads(Path('ios/StillWaterTests/TLSProbe.json').read_text()).get('available'):
                   break
               time.sleep(1)
           else:
-              raise SystemExit('Synthetic TLS peer did not start')
+              print(Path('local/ios-ci/tls-probe.log').read_text())
+              raise SystemExit('Synthetic TLS peer did not start within 180 seconds')
           PY
       - name: Exercise native TLS on iOS 26
         run: |

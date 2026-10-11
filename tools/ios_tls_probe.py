@@ -22,7 +22,7 @@ def prepare(directory):
     def openssl(*args):
         print('Generating synthetic certificate:', args[0], flush=True)
         subprocess.run(['openssl', *args], cwd=directory, check=True,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=20)
+                       stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=60)
 
     root_config = '''[req]
 distinguished_name = dn
@@ -104,7 +104,9 @@ def serve(directory, metadata):
         threading.Thread(target=peer.serve_forever, daemon=True).start()
         peers.append(peer)
         values[name] = 'https://127.0.0.1:' + str(peer.server_port)
-    metadata.write_text(json.dumps(values), encoding='utf-8')
+    pending = metadata.with_suffix('.pending')
+    pending.write_text(json.dumps(values), encoding='utf-8')
+    pending.replace(metadata)
     print('Synthetic TLS peers ready on loopback only', flush=True)
     threading.Event().wait(1200)
     for peer in peers:
