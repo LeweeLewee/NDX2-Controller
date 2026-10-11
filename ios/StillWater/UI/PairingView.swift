@@ -82,7 +82,8 @@ struct PairingView: View {
                 Task {
                     defer { working = false }
                     do { let record = try await BridgeClient.replaceTrust(certificate); model.replaceTransport(BridgeClient(record)); message = "Trust replaced after verification." }
-                    catch { message = "Trust replacement: " + PairingFailure(stage:.connect,cause:error).message + " Saved binding retained." }
+                    catch let failure as TrustReplacementFailure { message = failure.message }
+                    catch { message = "Trust replacement unavailable; saved binding retained." }
                 }
             }
         } message: { Text("Use only after independently verifying this certificate fingerprint. The saved origin cannot change.\n" + fingerprint) }

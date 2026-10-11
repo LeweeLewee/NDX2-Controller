@@ -147,6 +147,14 @@ import XCTest
         }
         m.deactivate()
     }
+    func testTrustReplacementSeparatesRecoveryFromTLSWithoutLeakingErrors() {
+        let local = TrustReplacementFailure(stage:"Read saved pairing",cause:BridgeFailure.notConfigured)
+        XCTAssertTrue(local.message.contains("local recovery"))
+        let auth = TrustReplacementFailure(stage:"Verify bridge snapshot",cause:BridgeFailure.unauthenticated)
+        XCTAssertTrue(auth.message.contains("saved pairing")); XCTAssertFalse(auth.message.contains("code"))
+        let network = TrustReplacementFailure(stage:"Verify bridge snapshot",cause:URLError(.timedOut,userInfo:[NSLocalizedDescriptionKey:"secret"]))
+        XCTAssertFalse(network.message.contains("secret"))
+    }
     func testFixtureRevisionAdvancesThroughPauseResumeAndSelection() async throws {
         let t = FixtureTransport()
         let first = try await t.send(BridgeRequest("snapshot"))
