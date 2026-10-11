@@ -62,6 +62,41 @@ class M2Tests(unittest.TestCase):
         self.assertEqual(self.service.naim.calls,[('transport','pause'),('transport','resume')])
         self.service.naim.transport('pause'); self.service.naim.play('inputs/tidal/tracks/101','replace')
         self.assertEqual(self.service.naim.status()['transportState'],'2')
+    def test_transport_rejects_changed_track_before_journaling(self):
+        self.client.request('snapshot')
+        self.service.naim.transport('next')
+        self.service.naim.calls.clear()
+        reply = self.client.request('transport', {'command':'pause',
+            'expected_reference':'inputs/tidal/tracks/101', 'expected_state':'playing'})
+        self.assertEqual(reply['outcome'], 'rejected')
+        self.assertEqual(reply['error']['code'], 'STATE_CHANGED')
+        self.assertEqual(self.service.naim.calls, [])
+        self.assertEqual(self.vault.data['commands'], {})
+
+    def test_play_resolution_failure_is_definite_without_mutation(self):
+        self.client.request('snapshot')
+        with patch.object(self.service.naim, 'browse', side_effect=ValueError('unavailable')):
+            reply = self.client.request('play', {'reference':'inputs/tidal/tracks/101'})
+        self.assertEqual(reply['outcome'], 'rejected')
+        self.assertEqual(self.service.naim.calls, [])
+        self.assertEqual(self.vault.data['commands'], {})
+        reply = self.client.request('play', {'reference':'inputs/tidal/tracks/101'})
+        self.assertEqual(reply['outcome'], 'submitted')
+
+    def test_queue_selection_checks_current_queue_and_is_not_replayed(self):
+        self.client.request('snapshot')
+        queue = {'children':[{'ussi':'inputs/playqueue/7','name':'Selected track'}]}
+        with patch.object(self.service.naim, 'queue', return_value=queue), \
+             patch.object(self.service.naim, 'select', create=True) as select:
+            request = {'reference':'inputs/playqueue/7'}
+            reply = self.req('play',request)
+            self.assertEqual(reply['outcome'],'submitted')
+            self.req('play',request)
+            select.assert_called_once_with('inputs/playqueue/7')
+        self.client.request('snapshot')
+        reply = self.client.request('play',{'reference':'inputs/playqueue/999'})
+        self.assertEqual(reply['outcome'],'rejected')
+
     def test_pair_expiry_single_use_revocation_restart(self):
         pairing = Pairing(self.vault, lambda:self.time[0])
         code=pairing.issue(); self.time[0]+=121

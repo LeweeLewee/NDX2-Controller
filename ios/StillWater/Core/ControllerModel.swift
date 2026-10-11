@@ -53,6 +53,7 @@ struct Preview {
     @Published var colorPreview: Preview?
     @Published var queueArtwork: [String:Preview] = [:]
     @Published private(set) var libraryFirstIndex = 0
+    @Published private(set) var preparingCommand = false
     private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
     private var missingArtUntil: [String:Double] = [:]
     var fieldPreview: Preview? {
@@ -90,7 +91,7 @@ struct Preview {
         self.transport = transport; self.clock = clock; fixture = transport is FixtureTransport
         if restore { unknownAction = UserDefaults.standard.string(forKey: "uncertain-command") }
     }
-    var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation }
+    var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation && !preparingCommand }
     var touched: Bool { rest == .touched }
     var artworkReference: String? { context.screen == .detail ? context.selected.artwork : player.artwork }
     func replaceTransport(_ value: BridgeTransport) {
@@ -155,7 +156,7 @@ struct Preview {
         // iOS owns actual lock. Releasing the idle timer cannot force a hardware sleep deadline.
         let idleHold = now - lastTouch < Double(preferences.timeout) && (rest == .touched || (context.screen == .ask && voiceState == "recording"))
         applyIdlePolicy?(idleHold)
-        guard inFlight == nil, pendingAction == nil else { return }
+        guard inFlight == nil, pendingAction == nil, !preparingCommand else { return }
         if now >= nextPoll {
             nextPoll = now + 2
             readTask = Task { await self.refresh() }
@@ -199,7 +200,8 @@ struct Preview {
                 if r.outcome == "unknown" { markUnknown() }
                 else if unknownAction == nil { UserDefaults.standard.removeObject(forKey: "uncertain-command") }
             }
-            if r.outcome == "rejected" { status = r.error["code"].text ?? "Request unavailable" }
+            if r.outcome == "rejected" { status = "Request not sent: " + (r.error["code"].text ?? "unavailable") }
+            if r.outcome == "unknown" { status = "Command outcome unknown. Check the player before acknowledging in Connection." }
             return r
         } catch {
             guard generation == gen, inFlight == token else { return nil }
@@ -210,7 +212,7 @@ struct Preview {
             return nil
         }
     }
-    func refresh() async {
+    func refresh(includeMembership: Bool = true) async {
         let started = clock()
         guard let r = await perform(BridgeRequest("snapshot")), r.outcome == "observed",
               let valid = r.data["valid_for_ms"].number, (1...5000).contains(valid),
@@ -222,7 +224,7 @@ struct Preview {
         if p.artwork != player.artwork { artwork = nil; colorPreview = nil; nextArtAttempt = 0 }
         player = p; queue = r.data["queue"].values.map(MusicItem.init)
         account = r.data["account"].text ?? "disconnected"
-        if context.screen == .now { await currentMembership() }
+        if includeMembership && context.screen == .now { await currentMembership() }
     }
     private func rememberArtwork() {
         guard online, clock() < freshUntil else { recentArtwork = []; return }
@@ -380,16 +382,32 @@ struct Preview {
         return selectedIsPlaying ? "Playing" : "Play"
     }
     func mutate(_ action: String, _ args: [String: JSONValue], target: String? = nil) {
-        guard controlsAvailable, unknownAction != action, cancelReadForInteraction() else { return }
+        guard unknownAction != action else { status = "Check the player, then acknowledge the uncertain command in Connection."; return }
+        guard controlsAvailable, cancelReadForInteraction() else { status = "Waiting for a fresh player connection"; return }
         // Reserve synchronously so two taps cannot dispatch before the task starts.
-        noteContact(); pendingTarget = target; pendingAction = action
+        noteContact(); preparingCommand = true; pendingTarget = target; pendingAction = action
+        let expectedReference = player.current.reference, expectedState = player.state
         let gen = generation
         readTask = Task {
-            defer { if self.generation == gen && self.inFlight == nil { self.pendingAction = nil; self.pendingTarget = nil } }
+            defer { self.preparingCommand = false; if self.generation == gen && self.inFlight == nil { self.pendingAction = nil; self.pendingTarget = nil } }
             guard self.generation == gen, !Task.isCancelled else { return }
-            guard let r = await self.perform(BridgeRequest(action, args)) else { return }
-            if r.outcome == "submitted" { self.status = "Request sent; checking player" }
+            // Refresh before a write: background metadata failures must not leave the
+            // bridge freshness gate stale while the screen still looks connected.
+            await self.refresh(includeMembership:false)
+            guard self.generation == gen, self.online, self.clock() < self.freshUntil, !Task.isCancelled else { return }
+            var checkedArgs = args
+            if action == "transport", ["pause","resume"].contains(args["command"]?.text ?? "") {
+                guard self.player.current.reference == expectedReference, self.player.state == expectedState else {
+                    self.status = "Player changed. Check Now Playing before trying again."; return
+                }
+                checkedArgs["expected_reference"] = .string(expectedReference)
+                checkedArgs["expected_state"] = .string(expectedState)
+            }
+            self.pendingTarget = target
+            guard let r = await self.perform(BridgeRequest(action, checkedArgs)) else { return }
+            let commandStatus = r.outcome == "submitted" ? "Request sent; checking player" : self.status
             await self.refresh()
+            if r.outcome != "submitted" { self.status = commandStatus }
             if action == "library_save", let ref = args["reference"]?.text {
                 let gen = self.generation
                 if let observed = await self.perform(BridgeRequest("library_state",["reference":.string(ref)])), observed.outcome == "observed", gen == self.generation {
@@ -459,7 +477,7 @@ struct Preview {
         let expiring = eligible.first { (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5 }
         guard [.queue,.detail,.library,.find].contains(screen), let item = missing ?? expiring else { return }
         let gen = generation
-        let renewing = queueArtwork[item.reference] != nil || item.artwork != nil
+        let renewing = queueArtwork[item.reference] != nil
         var completed = false
         defer {
             // Navigation cancellation is not evidence that artwork is missing.

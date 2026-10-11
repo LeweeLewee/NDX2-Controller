@@ -147,6 +147,28 @@ import XCTest
         }
         m.deactivate()
     }
+    func testPauseRefusesChangedTrackDuringPreflight() async {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        t.fixture.track = 1
+        m.mutate("transport",["command":.string("pause")]); await settle()
+        XCTAssertTrue(t.fixture.mutations.isEmpty)
+        XCTAssertTrue(m.status.contains("Player changed"))
+        m.deactivate()
+    }
+    func testDetailPlayRefreshesThenStartsChosenTrack() async {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
+        m.context.screen = .detail
+        t.requests = []
+        m.mutate("play",["reference":.string("inputs/tidal/tracks/103")],target:"play-detail")
+        m.mutate("play",["reference":.string("inputs/tidal/tracks/102")],target:"play-detail")
+        await settle()
+        XCTAssertEqual(t.fixture.mutations,["play"])
+        XCTAssertEqual(t.requests.first,"snapshot")
+        XCTAssertEqual(m.player.current.reference,"inputs/tidal/tracks/103")
+        m.deactivate()
+    }
     func testPlayLabelRequiresFreshMatchingPlayerObservation() async throws {
         var now = 100.0
         let m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)

@@ -20,7 +20,7 @@ MUTATIONS = {'play', 'amplifier', 'transport', 'library_save'}
 FIELDS = {'snapshot': set(), 'search': {'query', 'kind', 'cursor', 'result_id', 'offset'},
           'artist_bio': {'reference'}, 'browse': {'reference', 'offset'}, 'queue': {'offset'},
           'library_state': {'reference'}, 'library_save': {'reference', 'saved'},
-          'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command'},
+          'play': {'reference'}, 'amplifier': {'direction'}, 'transport': {'command', 'expected_reference', 'expected_state'},
           'voice_review': {'fixture'}, 'suggest': {'prompt'},
           'library_page': {'kind', 'cursor', 'offset'}, 'artwork': {'reference', 'side', 'pixel_offset', 'encoding'},
           'battery_report': {'level', 'charging', 'client_id'}, 'charge?': set()}
@@ -185,6 +185,8 @@ class Contract:
                     'library_save': {'reference', 'saved'}, 'amplifier': {'direction'}, 'transport': {'command'}}
         if not required.get(action, set()).issubset(args): raise ContractError('INVALID_ARGUMENT')
         if action == 'amplifier' and args['direction'] not in ('up', 'down'): raise ContractError('INVALID_ARGUMENT')
+        if ('expected_reference' in args) != ('expected_state' in args): raise ContractError('INVALID_ARGUMENT')
+        if 'expected_state' in args and args['expected_state'] not in ('playing', 'paused', 'stopped'): raise ContractError('INVALID_ARGUMENT')
         if action == 'transport' and args['command'] not in ('pause', 'resume', 'stop', 'next', 'prev'): raise ContractError('INVALID_ARGUMENT')
         if action in ('search', 'library_page') and args.get('kind', 'albums') not in ('albums','tracks','artists','playlists'):
             raise ContractError('INVALID_ARGUMENT')
@@ -218,6 +220,21 @@ class Contract:
             if previous:
                 if previous['fingerprint'] != fingerprint: raise ContractError('REQUEST_ID_CONFLICT')
                 return self.envelope(rid, previous['outcome'], error='OUTCOME_UNKNOWN' if previous['outcome'] == 'unknown' else None)
+            if self.clock() - self.fresh.get(device, float('-inf')) > 5: raise ContractError('STATE_STALE')
+            # Read-only preflight failures cannot create uncertain mutations.
+            if action == 'transport' and 'expected_reference' in args:
+                current = self.service.request('current_item', {})
+                player = self.service.request('status', {})
+                if current.get('reference') != args['expected_reference'] or player.get('state') != args['expected_state']:
+                    raise ContractError('STATE_CHANGED')
+            if action == 'play':
+                reference = args['reference']
+                if re.fullmatch(r'inputs/playqueue/[0-9]+', reference):
+                    items = self.service.request('queue', {}).get('items', [])
+                    if not any(i.get('reference') == reference for i in items): raise ContractError('NATIVE_UNRESOLVED')
+                else:
+                    detail = self.service.request('browse', {'reference': reference})
+                    if not detail['playable']: raise ContractError('NATIVE_UNRESOLVED')
             if self.clock() - self.fresh.get(device, float('-inf')) > 5: raise ContractError('STATE_STALE')
             # Fail closed when full; never evict an ID and accidentally re-execute it.
             if len(self.vault.data['commands']) >= 10000: raise ContractError('JOURNAL_FULL')
@@ -263,13 +280,9 @@ class Contract:
                 data = {'transcript': 'Find quiet instrumental albums', 'queries': ['quiet instrumental'], 'fixture': True}
             else:
                 offset = args.get('offset', 0)
-                passed = {k: v for k, v in args.items() if k != 'offset'}
+                passed = {k: v for k, v in args.items() if k not in ('offset','expected_reference','expected_state')}
                 if action == 'browse': passed['offset'] = offset
                 if action == 'queue': passed.update(artwork_offset=offset, artwork_limit=PAGE_SIZE)
-                if action == 'play':
-                    # Resolve on EVERY play request, never trust cached catalogue IDs.
-                    detail = self.service.request('browse', {'reference': args['reference']})
-                    if not detail['playable']: raise ContractError('NATIVE_UNRESOLVED')
                 if action == 'library_state': passed['fresh'] = True
                 data = self.service.request(action, passed)
                 if action == 'browse':

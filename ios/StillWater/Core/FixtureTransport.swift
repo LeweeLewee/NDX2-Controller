@@ -47,7 +47,10 @@ import Foundation
         case "transport", "play", "amplifier", "library_save":
             mutations.append(request.action)
             if request.action == "library_save", let ref = request.args["reference"]?.text { memberships[ref] = request.args["saved"]?.flag == true ? "saved" : "unsaved" }
-            if request.action == "play" { state = "playing" }
+            if request.action == "play" {
+                state = "playing"
+                if let ref = request.args["reference"]?.text, let id = Int(ref.split(separator:"/").last ?? ""), (101...103).contains(id) { track = id - 101 }
+            }
             if request.action == "transport" {
                 switch request.args["command"]?.text {
                 case "pause": state = "paused"

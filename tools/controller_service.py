@@ -152,6 +152,13 @@ class Bridge:
                     'items': [native_item(i) for i in data.get('children', [])], 'total': total}
         if action == 'play':
             reference = args.get('reference')
+            if isinstance(reference, str) and reference.startswith('inputs/playqueue/'):
+                native_ref(reference, queue=True)
+                # Verify again immediately before selecting; queue IDs are not catalogue IDs.
+                if not any(i.get('ussi') == reference for i in self.naim.queue().get('children', [])):
+                    raise ValueError('Queue item no longer exists')
+                self.naim.select(reference)
+                return {'message': 'Queue selection sent. Check now playing.'}
             if reference not in self.resolved:
                 raise ValueError('Resolve this item through Naim before playing')
             # Read before every mutation; do not silently proceed if the player is unreachable.

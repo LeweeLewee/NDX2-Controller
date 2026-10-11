@@ -388,7 +388,8 @@ struct StillWaterView: View {
     }
     private var detailMembershipLabel: String {
         if model.pendingAction == "library_save" { return "Saving…" }
-        if model.unknownAction == "library_save" || model.context.membership == "unknown" { return model.context.selected.kind == "artists" ? "Follow ?" : "Library ?" }
+        if model.unknownAction == "library_save" { return "Check saved status" }
+        if model.context.membership == "unknown" { return "Status unavailable" }
         if model.context.selected.kind == "artists" { return model.context.membership == "saved" ? "✓ Following" : "Follow" }
         return model.context.membership == "saved" ? "✓ In your library" : "Add to library"
     }
@@ -410,10 +411,13 @@ struct StillWaterView: View {
             }
             if item.kind == "tracks" {
                 icon(.heart,id:"membership-write",label:model.membershipAction,x:488,y:212,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }
+            } else if model.context.membership == "unknown" && model.unknownAction != "library_save" {
+                label("Saved status unavailable",id:"membership-unavailable",x:488,y:228,w:256,h:40,size:18,alpha:0.55)
             } else { button(detailMembershipLabel,id:"membership-write",x:488,y:212,w:232,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction) }
             if let albumRef = item.albumReference {
                 button("Album ›",id:"album-link",x:760,y:212,w:144,border:false) { model.details(MusicItem(.object(["reference":.string(albumRef)]))) }
             }
+            if !model.status.isEmpty || model.unknownAction != nil { label(model.unknownAction != nil ? "Check the player; acknowledge the uncertain command in Connection." : model.status,id:"detail-status",x:336,y:280,w:664,h:44,size:18,alpha:0.7,lines:2) }
             if item.kind != "tracks" {
                 rows(y:328,height:152,tracks:true)
                 LinearGradient(colors:[.clear,palette.dark.scale(0.3).color],startPoint:.top,endPoint:.bottom).frame(width:952,height:32).position(x:524,y:464).allowsHitTesting(false)
@@ -486,7 +490,7 @@ struct StillWaterView: View {
                         let side = sizes[min(i,6)]
                         let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette)
                         ZStack(alignment:.topLeading) {
-                            Button { model.context.queueSelection = i; model.noteContact() } label: {
+                            Button { model.context.queueSelection = i; model.mutate("play",["reference":.string(item.reference)],target:"queue-\(i)") } label: {
                                 ZStack {
                                     palette.dark.color
                                     if let image { Image(uiImage:image).resizable().interpolation(.high) }
@@ -514,6 +518,7 @@ struct StillWaterView: View {
             }.frame(width:960,height:284).position(x:524,y:254)
             label(selected?.reference == model.player.current.reference ? "PLAYING NOW" : "UP NEXT",id:"queue-timing",x:48,y:392,w:952,h:20,size:15,alpha:0.55,caps:true)
             label(selected?.title ?? "Queue unavailable",id:"queue-title",x:48,y:412,w:700,h:42,size:32,serif:true)
+            if !model.status.isEmpty { label(model.status,id:"queue-status",x:48,y:454,w:952,h:26,size:15,alpha:0.7) }
             if model.context.nextOffset != nil { button("More",id:"queue-more",x:860,y:388) { model.loadPage(more:true) } }
         }
     }

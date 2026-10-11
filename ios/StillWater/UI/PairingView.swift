@@ -45,6 +45,10 @@ struct PairingView: View {
                     .font(Design.font(18)).foregroundStyle(Design.ink.opacity(0.7))
             }.buttonStyle(QuietButtonStyle()).tint(Design.ink).padding(.bottom,16)
         }
+        .onAppear {
+            do { if let record = try SecureEnrollment.load() { origin = record.origin.absoluteString } }
+            catch { message = "Saved pairing could not be read. Recovery is required." }
+        }
         .fileImporter(isPresented:$showImporter,allowedContentTypes:[.data]) { result in
             do {
                 let url = try result.get(), granted = url.startAccessingSecurityScopedResource()
@@ -78,7 +82,7 @@ struct PairingView: View {
                 Task {
                     defer { working = false }
                     do { let record = try await BridgeClient.replaceTrust(certificate); model.replaceTransport(BridgeClient(record)); message = "Trust replaced after verification." }
-                    catch { message = "Trust verification failed; saved binding retained." }
+                    catch { message = "Trust replacement: " + PairingFailure(stage:.connect,cause:error).message + " Saved binding retained." }
                 }
             }
         } message: { Text("Use only after independently verifying this certificate fingerprint. The saved origin cannot change.\n" + fingerprint) }
