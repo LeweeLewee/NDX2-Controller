@@ -3,6 +3,7 @@ import Foundation
 @MainActor final class FixtureTransport: BridgeTransport {
     private var samples: [String: JSONValue] = [:]
     var state = "playing", saved = "unsaved", track = 0
+    private var revision = 0
     private var memberships: [String:String] = [:]
     var mutations: [String] = []
     var fail = false
@@ -140,6 +141,7 @@ import Foundation
             item["reference"] = ref; d["item"] = .object(item); r["data"] = .object(d)
         }
         if request.action == "snapshot", case .object(var d) = r["data"], case .object(var p) = d["player"] {
+            revision += 1; d["revision"] = .int(revision)
             if state == "playing" || state == "paused" { p["title"] = .string(["A Still Morning","Soft Light","Quiet Hours"][track]) }
             d["player"] = .object(p)
             if case .object(var current) = d["current_item"] {

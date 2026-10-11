@@ -147,6 +147,17 @@ import XCTest
         }
         m.deactivate()
     }
+    func testFixtureRevisionAdvancesThroughPauseResumeAndSelection() async throws {
+        let t = FixtureTransport()
+        let first = try await t.send(BridgeRequest("snapshot"))
+        _ = try await t.send(BridgeRequest("transport",["command":.string("pause")]))
+        let paused = try await t.send(BridgeRequest("snapshot"))
+        _ = try await t.send(BridgeRequest("transport",["command":.string("resume")]))
+        let resumed = try await t.send(BridgeRequest("snapshot"))
+        XCTAssertLessThan(try XCTUnwrap(first.data["revision"].number),try XCTUnwrap(paused.data["revision"].number))
+        XCTAssertLessThan(try XCTUnwrap(paused.data["revision"].number),try XCTUnwrap(resumed.data["revision"].number))
+        XCTAssertEqual(resumed.data["player"]["state"].text,"playing")
+    }
     func testPauseRefusesChangedTrackDuringPreflight() async {
         let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); await m.refresh(); m.contactEnded()
