@@ -309,19 +309,19 @@ final class PinnedTrust: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     static func replaceTrust(_ certificate: Data) async throws -> Enrollment {
         var stage = "Read saved pairing"
         do {
-        guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
-        guard var candidate = try SecureEnrollment.load(), candidate.state == "paired" else { throw BridgeFailure.notConfigured }
-        stage = "Read imported trust"
-        candidate.anchors = try Enrollment.certificates(certificate)
-        stage = "Verify bridge snapshot"
-        let probe = BridgeClient(candidate, persistRevocation: false), started = ProcessInfo.processInfo.systemUptime
-        let r = try await probe.send(BridgeRequest("snapshot"))
-        guard r.outcome == "observed", let valid = r.data["valid_for_ms"].number, (1...5000).contains(valid),
-              let age = r.data["age_ms"].number, age >= 0, age + valid <= 5000,
-              ProcessInfo.processInfo.systemUptime < started + Double(valid) / 1000 else { throw BridgeFailure.expired }
-        stage = "Save verified trust"
-        try SecureEnrollment.save(candidate)
-        return candidate
+            guard !RuntimeMode.demoOnly else { throw BridgeFailure.notConfigured }
+            guard var candidate = try SecureEnrollment.load(), candidate.state == "paired" else { throw BridgeFailure.notConfigured }
+            stage = "Read imported trust"
+            candidate.anchors = try Enrollment.certificates(certificate)
+            stage = "Verify bridge snapshot"
+            let probe = BridgeClient(candidate, persistRevocation: false), started = ProcessInfo.processInfo.systemUptime
+            let r = try await probe.send(BridgeRequest("snapshot"))
+            guard r.outcome == "observed", let valid = r.data["valid_for_ms"].number, (1...5000).contains(valid),
+                  let age = r.data["age_ms"].number, age >= 0, age + valid <= 5000,
+                  ProcessInfo.processInfo.systemUptime < started + Double(valid) / 1000 else { throw BridgeFailure.expired }
+            stage = "Save verified trust"
+            try SecureEnrollment.save(candidate)
+            return candidate
         } catch { throw TrustReplacementFailure(stage:stage,cause:error) }
     }
 }
