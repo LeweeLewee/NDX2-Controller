@@ -45,6 +45,28 @@ final class InteractionTests: XCTestCase {
         app.buttons["back"].tap()
         let image = XCTAttachment(screenshot:XCUIScreen.main.screenshot()); image.name = "Remediation-full-phone"; image.lifetime = .keepAlways; add(image)
     }
+    func testPlaybackButtonsDispatchFromRealScreens() {
+        let app = XCUIApplication(); app.launchArguments = ["--fixture"]
+        XCUIDevice.shared.orientation = .landscapeLeft; app.launch()
+        XCTAssertTrue(app.buttons["wake-contact"].waitForExistence(timeout:5)); app.buttons["wake-contact"].tap()
+        let transport = app.buttons["play-pause"]
+        XCTAssertTrue(transport.waitForExistence(timeout:5))
+        transport.tap(); expectLabel(transport,"Resume")
+        transport.tap(); expectLabel(transport,"Pause")
+        app.buttons["up-next"].tap()
+        let queued = app.buttons["queue-1"]
+        XCTAssertTrue(queued.waitForExistence(timeout:5)); queued.tap()
+        XCTAssertTrue(app.staticTexts["PLAYING NOW"].waitForExistence(timeout:5))
+        app.buttons["back"].tap()
+        XCTAssertTrue(app.staticTexts["Soft Light"].waitForExistence(timeout:5))
+        app.buttons["now-album"].tap()
+        let track = app.buttons["row-inputs/tidal/tracks/103"]
+        XCTAssertTrue(track.waitForExistence(timeout:5)); track.tap()
+        let play = app.buttons["play-detail"]
+        XCTAssertTrue(play.waitForExistence(timeout:5)); play.tap(); expectLabel(play,"Playing")
+        let capture = XCTAttachment(screenshot:XCUIScreen.main.screenshot())
+        capture.name = "Verified-track-play"; capture.lifetime = .keepAlways; add(capture)
+    }
     private func expectLabel(_ element: XCUIElement,_ label: String) {
         let changed = XCTNSPredicateExpectation(predicate:NSPredicate(format:"label == %@",label),object:element)
         XCTAssertEqual(XCTWaiter.wait(for:[changed],timeout:5),.completed)

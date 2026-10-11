@@ -338,7 +338,7 @@ struct StillWaterView: View {
                                     }.frame(maxWidth:.infinity,alignment:.leading)
                                     if tracks, let duration = item.duration { Text(time(duration)).font(Design.font(18)).opacity(0.55) }
                                 }.frame(maxWidth:.infinity,alignment:.leading).frame(height:64).contentShape(Rectangle())
-                            }.buttonStyle(.plain).audit("row-"+item.id,tap:true,scroll:true)
+                            }.buttonStyle(.plain).accessibilityIdentifier("row-"+item.id).audit("row-"+item.id,tap:true,scroll:true)
                             Button {
                                 model.mutate("library_save",["reference":.string(item.reference),"saved":.bool(item.saved != "saved")],target:"row-membership-"+item.id)
                             } label: {
@@ -499,6 +499,7 @@ struct StillWaterView: View {
                                     .overlay { if model.context.queueSelection == i { Rectangle().stroke(Design.ink.opacity(0.8),lineWidth:1.5).padding(-4) } }
                                     .frame(width:max(72,side),height:side).contentShape(Rectangle())
                             }.buttonStyle(.plain).frame(width:max(72,side),height:side).contentShape(Rectangle())
+                                .accessibilityIdentifier("queue-\(i)").accessibilityLabel("Play " + item.title)
                                 .audit("queue-\(i)",tap:true,scroll:true).position(x:max(72,side)/2,y:204-side/2)
                             if let image {
                                 Image(uiImage:image).resizable().interpolation(.high).frame(width:side,height:side).scaleEffect(x:1,y:-1)
