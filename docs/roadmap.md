@@ -189,3 +189,6 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 
 
 **24 October — remove unnecessary measurement gates:** Continue with 4 mm cable allowance, front USB assumption and adjustable recess/padding. Fix shell export and complete collision/service/retention checks; no cable diameter or historical spacer identification is required to progress.
+
+
+**24 October — user requests fresh fit trial:** Detailed print/fitting instructions added to sample-v3r1/README.md for the corrected R6.5 frame and optional 0.4/0.8 mm spacer comparison. Await this result; no new physical pass is inferred. Earlier reported body-fit evidence is preserved.
