@@ -195,7 +195,8 @@ import XCTest
     }
     func testExpiredGridCoverRenewsMetadataBeforeFetching() async throws {
         var now = 100.0
-        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        let t = FaultTransport()
+        let m = ControllerModel(transport:t,clock:{now},restore:false)
         m.active = true; m.snapshotMode = true; await m.refresh()
         m.context.screen = .library
         var item = MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))

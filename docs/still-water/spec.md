@@ -343,4 +343,4 @@ The earlier LVGL brief is in `codex-prompt.md` history only if Codex committed i
 
 
 ### 24 October implementation correction (D040)
-Artist album shelves retain the aligned text column and 96-unit covers, with tabs at y280 and covers at y344. Album captions are sans15 at70%, one line with ellipsis, below each cover with an8-unit gap; the shelf ends at468 inside the480-unit content area. Playing is an ink outline status at full text contrast, disabled for interaction without dimming its text. Live-beta controls outside the approved trial are disabled.
+Artist album shelves retain the aligned text column and 96-unit covers, with tabs at y280 and covers at y344. Album captions use sans-15 at 70% opacity, one line with ellipsis, below each cover with an 8-unit gap; the shelf ends at y468 inside the 480-unit content area. Playing is an ink outline status at full text contrast, disabled for interaction without dimming its text. Live-beta controls outside the approved trial are disabled.
