@@ -126,7 +126,7 @@ struct StillWaterView: View {
                 .overlay(Capsule().stroke(Design.ink.opacity(border ? 0.18 : 0),lineWidth:1))
                 .overlay(alignment:alignment == .leading ? .bottomLeading : .bottom) { if indicator { Rectangle().fill(Design.ink).frame(width:24,height:1).padding(.leading,alignment == .leading ? 18 : 0).padding(.bottom,8) } }
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(!enabled).opacity(enabled || activeState ? 1 : 0.35)
+        }.buttonStyle(ExplicitContrastButtonStyle()).disabled(!enabled).opacity(enabled || activeState ? 1 : 0.35)
             .accessibilityIdentifier(id).audit(id,font:size,tap:true,pill:true,text:title)
             .position(x:x+w/2,y:y+h/2)
     }
@@ -626,5 +626,12 @@ struct Ripples: View {
                     .animation(reduce ? nil : .linear(duration:3.6).repeatForever(autoreverses:false).delay(Double(i)*1.2),value:expand)
             }
         }.onAppear { expand = true }
+    }
+}
+
+// Disabled action opacity is explicit above; the native plain style also dims labels.
+private struct ExplicitContrastButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.opacity(configuration.isPressed ? 0.7 : 1)
     }
 }
