@@ -2,7 +2,7 @@
 
 10 October 2026. **Not released for full-shell printing.** Based on original 01, iPhone 11 and UGREEN 25683. The passed v3 0p20 body fit is retained, with derived, unprinted R6.5 aperture corners.
 
-The candidate integrates the mounting frame into a curved shell, with two removable rear keeper bars and an underside bank cover. Four padded bank supports and two strap paths allow bank removal before phone service. Proposed keeper screws close against hard stops; foam thickness and preload are provisional until the spacer used for the passed fit is confirmed. Feet, cable routing and bank-port access are unfinished.
+The candidate integrates the mounting frame into a curved shell, with two removable rear keeper bars and an underside bank cover. Four padded bank supports and two strap paths allow bank removal before phone service. Proposed keeper screws close against hard stops; foam thickness and preload are provisional with recess/pad adjustment to be resolved in the retention design. Feet, cable routing and bank-port access are unfinished.
 
 Bounds are approximately 211.1 × 145.3 × 105 mm, versus the earlier 210 × 145 × 102 mm packaging proposal. Curved lofts and spline overshoot account for the difference. The cavity uses radial profile insets, not a verified constant wall thickness. Print orientation/support and wall-depth checks remain open.
 
@@ -28,10 +28,10 @@ User supplied **18 mm L × 8.25 mm W × 5.25 mm H** on 10 October. Length is int
 
 **Existing STL/GLB/STEP study outputs and validation predate this measurement and have not been regenerated.** Resolve the export defect and regenerate/check the model before relying on the new cable geometry. The historical compact-layout outputs retain their original assumptions.
 
-## Inputs still required
+## Working assumptions updated 24 October
 
-- Cable diameter and bend space.
-- Bank port being used and cable exit position.
-- Whether 0.4 mm, 0.8 mm or no spacers were used in the passed fit.
+- User accepts a 4 mm cable allowance; no diameter measurement required. Provide additional loose routing space rather than a tight 4 mm bore.
+- Assume the bank front USB port. Preserve a broad port-face reservation; precise port-centre measurement is not required to continue.
+- The 0.4/0.8 mm spacers are optional strips from the fit sample that change glass setback behind the lip. Previous spacer use remains unknown, not a failed fit. Retain recess/pad adjustment during keeper development; do not block progress on identifying the old spacers. The existing model still assumes 0.4 mm and does not yet validate other settings.
 
-Keep cable and pad dimensions adjustable. Do not repeat the already passed phone body-fit trial solely for these changes.
+Remaining work is engineering verification, including the export defect, service path, keeper loading and physical microphone checks. Do not repeat the already passed body-fit trial solely for these changes.

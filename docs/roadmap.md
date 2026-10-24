@@ -186,3 +186,6 @@ Preserved `docs/still-water/` byte-for-byte as supplied. Its iPhone-selection as
 
 
 **10 October — shell study checkpoint:** Curved shell and retention checkpoint saved; resolve STL topology, run actual-phone/service-path and wall-depth checks, then finalize cable and pad dimensions from user measurements before full-shell slicing.
+
+
+**24 October — remove unnecessary measurement gates:** Continue with 4 mm cable allowance, front USB assumption and adjustable recess/padding. Fix shell export and complete collision/service/retention checks; no cable diameter or historical spacer identification is required to progress.

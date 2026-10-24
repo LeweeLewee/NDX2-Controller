@@ -7,12 +7,13 @@
   },
   "length_datum": "Interpreted as phone edge to flexible cable, including housing and strain relief, per preceding measurement request",
   "cable_diameter_mm": null,
-  "bank_port": null,
+  "bank_port": "Front USB port (user-authorized assumption, 24 October 2026)",
   "bank_port_position_mm": null,
   "provisional_clearance_mm": {
     "radial_each_side": 1.0,
     "beyond_plug_end": 1.0,
     "cut_overlap_into_phone_end": 1.0
   },
-  "notes": "Clearances are design allowances, not measurements. Cable bend and port routing remain unresolved."
+  "notes": "Cable diameter is unmeasured and is not a blocker. Use a 4 mm cable envelope with additional free routing space; no close-fitting cable clamp. Retain a broad bank-front port reservation rather than requiring a measured port centre. Bend clearance remains a design/assembly check.",
+  "cable_design_allowance_mm": 4.0
 }

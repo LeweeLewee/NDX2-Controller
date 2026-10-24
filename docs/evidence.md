@@ -292,3 +292,6 @@ User-proposed 6.5 mm overlap on each outer phone edge gives a 137.9 × 62.7 mm n
 
 
 **10 October — Lightning plug measured:** User reports 18 mm L, 5.25 mm H, 8.25 mm W following the plugged-in projection request. Recorded in cable-measurements.json; shell generator updated with explicit provisional clearances. Existing shell exports are not regenerated or newly validated. Cable diameter/bend, bank port and passed-fit spacer remain unresolved.
+
+
+**24 October — routing assumptions:** User authorizes 4 mm cable allowance and front USB assumption. These are design inputs, not measured cable/port geometry. Previous fit-sample spacer use remains unknown; it does not invalidate the reported body-fit pass. No new CAD regeneration or print validation in this update.
