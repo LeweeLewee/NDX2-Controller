@@ -193,6 +193,23 @@ import XCTest
         XCTAssertNil(m.queueArtwork[item.reference])
         m.deactivate()
     }
+    func testExpiredGridCoverRenewsMetadataBeforeFetching() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        var item = MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))
+        m.context.items = [item]; await m.loadQueueArtwork()
+        let original = try XCTUnwrap(m.queueArtwork[item.reference])
+        item.artwork = original.reference; m.context.items = [item]
+        now = original.deadline; m.queueArtwork = [:]
+        await m.refresh(); t.requests = []
+        await m.loadQueueArtwork()
+        XCTAssertEqual(t.requests.first,"browse")
+        XCTAssertNotNil(m.queueArtwork[item.reference])
+        XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,original.deadline)
+        m.deactivate()
+    }
     func testLiveTrialDisablesUnapprovedTransportAndUncertainPause() async throws {
         let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.active = true; await m.refresh(); m.contactEnded(); m.fixture = false

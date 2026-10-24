@@ -55,6 +55,7 @@ struct Preview {
     @Published private(set) var libraryFirstIndex = 0
     @Published private(set) var preparingCommand = false
     private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
+    private var artworkDeadlines: [String:Double] = [:] // At most 48 registration hints, never image bytes.
     private var missingArtUntil: [String:Double] = [:]
     var fieldPreview: Preview? {
         guard context.screen == .library else { return colorPreview }
@@ -122,7 +123,7 @@ struct Preview {
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        if clearArtwork { recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        if clearArtwork { artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -484,7 +485,7 @@ struct Preview {
         let expiring = eligible.first { (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5 }
         guard [.queue,.detail,.library,.find].contains(screen), let item = missing ?? expiring else { return }
         let gen = generation
-        let renewing = queueArtwork[item.reference] != nil
+        let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false
         defer {
             // Navigation cancellation is not evidence that artwork is missing.
@@ -516,6 +517,10 @@ struct Preview {
         guard let preview = await fetchPreview(ref), online, clock() < freshUntil,
               generation == gen, context.screen == screen else { return }
         queueArtwork = queueArtwork.filter { clock() < $0.value.deadline }
+        artworkDeadlines[item.reference] = preview.deadline
+        while artworkDeadlines.count > 48 {
+            if let oldest = artworkDeadlines.min(by: { $0.value < $1.value })?.key { artworkDeadlines.removeValue(forKey:oldest) }
+        }
         queueArtwork[item.reference] = preview
         // One authenticated image can serve every track that references that exact cover.
         for sibling in candidates where sibling.artwork == ref { queueArtwork[sibling.reference] = preview }
