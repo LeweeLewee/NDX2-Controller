@@ -7,6 +7,7 @@ import XCTest
         var requests: [String] = []
         var artworkSides: [Int] = []
         var loseMutation = false
+        var failRead: String?
         var holdNextAction: String?
         var held: CheckedContinuation<Void, Never>?
         func release() { let continuation = held; held = nil; continuation?.resume() }
@@ -14,6 +15,7 @@ import XCTest
         func cancel() {}
         func send(_ request: BridgeRequest) async throws -> BridgeReply {
             requests.append(request.action)
+            if failRead == request.action { throw BridgeFailure.unavailable }
             if request.action == "artwork" { artworkSides.append(request.args["side"]?.number ?? 80) }
             let reply = try await fixture.send(request)
             if holdNextAction == request.action {
@@ -272,6 +274,40 @@ import XCTest
         m.pendingAction = nil; m.unknownAction = "play"; XCTAssertEqual(m.detailPlayLabel,"Check player")
         m.unknownAction = nil; now = 106; XCTAssertFalse(m.selectedIsPlaying)
         XCTAssertEqual(m.detailPlayLabel,"Play")
+        m.deactivate()
+    }
+    func testFailedLibraryReadEndsLoadingAndCanRetry() async {
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        t.failRead = "library_page"; m.navigate(.library); await settle()
+        XCTAssertFalse(m.loading); XCTAssertNotNil(m.pageError)
+        XCTAssertNotEqual(m.libraryEmptyMessage,"Looking…")
+        t.failRead = nil; await m.refresh(); m.loadPage(); await settle()
+        XCTAssertFalse(m.loading); XCTAssertNil(m.pageError); XCTAssertFalse(m.context.items.isEmpty)
+        m.deactivate()
+    }
+    func testBusyReadDoesNotBackOffMissingGridCover() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))]
+        t.holdNextAction = "snapshot"
+        let read = Task { await m.refresh() }; await settle()
+        await m.loadQueueArtwork(); XCTAssertTrue(m.queueArtwork.isEmpty)
+        t.release(); await read.value
+        await m.loadQueueArtwork()
+        XCTAssertNotNil(m.queueArtwork[m.context.items[0].reference])
+        m.deactivate()
+    }
+    func testTransientGridReadFailureRetriesWithoutThirtySecondDelay() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))]
+        t.failRead = "browse"; await m.loadQueueArtwork()
+        t.failRead = nil; now += 2; await m.refresh(); await m.loadQueueArtwork()
+        XCTAssertNotNil(m.queueArtwork[m.context.items[0].reference])
         m.deactivate()
     }
     func testDisconnectedLibraryIsNotReportedAsEmptyCollection() {

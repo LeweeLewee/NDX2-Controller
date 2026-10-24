@@ -120,6 +120,7 @@ struct Preview {
     }
     func invalidate(clearArtwork: Bool = true) {
         generation += 1; consumeContact = true
+        if loading { loading = false; pageError = "Library unavailable. Select the Library tab to retry." }
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
@@ -166,7 +167,7 @@ struct Preview {
         } else if now >= nextBattery, let reportBattery {
             nextBattery = now + 900
             readTask = Task { await reportBattery() }
-        } else if (artwork == nil || (artwork?.deadline ?? 0) - now <= 5) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
+        } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= 5) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
         } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
@@ -470,6 +471,8 @@ struct Preview {
     }
 
     func loadQueueArtwork() async {
+        // A busy read lane is not evidence that a cover is missing.
+        guard inFlight == nil, !loading else { return }
         let items = context.items.isEmpty ? queue : context.items
         // Album track rows do not display covers; do not evict visible Library art for them.
         let visibleItems = context.screen == .detail
@@ -487,11 +490,12 @@ struct Preview {
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false
+        var retryDelay = 2.0
         defer {
             // Navigation cancellation is not evidence that artwork is missing.
             if generation == gen && !Task.isCancelled && !completed {
-                missingArtUntil[item.reference] = clock() + 30
-                if missingArtUntil.count > 48 { missingArtUntil = [item.reference:clock() + 30] }
+                missingArtUntil[item.reference] = clock() + retryDelay
+                if missingArtUntil.count > 48 { missingArtUntil = [item.reference:clock() + retryDelay] }
             }
         }
         // Queue identities are not catalogue browse references. Use artwork registered
@@ -510,6 +514,7 @@ struct Preview {
             let metadata = action == "artist_bio" ? detail.data : detail.data["item"]
             guard metadata["reference"].text == item.reference else { return }
             reference = metadata["artwork"].text
+            if reference == nil { retryDelay = 30 }
         }
         guard let ref = reference,
               ref.range(of:"^/artwork/[0-9a-f]{64}\\.jpg$",options:.regularExpression) != nil,
