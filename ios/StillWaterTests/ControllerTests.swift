@@ -147,6 +147,62 @@ import XCTest
         }
         m.deactivate()
     }
+    func testNavigationDuringReservedPreflightDoesNotInventUncertainWrite() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh(); m.contactEnded()
+        m.mutate("transport",["command":.string("pause")])
+        m.navigate(.settings) // Before the task has dispatched even its snapshot read.
+        await settle()
+        XCTAssertNil(m.unknownAction)
+        XCTAssertTrue(t.fixture.mutations.isEmpty)
+        m.back(); m.contactEnded()
+        m.mutate("transport",["command":.string("pause")]); await settle()
+        XCTAssertEqual(t.fixture.mutations,["transport"])
+        m.deactivate()
+    }
+    func testAlbumTrackRowsDoNotFetchHiddenCoversOrEvictLibrary() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))]
+        await m.loadQueueArtwork()
+        let saved = m.queueArtwork
+        m.navigate(.detail)
+        m.context.selected = MusicItem(.object(["kind":.string("albums")]))
+        m.context.items = (1...24).map { MusicItem(.object(["reference":.string("inputs/tidal/tracks/\($0)"),"kind":.string("tracks")])) }
+        t.requests = []
+        for _ in 0..<24 { await m.loadQueueArtwork() }
+        XCTAssertTrue(t.requests.isEmpty)
+        XCTAssertEqual(m.queueArtwork.count,saved.count)
+        m.back(); await m.loadQueueArtwork(); XCTAssertTrue(t.requests.isEmpty)
+        m.deactivate()
+    }
+    func testBriefPlayerStalenessKeepsValidGridArtButNeverEnablesControls() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{now},restore:false)
+        m.active = true; await m.refresh(); m.contactEnded()
+        m.context.screen = .library
+        m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))]
+        await m.loadQueueArtwork()
+        let item = m.context.items[0], original = try XCTUnwrap(m.queueArtwork[m.context.items[0].reference])
+        now += 6; m.tick()
+        XCTAssertFalse(m.controlsAvailable)
+        XCTAssertEqual(m.queueArtwork[item.reference]?.renderID,original.renderID)
+        XCTAssertEqual(m.queueArtwork[item.reference]?.deadline,original.deadline)
+        now = original.deadline; m.tick()
+        XCTAssertNil(m.queueArtwork[item.reference])
+        m.deactivate()
+    }
+    func testLiveTrialDisablesUnapprovedTransportAndUncertainPause() async throws {
+        let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.active = true; await m.refresh(); m.contactEnded(); m.fixture = false
+        XCTAssertTrue(m.pauseResumeAvailable)
+        XCTAssertFalse(m.extendedTransportAvailable)
+        m.unknownAction = "transport"
+        XCTAssertFalse(m.pauseResumeAvailable)
+        m.acknowledgeUnknown(); XCTAssertTrue(m.pauseResumeAvailable)
+        m.deactivate()
+    }
     func testTrustReplacementSeparatesRecoveryFromTLSWithoutLeakingErrors() {
         let local = TrustReplacementFailure(stage:"Read saved pairing",cause:BridgeFailure.notConfigured)
         XCTAssertTrue(local.message.contains("local recovery"))

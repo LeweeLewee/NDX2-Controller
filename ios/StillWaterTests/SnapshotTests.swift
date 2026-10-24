@@ -114,6 +114,13 @@ import UIKit
                 let tab = try XCTUnwrap(visible.first { $0.id == "artist-tab-albums" })
                 let name = try XCTUnwrap(visible.first { $0.id == "detail-title" })
                 XCTAssertEqual(tab.frame.minX,name.frame.minX,accuracy:1)
+                let titles = visible.filter { $0.id.hasPrefix("artist-cover-title-") }
+                XCTAssertFalse(titles.isEmpty)
+                for title in titles {
+                    XCTAssertEqual(title.fontSize,15)
+                    XCTAssertEqual(title.opacity,0.7)
+                    XCTAssertLessThanOrEqual(title.frame.maxY,472)
+                }
             }
             if state.hasPrefix("artist-"), let albums = visible.first(where: { $0.id.hasPrefix("artist-album-") }) {
                 XCTAssertLessThanOrEqual(albums.frame.maxY,472.5,"Artist album row must clear the bottom edge")

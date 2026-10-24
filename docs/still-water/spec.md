@@ -340,3 +340,7 @@ Applies only if the Waveshare panel is selected. Canvas 800 × 480 px, 1 px = 1 
 | Acceptance | Extend `tools/m2_visual_review.py` to the section 10 matrix; existing native transport target gate (five targets, at least 72 × 64, non-overlapping) must pass; no Montserrat glyphs; no text below caps-15; rings 5% wider than tall in captures | Physical readability, touch, frame timing and power remain HP-01, P3, P4, P5 |
 
 The earlier LVGL brief is in `codex-prompt.md` history only if Codex committed it; otherwise it is reconstructed from this appendix.
+
+
+### 24 October implementation correction (D040)
+Artist album shelves retain the aligned text column and 96-unit covers, with tabs at y280 and covers at y344. Album captions are sans15 at70%, one line with ellipsis, below each cover with an8-unit gap; the shelf ends at468 inside the480-unit content area. Playing is an ink outline status at full text contrast, disabled for interaction without dimming its text. Live-beta controls outside the approved trial are disabled.

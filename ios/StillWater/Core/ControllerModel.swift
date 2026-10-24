@@ -92,6 +92,8 @@ struct Preview {
         if restore { unknownAction = UserDefaults.standard.string(forKey: "uncertain-command") }
     }
     var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation && !preparingCommand }
+    var extendedTransportAvailable: Bool { fixture && controlsAvailable }
+    var pauseResumeAvailable: Bool { controlsAvailable && unknownAction != "transport" && ["playing","paused"].contains(player.state) }
     var touched: Bool { rest == .touched }
     var artworkReference: String? { context.screen == .detail ? context.selected.artwork : player.artwork }
     func replaceTransport(_ value: BridgeTransport) {
@@ -115,12 +117,12 @@ struct Preview {
         active = false; timer?.cancel(); timer = nil
         invalidate(); online = false; freshUntil = 0; applyIdlePolicy?(false)
     }
-    func invalidate() {
+    func invalidate(clearArtwork: Bool = true) {
         generation += 1; consumeContact = true
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:]; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        if clearArtwork { recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -130,7 +132,7 @@ struct Preview {
     }
     func acknowledgeUnknown() {
         // Explicit local acknowledgement, never a retry or claim that the command completed.
-        unknownAction = nil; UserDefaults.standard.removeObject(forKey: "uncertain-command")
+        unknownAction = nil; status = ""; UserDefaults.standard.removeObject(forKey: "uncertain-command")
     }
     func contactEnded() {
         lastTouch = clock()
@@ -141,8 +143,8 @@ struct Preview {
     func tick() {
         guard active, !snapshotMode else { return }
         let now = clock()
-        if inFlight != nil && now >= flightDeadline { invalidate(); online = false; status = "Connection unavailable"; nextPoll = now + retry }
-        if now >= freshUntil { online = false; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:]; if voiceState == "recording" { cancelVoice() } }
+        if inFlight != nil && now >= flightDeadline { invalidate(clearArtwork:flightMutation); online = false; status = "Connection unavailable"; nextPoll = now + retry }
+        if now >= freshUntil { online = false; if voiceState == "recording" { cancelVoice() } }
         if let art = artwork, now >= art.deadline { artwork = nil }
         if let art = colorPreview, now >= art.deadline { colorPreview = nil }
         if queueArtwork.values.contains(where:{ now >= $0.deadline }) { queueArtwork = queueArtwork.filter { now < $0.value.deadline } }
@@ -185,7 +187,7 @@ struct Preview {
             guard active, generation == gen, inFlight == token else { return nil }
             guard clock() < flightDeadline, !Task.isCancelled else {
                 let mutation = flightMutation
-                invalidate(); online = false; freshUntil = 0; status = mutation ? "Command outcome unknown" : "Connection unavailable"
+                invalidate(clearArtwork:mutation); online = false; freshUntil = 0; status = mutation ? "Command outcome unknown" : "Connection unavailable"
                 return nil
             }
             fixture = r.fixture
@@ -206,7 +208,7 @@ struct Preview {
         } catch {
             guard generation == gen, inFlight == token else { return nil }
             if request.isMutation { markUnknown() }
-            invalidate(); online = false; freshUntil = 0
+            invalidate(clearArtwork:request.isMutation || (error as? BridgeFailure) == .unauthenticated || error is TLSFailure || error is KeychainFailure); online = false; freshUntil = 0
             status = error as? BridgeFailure == .unauthenticated ? "Pairing requires attention" : "Reconnecting to the bridge"
             nextPoll = clock() + retry + Double.random(in: 0...0.2); retry = min(30, retry * 2)
             return nil
@@ -219,7 +221,8 @@ struct Preview {
               let age = r.data["age_ms"].number, (0...5000).contains(age), age + valid <= 5000,
               let rev = r.data["revision"].number, rev >= revision,
               clock() < started + Double(valid) / 1000 else { return }
-        revision = rev; freshUntil = started + Double(valid) / 1000; online = true; retry = 1; status = ""
+        revision = rev; freshUntil = started + Double(valid) / 1000; online = true; retry = 1
+        if !status.hasPrefix("Request not sent:") && !status.hasPrefix("Player changed.") { status = "" }
         var p = Player(r.data["player"]); p.current = MusicItem(r.data["current_item"])
         if p.artwork != player.artwork { artwork = nil; colorPreview = nil; nextArtAttempt = 0 }
         player = p; queue = r.data["queue"].values.map(MusicItem.init)
@@ -246,7 +249,7 @@ struct Preview {
         rememberArtwork()
         noteContact(); cancelVoice(); generation += 1; transport.cancel(); inFlight = nil
         readTask?.cancel(); artTask?.cancel(); artTask = nil; artwork = nil; colorPreview = nil; nextArtAttempt = 0; loading = false
-        if pendingAction != nil { markUnknown(); pendingAction = nil; flightMutation = false }
+        if pendingAction != nil { if flightMutation { markUnknown() }; pendingAction = nil; flightMutation = false; preparingCommand = false }
         history.append(context); if history.count > 4 { history.removeFirst() }
         context = BrowseContext(screen: screen)
         restoreArtwork()
@@ -255,7 +258,7 @@ struct Preview {
     func back(toNow: Bool = false) {
         rememberArtwork()
         cancelVoice(); generation += 1; transport.cancel(); inFlight = nil
-        if pendingAction != nil { markUnknown(); pendingAction = nil; flightMutation = false }
+        if pendingAction != nil { if flightMutation { markUnknown() }; pendingAction = nil; flightMutation = false; preparingCommand = false }
         readTask?.cancel(); artTask?.cancel(); artTask = nil; artwork = nil; colorPreview = nil; nextArtAttempt = 0; loading = false
         context = toNow ? BrowseContext() : history.popLast() ?? BrowseContext()
         restoreArtwork()
@@ -385,7 +388,7 @@ struct Preview {
         guard unknownAction != action else { status = "Check the player, then acknowledge the uncertain command in Connection."; return }
         guard controlsAvailable, cancelReadForInteraction() else { status = "Waiting for a fresh player connection"; return }
         // Reserve synchronously so two taps cannot dispatch before the task starts.
-        noteContact(); preparingCommand = true; pendingTarget = target; pendingAction = action
+        noteContact(); status = ""; preparingCommand = true; pendingTarget = target; pendingAction = action
         let expectedReference = player.current.reference, expectedState = player.state
         let gen = generation
         readTask = Task {
@@ -467,7 +470,11 @@ struct Preview {
 
     func loadQueueArtwork() async {
         let items = context.items.isEmpty ? queue : context.items
-        let candidates = Array(items.prefix(24))
+        // Album track rows do not display covers; do not evict visible Library art for them.
+        let visibleItems = context.screen == .detail
+            ? (context.selected.kind == "artists" && context.artistTab == "albums" ? items.filter { $0.kind == "albums" } : [])
+            : items
+        let candidates = Array(visibleItems.prefix(24))
         missingArtUntil = missingArtUntil.filter { clock() < $0.value }
         let screen = context.screen
         let start = screen == .library ? min(libraryFirstIndex, candidates.count) : 0

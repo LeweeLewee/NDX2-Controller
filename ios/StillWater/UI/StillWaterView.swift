@@ -116,7 +116,7 @@ struct StillWaterView: View {
             .position(x:x+w/2,y:y+h/2)
     }
     private func button(_ title: String, id: String, x: CGFloat, y: CGFloat, w: CGFloat = 140, h: CGFloat = 56,
-                        enabled: Bool = true, filled: Bool = false, border: Bool = true,
+                        enabled: Bool = true, filled: Bool = false, border: Bool = true, activeState: Bool = false,
                         size: CGFloat = 22, alignment: Alignment = .center, indicator: Bool = false,
                         action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -126,7 +126,7 @@ struct StillWaterView: View {
                 .overlay(Capsule().stroke(Design.ink.opacity(border ? 0.18 : 0),lineWidth:1))
                 .overlay(alignment:alignment == .leading ? .bottomLeading : .bottom) { if indicator { Rectangle().fill(Design.ink).frame(width:24,height:1).padding(.leading,alignment == .leading ? 18 : 0).padding(.bottom,8) } }
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(!enabled).opacity(enabled ? 1 : 0.35)
+        }.buttonStyle(.plain).disabled(!enabled).opacity(enabled || activeState ? 1 : 0.35)
             .accessibilityIdentifier(id).audit(id,font:size,tap:true,pill:true,text:title)
             .position(x:x+w/2,y:y+h/2)
     }
@@ -190,11 +190,11 @@ struct StillWaterView: View {
                 }
             }
             if touched {
-                icon(.previous,id:"previous",label:"Previous track",x:363,y:268,w:98,h:96,enabled:model.controlsAvailable,glyph:36) { model.mutate("transport",["command":.string("prev")],target:"previous") }
-                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:472,y:264,w:104,h:104,ring:true,enabled:model.controlsAvailable,glyph:40) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
-                icon(.next,id:"next",label:"Next track",x:587,y:268,w:98,h:96,enabled:model.controlsAvailable,glyph:36) { model.mutate("transport",["command":.string("next")],target:"next") }
-                icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:276,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
-                icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:276,w:80,h:80,enabled:model.controlsAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
+                icon(.previous,id:"previous",label:"Previous track",x:363,y:268,w:98,h:96,enabled:model.extendedTransportAvailable,glyph:36) { model.mutate("transport",["command":.string("prev")],target:"previous") }
+                icon(model.player.state == "playing" ? .pause : .play,id:"play-pause",label:model.player.state == "playing" ? "Pause" : "Resume",x:472,y:264,w:104,h:104,ring:true,enabled:model.pauseResumeAvailable,glyph:40) { model.mutate("transport",["command":.string(model.player.state == "playing" ? "pause" : "resume")],target:"play-pause") }
+                icon(.next,id:"next",label:"Next track",x:587,y:268,w:98,h:96,enabled:model.extendedTransportAvailable,glyph:36) { model.mutate("transport",["command":.string("next")],target:"next") }
+                icon(.volumeDown,id:"amp-down",label:"Volume down",x:816,y:276,w:80,h:80,enabled:model.extendedTransportAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("down")],target:"amp-down") }
+                icon(.volumeUp,id:"amp-up",label:"Volume up",x:920,y:276,w:80,h:80,enabled:model.extendedTransportAvailable && model.unknownAction != "amplifier",glyph:32) { model.mutate("amplifier",["direction":.string("up")],target:"amp-up") }
                 Button { model.navigate(.queue) } label: {
                     VStack(alignment:.leading,spacing:2) {
                         Text("UP NEXT").font(Design.font(15,caps:true)).tracking(2.7).opacity(0.55)
@@ -208,8 +208,11 @@ struct StillWaterView: View {
                         .frame(width:184,height:80).position(x:908,y:316).allowsHitTesting(false)
                     label("Volume outcome unknown",id:"unknown",x:760,y:360,w:288,h:24,size:15,alpha:0.7,align:.center)
                 } else if model.unknownAction != nil {
-                    label("Outcome unknown",id:"unknown",x:48,y:320,w:280,h:24,size:18,alpha:0.7)
+                    button("Check command ›",id:"unknown",x:48,y:320,w:240,h:56,size:18) { model.navigate(.connection) }
                 }
+            }
+            if touched && model.unknownAction == nil && !model.status.isEmpty {
+                label(model.status,id:"transport-status",x:336,y:232,w:664,h:28,size:15,alpha:0.7)
             }
             if !stopped {
                 Rectangle().fill(Design.ink.opacity(0.18)).frame(width:1048,height:1).audit("waterline").position(x:524,y:472.5)
@@ -407,7 +410,7 @@ struct StillWaterView: View {
             label(item.title,id:"detail-title",x:336,y:88,w:664,h:72,size:32,serif:true,lines:2)
             label(facts,id:"detail-facts",x:336,y:168,w:664,h:28,size:18,alpha:0.55)
             if model.context.playable {
-                button(model.detailPlayLabel,id:"play-detail",x:336,y:212,w:140,enabled:model.controlsAvailable && !model.selectedIsPlaying && model.unknownAction != "play",filled:true) { model.mutate("play",["reference":.string(item.reference)],target:"play-detail") }
+                button(model.detailPlayLabel,id:"play-detail",x:336,y:212,w:140,enabled:model.controlsAvailable && !model.selectedIsPlaying && model.unknownAction != "play",filled:!model.selectedIsPlaying,activeState:model.selectedIsPlaying) { model.mutate("play",["reference":.string(item.reference)],target:"play-detail") }
             }
             if item.kind == "tracks" {
                 icon(.heart,id:"membership-write",label:model.membershipAction,x:488,y:212,w:80,h:64,enabled:membershipEnabled,glyph:40,selected:model.context.membership == "saved") { toggleMembership() }
@@ -455,23 +458,28 @@ struct StillWaterView: View {
             }
             if !model.context.biographyExpanded && model.context.artistTab != "about" {
                 button(detailMembershipLabel,id:"membership-write",x:item.biography == nil ? left : 816,y:item.biography == nil ? max(148,84+nameHeight+12) : 262,w:184,enabled:membershipEnabled) { toggleMembership() }.accessibilityLabel(model.membershipAction)
-                if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:left,y:312,w:120,border:false,size:18,alignment:.leading,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
-                if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:left+136,y:312,w:120,border:false,size:18,alignment:.leading,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
+                if !albums.isEmpty { button("Albums",id:"artist-tab-albums",x:left,y:280,w:120,border:false,size:18,alignment:.leading,indicator:model.context.artistTab == "albums") { model.selectArtistTab("albums") } }
+                if !tracks.isEmpty { button("Tracks",id:"artist-tab-tracks",x:left+136,y:280,w:120,border:false,size:18,alignment:.leading,indicator:model.context.artistTab == "tracks") { model.selectArtistTab("tracks") } }
                 if model.context.artistTab == "tracks" { rows(y:384,height:88,items:tracks,tracks:true,width:1000-left,left:left) }
                 else if !albums.isEmpty {
                     ScrollView(.horizontal) {
                         HStack(spacing:16) {
                             ForEach(albums) { album in
                                 Button { model.details(album) } label: {
-                                    Group {
-                                        if let image = model.queueArtwork[album.reference]?.uiImage(palette:model.preferences.palette) { Image(uiImage:image).resizable().interpolation(.high) }
-                                        else { Text(album.title).font(Design.font(18,serif:true)).lineLimit(3) }
-                                    }.frame(width:96,height:96).clipped().contentShape(Rectangle())
+                                    VStack(alignment:.leading,spacing:8) {
+                                        Group {
+                                            if let image = model.queueArtwork[album.reference]?.uiImage(palette:model.preferences.palette) { Image(uiImage:image).resizable().interpolation(.high) }
+                                            else { RoundedRectangle(cornerRadius:3).stroke(Design.ink.opacity(0.18),lineWidth:1) }
+                                        }.frame(width:96,height:96).clipped()
+                                        Text(album.title).font(Design.font(15)).foregroundStyle(Design.ink.opacity(0.7))
+                                            .lineLimit(1).truncationMode(.tail).frame(width:96,height:20,alignment:.leading)
+                                            .audit("artist-cover-title-"+album.id,font:15,opacity:0.7,scroll:true,truncates:true,text:album.title)
+                                    }.frame(width:96,height:124).contentShape(Rectangle())
                                 }.buttonStyle(.plain).accessibilityIdentifier("artist-album-"+album.id).accessibilityLabel(album.title).audit("artist-album-"+album.id,tap:true,scroll:true).id(album.id)
                             }
                             if model.context.nextOffset != nil { Button("More albums") { model.moreChildren() }.font(Design.font(18)).frame(width:144,height:64).audit("artist-more",font:18,tap:true,scroll:true) }
                         }.scrollTargetLayout()
-                    }.scrollPosition(id:$model.context.scrollID,anchor:.leading).frame(width:1000-left,height:96).position(x:left+(1000-left)/2,y:424)
+                    }.scrollPosition(id:$model.context.scrollID,anchor:.leading).frame(width:1000-left,height:124).position(x:left+(1000-left)/2,y:406)
                 }
             }
         }
