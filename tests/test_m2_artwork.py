@@ -46,7 +46,7 @@ class ArtworkTests(unittest.TestCase):
         self.delivery.register(self.reference)
         with patch.object(self.service, 'image', wraps=self.service.image) as fetch:
             first = self.delivery.get_jpeg(self.reference)
-            self.now[0] += 51
+            self.now[0] += 41
             self.delivery.register(self.reference)
             renewed = self.delivery.get_jpeg(self.reference)
             self.assertEqual(fetch.call_count, 2)

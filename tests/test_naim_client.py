@@ -58,6 +58,26 @@ class ClientTests(unittest.TestCase):
         self.opener = FakeOpener()
         self.client = NaimClient('192.168.1.2', self.opener)
 
+    def test_resume_uses_current_transport_play_once_without_queue_replacement(self):
+        self.client.transport('resume')
+        self.assertEqual(len(self.opener.requests), 1)
+        request = self.opener.requests[0]
+        url = urllib.parse.urlsplit(request.full_url)
+        self.assertEqual(url.path, '/nowplaying')
+        self.assertEqual(urllib.parse.parse_qs(url.query), {'cmd': ['play']})
+        self.assertEqual(request.get_method(), 'GET')
+
+    def test_resume_timeout_is_not_retried_or_replaced(self):
+        class TimeoutOpener(FakeOpener):
+            def open(self, request, timeout):
+                self.requests.append(request)
+                raise TimeoutError('delivery uncertain')
+        opener = TimeoutOpener()
+        with self.assertRaises(TimeoutError):
+            NaimClient('192.168.1.2', opener).transport('resume')
+        self.assertEqual(len(opener.requests), 1)
+        self.assertTrue(opener.requests[0].full_url.endswith('/nowplaying?cmd=play'))
+
     def test_native_only_and_no_parameter_injection(self):
         for ref in ('https://audio.example/track.flac', 'inputs/upnp/1', 'inputs/tidal/tracks/1?cmd=logout', '../system', 'inputs/tidal/tracks/1/../../system'):
             with self.assertRaises(ValueError):

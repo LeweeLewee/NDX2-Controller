@@ -89,7 +89,9 @@ class NaimClient:
     def transport(self, command, position_ms=None):
         if command not in ('play', 'pause', 'resume', 'stop', 'next', 'prev', 'seek'):
             raise ValueError('Unsupported transport command')
-        params = {'cmd': command}
+        # The controller's Resume intent uses native nowplaying Play, not a
+        # catalogue Play or queue selection. The native command is not 'resume'.
+        params = {'cmd': 'play' if command == 'resume' else command}
         if command == 'seek':
             if type(position_ms) is not int or position_ms < 0:
                 raise ValueError('Seek requires nonnegative milliseconds')

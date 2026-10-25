@@ -56,6 +56,8 @@ struct Preview {
     @Published private(set) var preparingCommand = false
     private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
     private var artworkDeadlines: [String:Double] = [:] // At most 48 registration hints, never image bytes.
+    private let artworkRenewalLead = 20.0
+    private var libraryPages: [String:(context:BrowseContext, deadline:Double)] = [:] // One bounded page per section.
     private var missingArtUntil: [String:Double] = [:]
     var fieldPreview: Preview? {
         guard context.screen == .library else { return colorPreview }
@@ -124,7 +126,7 @@ struct Preview {
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        if clearArtwork { artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        if clearArtwork { libraryPages = [:]; artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -167,7 +169,7 @@ struct Preview {
         } else if now >= nextBattery, let reportBattery {
             nextBattery = now + 900
             readTask = Task { await reportBattery() }
-        } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= 5) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
+        } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= artworkRenewalLead) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
         } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
@@ -232,7 +234,6 @@ struct Preview {
         if includeMembership && context.screen == .now { await currentMembership() }
     }
     private func rememberArtwork() {
-        guard online, clock() < freshUntil else { recentArtwork = []; return }
         recentArtwork = recentArtwork.filter { clock() < $0.deadline }
         for preview in [artwork, colorPreview].compactMap({ $0 }) where clock() < preview.deadline {
             recentArtwork.removeAll { $0.reference == preview.reference && $0.side == preview.side }
@@ -244,8 +245,8 @@ struct Preview {
         artwork = nil; colorPreview = nil
         guard active, online, clock() < freshUntil, let ref = artworkReference else { return }
         recentArtwork = recentArtwork.filter { clock() < $0.deadline }
-        artwork = recentArtwork.last { $0.reference == ref && $0.side == 320 }
-        colorPreview = recentArtwork.last { $0.reference == ref }
+        artwork = (recentArtwork + Array(queueArtwork.values)).filter { $0.reference == ref && $0.side == 320 && clock() < $0.deadline }.max { $0.deadline < $1.deadline }
+        colorPreview = artwork
     }
     func navigate(_ screen: Screen) {
         rememberArtwork()
@@ -269,7 +270,11 @@ struct Preview {
         noteContact()
     }
     func search() { noteContact(); keyboardVisible = false; context.cursor = nil; context.pageCursor = nil; context.nextOffset = nil; context.resultID = nil; loadPage() }
-    func filter(_ kind: String) { context.kind = kind; search() }
+    func filter(_ kind: String) {
+        context.kind = kind
+        if context.screen == .library { context.items = []; context.scrollID = nil }
+        search()
+    }
     private func cancelReadForInteraction() -> Bool {
         guard !flightMutation, pendingAction == nil else { status = "Command in progress"; return false }
         generation += 1; transport.cancel(); inFlight = nil
@@ -279,6 +284,11 @@ struct Preview {
     func loadPage(more: Bool = false) {
         guard cancelReadForInteraction() else { return }
         if context.screen == .find && context.query.utf8.count > 256 { status = "Search text too long; use fewer words."; return }
+        libraryPages = libraryPages.filter { clock() < $0.value.deadline }
+        if context.screen == .library, !more, let cached = libraryPages[context.kind] {
+            context = cached.context; loading = false; pageError = nil; libraryFirstIndex = 0
+            return
+        }
         let gen = generation, old = context
         loading = true; pageError = nil
         readTask = Task {
@@ -310,12 +320,19 @@ struct Preview {
             self.context.pageCursor = args["cursor"]?.text
             self.context.nextOffset = r.data["next_offset"].number; self.context.cursor = r.data["cursor"].text
             self.context.resultID = r.data["result_id"].text
+            if old.screen == .library, ["albums","artists","tracks","playlists"].contains(old.kind) {
+                self.libraryPages[old.kind] = (self.context, self.clock() + 60)
+            }
         }
     }
     func details(_ item: MusicItem) {
         guard !item.reference.isEmpty else { return }
         let old = context
-        navigate(.detail); context.selected = item; restoreArtwork()
+        navigate(.detail); context.selected = item
+        if context.selected.artwork == nil, let cached = queueArtwork[item.reference], clock() < cached.deadline {
+            context.selected.artwork = cached.reference
+        }
+        restoreArtwork()
         let gen = generation
         readTask = Task {
             guard let r = await self.perform(BridgeRequest("browse", ["reference": .string(item.reference)])), r.outcome == "observed", self.generation == gen else {
@@ -413,6 +430,7 @@ struct Preview {
             let commandStatus = r.outcome == "submitted" ? "Request sent; checking player" : self.status
             await self.refresh()
             if r.outcome != "submitted" { self.status = commandStatus }
+            if action == "library_save" { self.libraryPages = [:] }
             if action == "library_save", let ref = args["reference"]?.text {
                 let gen = self.generation
                 if let observed = await self.perform(BridgeRequest("library_state",["reference":.string(ref)])), observed.outcome == "observed", gen == self.generation {
@@ -450,7 +468,7 @@ struct Preview {
     private func fetchPreview(_ ref: String) async -> Preview? {
         let gen = generation
         if let cached = (recentArtwork + Array(queueArtwork.values)).last(where: {
-            $0.reference == ref && $0.side == 320 && $0.deadline - clock() > 5
+            $0.reference == ref && $0.side == 320 && $0.deadline - clock() > artworkRenewalLead
         }) { return cached }
         var image = ArtworkAssembly(reference:ref,side:320)
         while !image.complete && active && generation == gen && !Task.isCancelled {
@@ -485,8 +503,9 @@ struct Preview {
         let ordered = Array(candidates.dropFirst(start)) + Array(candidates.prefix(start))
         let eligible = ordered.filter { clock() >= (missingArtUntil[$0.reference] ?? 0) }
         let missing = eligible.first { queueArtwork[$0.reference] == nil }
-        let expiring = eligible.first { (queueArtwork[$0.reference]?.deadline ?? 0) - clock() <= 5 }
-        guard [.queue,.detail,.library,.find].contains(screen), let item = missing ?? expiring else { return }
+        let expiring = eligible.filter { queueArtwork[$0.reference] != nil && (queueArtwork[$0.reference]!.deadline - clock()) <= artworkRenewalLead }
+            .min { queueArtwork[$0.reference]!.deadline < queueArtwork[$1.reference]!.deadline }
+        guard [.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing else { return }
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false

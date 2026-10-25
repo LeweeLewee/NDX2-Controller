@@ -93,7 +93,7 @@ class ArtworkDelivery:
         now = self.clock()
         key = (reference, side, 'jpeg')
         # Early revalidation performs a new source read; it never extends old bytes locally.
-        if key in self.cache and self.cache[key][0] - now <= 10 and self.cache[key][1] is not None:
+        if key in self.cache and self.cache[key][0] - now <= 20 and self.cache[key][1] is not None:
             del self.cache[key]
         if key not in self.cache:
             url = self.service.artwork_refs[reference]

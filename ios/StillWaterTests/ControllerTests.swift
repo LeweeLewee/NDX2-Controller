@@ -289,6 +289,36 @@ import XCTest
         XCTAssertFalse(m.context.items.isEmpty, "Seeded saved albums must return after recovery")
         m.deactivate()
     }
+    func testWarmLibraryReturnReusesPageButExpiryAndSecurityRequireRead() async throws {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.navigate(.library); await settle()
+        let first = m.context.items.map(\.reference)
+        XCTAssertFalse(first.isEmpty)
+        m.navigate(.now); t.requests = []; m.navigate(.library); await settle()
+        XCTAssertEqual(m.context.items.map(\.reference),first)
+        XCTAssertFalse(t.requests.contains("library_page"))
+        now = 161; await m.refresh(); t.requests = []; m.loadPage(); await settle()
+        XCTAssertTrue(t.requests.contains("library_page"))
+        m.invalidate(); await m.refresh(); t.requests = []; m.loadPage(); await settle()
+        XCTAssertTrue(t.requests.contains("library_page"), "Security invalidation must discard page reuse")
+        m.deactivate()
+    }
+    func testDetailImmediatelyReusesValidGridCoverAndDoesNotExtendExpiry() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        let item = MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))
+        m.context.items = [item]; await m.loadQueueArtwork()
+        let first = try XCTUnwrap(m.queueArtwork[item.reference])
+        t.holdNextAction = "browse"; m.details(item)
+        XCTAssertEqual(m.artwork?.renderID, first.renderID)
+        XCTAssertEqual(m.artwork?.deadline, first.deadline)
+        await settle(); t.release(); await settle()
+        XCTAssertEqual(m.artwork?.deadline, first.deadline)
+        m.deactivate()
+    }
     func testBusyReadDoesNotBackOffMissingGridCover() async throws {
         let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
@@ -351,8 +381,11 @@ import XCTest
         m.context.items = [item]
         await m.loadQueueArtwork()
         let first = try XCTUnwrap(m.queueArtwork[item.reference])
-        now = 155; await m.refresh(); t.requests = []
-        await m.loadQueueArtwork()
+        now = 141; await m.refresh(); t.requests = []; t.holdNextAction = "artwork"
+        let renewal = Task { await m.loadQueueArtwork() }; await settle()
+        XCTAssertEqual(m.queueArtwork[item.reference]?.renderID,first.renderID,"Keep valid cover visible during renewal")
+        XCTAssertEqual(m.queueArtwork[item.reference]?.deadline,first.deadline,"No local expiry extension")
+        t.release(); await renewal.value
         XCTAssertTrue(t.requests.contains("browse"))
         XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,first.deadline)
         m.deactivate()
