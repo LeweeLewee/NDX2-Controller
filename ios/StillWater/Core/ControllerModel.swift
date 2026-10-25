@@ -58,9 +58,9 @@ struct Preview {
     @Published private(set) var libraryFirstIndex = 0
     @Published private(set) var preparingCommand = false
     private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
-    private var artworkDeadlines: [String:Double] = [:] // At most 128 registration hints, never image bytes.
-    static let artworkImageLimit = 64 // 12.5 MiB RGB565 at 320 square, shared across item aliases.
-    static let artworkBindingLimit = 128
+    private var artworkDeadlines: [String:Double] = [:] // Bounded registration hints, never image bytes.
+    static let artworkImageLimit = 256 // 50 MiB RGB565 ceiling; shared across aliases.
+    static let artworkBindingLimit = 1024
     private let artworkRenewalLead = 20.0
     private var libraryPages: [String:(context:BrowseContext, deadline:Double)] = [:] // One bounded page per section.
     private var artworkItems: [String:MusicItem] = [:] // Metadata only for retained cache bindings.
@@ -95,13 +95,15 @@ struct Preview {
     private var revision = -1
     private var nextArtAttempt = 0.0
     private var nextQueueArtAttempt = 0.0
+    private var libraryRecoveryAttempts = 0, nextLibraryRecovery = 0.0
+    private var nextPrefetch = 0.0, prefetchPausedUntil = 0.0
     let clock: () -> Double
     init(transport: BridgeTransport, clock: @escaping () -> Double = { ProcessInfo.processInfo.systemUptime }, restore: Bool = true) {
         self.transport = transport; self.clock = clock; fixture = transport is FixtureTransport
         if restore { unknownAction = UserDefaults.standard.string(forKey: "uncertain-command") }
     }
     var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation && !preparingCommand }
-    var extendedTransportAvailable: Bool { fixture && controlsAvailable }
+    var extendedTransportAvailable: Bool { controlsAvailable && unknownAction == nil }
     var pauseResumeAvailable: Bool { controlsAvailable && unknownAction != "transport" && ["playing","paused"].contains(player.state) }
     var touched: Bool { rest == .touched }
     var artworkReference: String? { context.screen == .detail ? context.selected.artwork : player.artwork }
@@ -128,7 +130,7 @@ struct Preview {
     }
     func invalidate(clearArtwork: Bool = true) {
         generation += 1; consumeContact = true
-        if loading { loading = false; pageError = "Library unavailable. Select the Library tab to retry." }
+        if loading { loading = false; pageError = "Library unavailable. Select the Library tab to retry."; nextLibraryRecovery = clock() + 3 }
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
@@ -175,12 +177,14 @@ struct Preview {
         } else if now >= nextBattery, let reportBattery {
             nextBattery = now + 900
             readTask = Task { await reportBattery() }
+        } else if recoverLibraryIfNeeded() {
+            // A fresh connection permits a bounded page retry, never a command replay.
         } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= artworkRenewalLead) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
         } else if ([Screen.now,.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
             nextQueueArtAttempt = now + 0.2
-            artTask = Task { await self.loadQueueArtwork(); self.artTask = nil }
+            artTask = Task { await self.loadQueueArtwork(); await self.prefetchLibrary(); self.artTask = nil }
         }
     }
     func perform(_ request: BridgeRequest) async -> BridgeReply? {
@@ -287,7 +291,8 @@ struct Preview {
         readTask?.cancel(); artTask?.cancel(); artTask = nil
         return true
     }
-    func loadPage(more: Bool = false) {
+    func loadPage(more: Bool = false, automaticRecovery: Bool = false) {
+        if !automaticRecovery { libraryRecoveryAttempts = 0 }
         guard cancelReadForInteraction() else { return }
         if context.screen == .find && context.query.utf8.count > 256 { status = "Search text too long; use fewer words."; return }
         libraryPages = libraryPages.filter { clock() < $0.value.deadline }
@@ -318,6 +323,7 @@ struct Preview {
             guard self.generation == gen else { return }
             guard let r = response, r.outcome == "observed" else {
                 self.pageError = "Library unavailable. Check Connection in Settings."
+                self.nextLibraryRecovery = self.clock() + 3
                 return
             }
             self.context.items = r.data["items"].values.map(MusicItem.init)
@@ -330,6 +336,38 @@ struct Preview {
                 self.libraryPages[old.kind] = (self.context, self.clock() + 60)
             }
         }
+    }
+    @discardableResult func recoverLibraryIfNeeded() -> Bool {
+        guard context.screen == .library, pageError != nil, !loading, online,
+              clock() < freshUntil, clock() >= nextLibraryRecovery, libraryRecoveryAttempts < 2,
+              inFlight == nil, pendingAction == nil, !preparingCommand else { return false }
+        libraryRecoveryAttempts += 1; nextLibraryRecovery = clock() + 10
+        loadPage(automaticRecovery:true)
+        return true
+    }
+    // Warm only first pages, not the full collection; foreground work always wins.
+    func prefetchLibrary() async {
+        guard active, online, clock() < freshUntil, account == "connected", context.screen == .now,
+              clock() - lastTouch >= 4, clock() >= nextPrefetch, clock() >= prefetchPausedUntil,
+              inFlight == nil, pendingAction == nil, !preparingCommand else { return }
+        let kinds = ["albums","artists","playlists","tracks"]
+        guard let kind = kinds.first(where:{ libraryPages[$0] == nil || libraryPages[$0]!.deadline <= clock() }) else { return }
+        nextPrefetch = clock() + 15
+        let gen = generation
+        guard let reply = await perform(BridgeRequest("library_page",["kind":.string(kind)])),
+              reply.outcome == "observed", gen == generation, context.screen == .now else { return }
+        var page = BrowseContext(screen:.library); page.kind = kind
+        page.items = reply.data["items"].values.map(MusicItem.init)
+        page.nextOffset = reply.data["next_offset"].number; page.cursor = reply.data["cursor"].text
+        libraryPages[kind] = (page,clock() + 60)
+    }
+    func handleMemoryPressure() {
+        // Retain visible images; discard speculative/offscreen storage and cool prefetch.
+        let visible = Set(context.items.map(\.reference))
+        queueArtwork = queueArtwork.filter { visible.contains($0.key) }
+        artworkItems = artworkItems.filter { queueArtwork[$0.key] != nil }
+        recentArtwork = []; libraryPages = libraryPages.filter { $0.key == context.kind && context.screen == .library }
+        prefetchPausedUntil = clock() + 60
     }
     func details(_ item: MusicItem) {
         guard !item.reference.isEmpty else { return }
@@ -519,7 +557,12 @@ struct Preview {
             guard let preview = queueArtwork[$0.reference] else { return false }
             return !$0.reference.hasPrefix("inputs/playqueue/") && preview.deadline - clock() <= artworkRenewalLead && clock() >= (missingArtUntil[$0.reference] ?? 0)
         }.min { queueArtwork[$0.reference]!.deadline < queueArtwork[$1.reference]!.deadline }
-        guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? background else { return }
+        let prefetched = screen == .now && clock() - lastTouch >= 4 && clock() >= prefetchPausedUntil
+            ? ["albums","artists","playlists","tracks"].flatMap { kind -> [MusicItem] in
+                guard let page = libraryPages[kind], clock() < page.deadline else { return [] }
+                return Array(page.context.items.prefix(12))
+            }.first { queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) } : nil
+        guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? background ?? prefetched else { return }
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false

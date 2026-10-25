@@ -221,10 +221,11 @@ struct OutlineMark: Shape {
     }
 }
 
-private final class RenderedArtworkCache: @unchecked Sendable {
+final class RenderedArtworkCache: @unchecked Sendable {
     static let shared = RenderedArtworkCache()
     private let lock = NSLock()
     private var entries: [(String,UIImage)] = []
+    func clear() { lock.lock(); defer { lock.unlock() }; entries = [] }
     func get(_ key: String) -> UIImage? {
         lock.lock(); defer { lock.unlock() }
         guard let index = entries.firstIndex(where: { $0.0 == key }) else { return nil }
@@ -233,8 +234,8 @@ private final class RenderedArtworkCache: @unchecked Sendable {
     func put(_ key: String, _ image: UIImage) {
         lock.lock(); defer { lock.unlock() }
         entries.removeAll { $0.0 == key }; entries.append((key,image))
-        // At most 64 rendered 320-square RGBA images: 25 MiB pixel data.
-        if entries.count > 64 { entries.removeFirst(entries.count-64) }
+        // At most 256 rendered 320-square RGBA images: 100 MiB pixel data.
+        if entries.count > 256 { entries.removeFirst(entries.count-256) }
     }
 }
 

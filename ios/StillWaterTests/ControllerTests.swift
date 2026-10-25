@@ -172,11 +172,11 @@ import XCTest
     }
     func testCacheBoundsUniqueImagesSeparatelyFromTrackAliases() {
         let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
-        for i in 0..<80 { m.queueArtwork["item-\(i)"] = Preview(reference:"image-\(i)",pixels:Data([0,1]),side:1,deadline:160) }
+        for i in 0..<(ControllerModel.artworkImageLimit+16) { m.queueArtwork["item-\(i)"] = Preview(reference:"image-\(i)",pixels:Data([0,1]),side:1,deadline:160) }
         m.trimArtworkCache(protecting:["item-79"])
         XCTAssertEqual(Set(m.queueArtwork.values.map(\.reference)).count,ControllerModel.artworkImageLimit)
         let shared = m.queueArtwork["item-79"]!
-        for i in 0..<150 { m.queueArtwork["alias-\(i)"] = shared }
+        for i in 0..<(ControllerModel.artworkBindingLimit+16) { m.queueArtwork["alias-\(i)"] = shared }
         m.trimArtworkCache(protecting:["item-79"])
         XCTAssertLessThanOrEqual(m.queueArtwork.count,ControllerModel.artworkBindingLimit)
         XCTAssertNotNil(m.queueArtwork["item-79"])
@@ -259,12 +259,13 @@ import XCTest
         XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,original.deadline)
         m.deactivate()
     }
-    func testLiveTrialDisablesUnapprovedTransportAndUncertainPause() async throws {
+    func testAuthorizedLiveControlsRequireFreshStateAndNoUncertainCommand() async throws {
         let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.active = true; await m.refresh(); m.contactEnded(); m.fixture = false
         XCTAssertTrue(m.pauseResumeAvailable)
-        XCTAssertFalse(m.extendedTransportAvailable)
+        XCTAssertTrue(m.extendedTransportAvailable)
         m.unknownAction = "transport"
+        XCTAssertFalse(m.extendedTransportAvailable)
         XCTAssertFalse(m.pauseResumeAvailable)
         m.acknowledgeUnknown(); XCTAssertTrue(m.pauseResumeAvailable)
         m.deactivate()
@@ -321,6 +322,45 @@ import XCTest
         m.unknownAction = nil; now = 106; XCTAssertFalse(m.selectedIsPlaying)
         XCTAssertEqual(m.detailPlayLabel,"Play")
         m.deactivate()
+    }
+    func testLibraryRecoversAfterFreshSnapshotAndBoundsRepeatedFailure() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        t.failRead = "library_page"; m.navigate(.library); await settle()
+        XCTAssertFalse(m.recoverLibraryIfNeeded())
+        for _ in 0..<2 {
+            now += 11; await m.refresh()
+            XCTAssertTrue(m.recoverLibraryIfNeeded()); await settle()
+        }
+        now += 11; await m.refresh(); XCTAssertFalse(m.recoverLibraryIfNeeded())
+        t.failRead = nil; m.loadPage(); await settle()
+        XCTAssertFalse(m.context.items.isEmpty); XCTAssertNil(m.pageError)
+        XCTAssertTrue(t.fixture.mutations.isEmpty); m.deactivate()
+    }
+    func testLibraryAutomaticRecoverySucceedsWithoutTapAndStopsAfterNavigation() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        t.failRead = "library_page"; m.navigate(.library); await settle()
+        t.failRead = nil; now += 4; await m.refresh()
+        XCTAssertTrue(m.recoverLibraryIfNeeded()); await settle()
+        XCTAssertFalse(m.context.items.isEmpty); XCTAssertNil(m.pageError)
+        m.navigate(.now); XCTAssertFalse(m.recoverLibraryIfNeeded()); m.deactivate()
+    }
+    func testIdlePrefetchWarmsLibraryWithoutNavigatingOrMutatingAndMemoryPressurePausesIt() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.contactEnded(); t.requests = []; await m.prefetchLibrary()
+        XCTAssertFalse(t.requests.contains("library_page"))
+        now += 5; await m.refresh(); await m.prefetchLibrary()
+        XCTAssertEqual(m.context.screen,.now)
+        XCTAssertTrue(t.requests.contains("library_page")); XCTAssertTrue(t.fixture.mutations.isEmpty)
+        t.requests = []; m.navigate(.library); await settle()
+        XCTAssertFalse(t.requests.contains("library_page")); XCTAssertFalse(m.context.items.isEmpty)
+        m.navigate(.now); m.handleMemoryPressure(); now += 16; await m.refresh(); t.requests = []
+        await m.prefetchLibrary(); XCTAssertFalse(t.requests.contains("library_page")); m.deactivate()
     }
     func testFailedLibraryReadEndsLoadingAndCanRetry() async {
         let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)

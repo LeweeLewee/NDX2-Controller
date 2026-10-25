@@ -95,9 +95,9 @@ import UIKit
                 let covers = visible.filter { $0.id.hasPrefix("library-cover-") }.sorted { $0.frame.minY == $1.frame.minY ? $0.frame.minX < $1.frame.minX : $0.frame.minY < $1.frame.minY }
                 XCTAssertGreaterThanOrEqual(covers.count,6)
                 for (index,cover) in covers.prefix(6).enumerated() {
-                    XCTAssertEqual(cover.frame.minX,48+CGFloat(index)*120,accuracy:1)
-                    XCTAssertEqual(cover.frame.width,104,accuracy:1)
-                    XCTAssertEqual(cover.frame.height,104,accuracy:1)
+                    XCTAssertEqual(cover.frame.minX,48+CGFloat(index)*160,accuracy:1)
+                    XCTAssertEqual(cover.frame.width,144,accuracy:1)
+                    XCTAssertEqual(cover.frame.height,144,accuracy:1)
                 }
             }
             if state == "queue" {

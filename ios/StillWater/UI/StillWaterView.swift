@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 struct AuditElement: Equatable {
@@ -71,6 +72,9 @@ struct StillWaterView: View {
         .simultaneousGesture(TapGesture().onEnded { model.noteContact() })
         .simultaneousGesture(DragGesture(minimumDistance: 10).onChanged { _ in model.noteContact() })
         .onAppear { updateArt(); animateWake() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+            model.handleMemoryPressure(); RenderedArtworkCache.shared.clear()
+        }
         .onChange(of: model.rest) { _, value in if value == .waking { animateWake() } }
         .onChange(of: model.artwork?.deadline) { _, _ in updateArt() }
         .onChange(of: model.fieldPreview?.reference) { _, _ in updateArt() }
@@ -80,11 +84,11 @@ struct StillWaterView: View {
         .task(id: collectionOffset) {
             do { try await Task.sleep(nanoseconds:250_000_000) } catch { return }
             guard model.context.screen == .library else { return }
-            let stride: CGFloat = model.context.kind == "tracks" ? 72 : 156
+            let stride: CGFloat = model.context.kind == "tracks" ? 72 : 198
             let columns = model.context.kind == "tracks" ? 1 : 6
             let offset = max(0,-collectionOffset)
             let row = Int(floor(offset/stride))
-            let coverBottom: CGFloat = model.context.kind == "tracks" ? 64 : 104
+            let coverBottom: CGFloat = model.context.kind == "tracks" ? 64 : 144
             let first = row + (offset.truncatingRemainder(dividingBy:stride) >= coverBottom ? 1 : 0)
             model.settleLibrary(firstIndex:first*columns)
         }
@@ -265,7 +269,7 @@ struct StillWaterView: View {
     }
     private var libraryGrid: some View {
         ScrollView {
-            LazyVGrid(columns:Array(repeating:GridItem(.fixed(104),spacing:16),count:6),alignment:.leading,spacing:16) {
+            LazyVGrid(columns:Array(repeating:GridItem(.fixed(144),spacing:16),count:6),alignment:.leading,spacing:16) {
                 ForEach(model.context.items) { item in
                     VStack(alignment:.leading,spacing:10) {
                         Button { model.details(item) } label: {
@@ -274,16 +278,16 @@ struct StillWaterView: View {
                                     collectionCover(item).opacity(0.5).offset(x:6,y:-6)
                                 }
                                 collectionCover(item)
-                            }.frame(width:104,height:104).contentShape(Rectangle())
+                            }.frame(width:144,height:144).contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityIdentifier("library-cover-"+item.id).accessibilityLabel(item.title)
                             .audit("library-cover-"+item.id,tap:true,scroll:true)
-                        Text(item.title).font(Design.font(15)).opacity(0.7).lineLimit(1).truncationMode(.tail)
-                            .frame(width:104,height:26,alignment:.topLeading)
-                    }.frame(width:104,height:140,alignment:.topLeading).id(item.id)
+                        Text(item.title).font(Design.font(18)).opacity(0.7).lineLimit(1).truncationMode(.tail)
+                            .frame(width:144,height:26,alignment:.topLeading)
+                    }.frame(width:144,height:182,alignment:.topLeading).id(item.id)
                 }
                 if model.context.nextOffset != nil || model.context.cursor != nil {
                     Button("More") { model.loadPage(more:true) }.font(Design.font(18))
-                        .frame(width:104,height:104).audit("more",font:18,tap:true,scroll:true)
+                        .frame(width:144,height:144).audit("more",font:18,tap:true,scroll:true)
                 }
             }.scrollTargetLayout().padding(.top,model.context.kind == "playlists" ? 6 : 0)
                 .background(GeometryReader { g in
@@ -294,26 +298,26 @@ struct StillWaterView: View {
                     .opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
             }
         }.coordinateSpace(name:"collection").scrollPosition(id:$model.context.scrollID,anchor:.top)
-            .frame(width:710,height:300,alignment:.leading).clipped()
+            .frame(width:952,height:300,alignment:.leading).clipped()
             .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:260.0/300),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
-            .position(x:403,y:330)
+            .position(x:524,y:330)
     }
     @ViewBuilder private func collectionCover(_ item: MusicItem) -> some View {
         let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette)
         if model.context.kind == "artists" {
             if let image {
                 Image(uiImage:image).resizable().interpolation(.high).scaledToFill()
-                    .frame(width:104,height:104).clipShape(Circle())
+                    .frame(width:144,height:144).clipShape(Circle())
             } else {
-                Circle().stroke(Design.ink.opacity(0.35),lineWidth:1).frame(width:104,height:104)
+                Circle().stroke(Design.ink.opacity(0.35),lineWidth:1).frame(width:144,height:144)
                     .overlay(Text(String(item.title.prefix(1))).font(Design.font(32,serif:true)).opacity(0.62))
             }
         } else {
             if let image {
                 Image(uiImage:image).resizable().interpolation(.high).scaledToFill()
-                    .frame(width:104,height:104).clipShape(RoundedRectangle(cornerRadius:3))
+                    .frame(width:144,height:144).clipShape(RoundedRectangle(cornerRadius:3))
             } else {
-                RoundedRectangle(cornerRadius:3).stroke(Design.ink.opacity(0.18),lineWidth:1).frame(width:104,height:104)
+                RoundedRectangle(cornerRadius:3).stroke(Design.ink.opacity(0.18),lineWidth:1).frame(width:144,height:144)
             }
         }
     }
