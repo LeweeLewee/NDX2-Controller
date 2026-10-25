@@ -24,7 +24,10 @@ struct DisplayPreferences: Codable {
 }
 struct Preview {
     let reference: String, pixels: Data, side: Int, deadline: Double
-    let renderID = UUID()
+    let renderID: UUID
+    init(reference: String, pixels: Data, side: Int, deadline: Double, renderID: UUID = UUID()) {
+        self.reference = reference; self.pixels = pixels; self.side = side; self.deadline = deadline; self.renderID = renderID
+    }
 }
 
 @MainActor final class ControllerModel: ObservableObject {
@@ -55,9 +58,12 @@ struct Preview {
     @Published private(set) var libraryFirstIndex = 0
     @Published private(set) var preparingCommand = false
     private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
-    private var artworkDeadlines: [String:Double] = [:] // At most 48 registration hints, never image bytes.
+    private var artworkDeadlines: [String:Double] = [:] // At most 128 registration hints, never image bytes.
+    static let artworkImageLimit = 64 // 12.5 MiB RGB565 at 320 square, shared across item aliases.
+    static let artworkBindingLimit = 128
     private let artworkRenewalLead = 20.0
     private var libraryPages: [String:(context:BrowseContext, deadline:Double)] = [:] // One bounded page per section.
+    private var artworkItems: [String:MusicItem] = [:] // Metadata only for retained cache bindings.
     private var missingArtUntil: [String:Double] = [:]
     var fieldPreview: Preview? {
         guard context.screen == .library else { return colorPreview }
@@ -126,7 +132,7 @@ struct Preview {
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        if clearArtwork { libraryPages = [:]; artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        if clearArtwork { artworkItems = [:]; libraryPages = [:]; artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -172,7 +178,7 @@ struct Preview {
         } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= artworkRenewalLead) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
             nextArtAttempt = now + 5
             artTask = Task { await self.loadArtwork(); self.artTask = nil }
-        } else if ([Screen.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
+        } else if ([Screen.now,.queue,.library,.find,.detail].contains(context.screen)) && artTask == nil && online && now >= nextQueueArtAttempt {
             nextQueueArtAttempt = now + 0.2
             artTask = Task { await self.loadQueueArtwork(); self.artTask = nil }
         }
@@ -482,7 +488,9 @@ struct Preview {
         }
         guard image.complete, generation == gen, !Task.isCancelled, clock() < freshUntil,
               clock() < image.deadline else { return nil }
-        let preview = Preview(reference:ref,pixels:image.bytes,side:320,deadline:image.deadline)
+        // Identical authenticated pixels keep their render identity across renewal.
+        let previous = (recentArtwork + Array(queueArtwork.values)).first { $0.reference == ref && $0.side == 320 && $0.pixels == image.bytes }
+        let preview = Preview(reference:ref,pixels:image.bytes,side:320,deadline:image.deadline,renderID:previous?.renderID ?? UUID())
         recentArtwork.removeAll { $0.reference == ref }
         recentArtwork.append(preview); recentArtwork = Array(recentArtwork.suffix(4))
         return preview
@@ -496,7 +504,7 @@ struct Preview {
         let visibleItems = context.screen == .detail
             ? (context.selected.kind == "artists" && context.artistTab == "albums" ? items.filter { $0.kind == "albums" } : [])
             : items
-        let candidates = Array(visibleItems.prefix(24))
+        let candidates = context.screen == .now ? [] : Array(visibleItems.prefix(24))
         missingArtUntil = missingArtUntil.filter { clock() < $0.value }
         let screen = context.screen
         let start = screen == .library ? min(libraryFirstIndex, candidates.count) : 0
@@ -505,7 +513,13 @@ struct Preview {
         let missing = eligible.first { queueArtwork[$0.reference] == nil }
         let expiring = eligible.filter { queueArtwork[$0.reference] != nil && (queueArtwork[$0.reference]!.deadline - clock()) <= artworkRenewalLead }
             .min { queueArtwork[$0.reference]!.deadline < queueArtwork[$1.reference]!.deadline }
-        guard [.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing else { return }
+        // Once visible work is satisfied, maintain already-viewed covers as well.
+        // This is not prefetch: no new unseen page or image is requested.
+        let background = artworkItems.values.filter {
+            guard let preview = queueArtwork[$0.reference] else { return false }
+            return !$0.reference.hasPrefix("inputs/playqueue/") && preview.deadline - clock() <= artworkRenewalLead && clock() >= (missingArtUntil[$0.reference] ?? 0)
+        }.min { queueArtwork[$0.reference]!.deadline < queueArtwork[$1.reference]!.deadline }
+        guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? background else { return }
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false
@@ -542,24 +556,51 @@ struct Preview {
               generation == gen, context.screen == screen else { return }
         queueArtwork = queueArtwork.filter { clock() < $0.value.deadline }
         artworkDeadlines[item.reference] = preview.deadline
-        while artworkDeadlines.count > 48 {
+        while artworkDeadlines.count > Self.artworkBindingLimit {
             if let oldest = artworkDeadlines.min(by: { $0.value < $1.value })?.key { artworkDeadlines.removeValue(forKey:oldest) }
         }
+        // Renew every alias for this exact image, including items on other pages.
+        for key in Array(queueArtwork.keys) where queueArtwork[key]?.reference == ref { queueArtwork[key] = preview }
         queueArtwork[item.reference] = preview
-        // One authenticated image can serve every track that references that exact cover.
         for sibling in candidates where sibling.artwork == ref { queueArtwork[sibling.reference] = preview }
-        let currentRefs = Set(candidates.map(\.reference))
-        while queueArtwork.count > 24 {
+        var retainedItem = item; retainedItem.artwork = ref; artworkItems[item.reference] = retainedItem
+        retainArtworkReference(ref, for:item.reference)
+        trimArtworkCache(protecting:Set(candidates.map(\.reference)))
+        completed = true; missingArtUntil.removeValue(forKey:item.reference)
+        nextQueueArtAttempt = clock() + 0.2
+    }
+    private func retainArtworkReference(_ reference: String, for item: String) {
+        func update(_ items: [MusicItem]) -> [MusicItem] {
+            items.map { value in var value = value; if value.reference == item { value.artwork = reference }; return value }
+        }
+        context.items = update(context.items)
+        for index in history.indices { history[index].items = update(history[index].items) }
+        for key in Array(libraryPages.keys) {
+            guard var page = libraryPages[key] else { continue }
+            page.context.items = update(page.context.items); libraryPages[key] = page
+        }
+    }
+    func trimArtworkCache(protecting items: Set<String>) {
+        let protectedImages = Set(items.compactMap { queueArtwork[$0]?.reference })
+        // Bound pixel storage by unique image, not by how many tracks share it.
+        while Set(queueArtwork.values.map(\.reference)).count > Self.artworkImageLimit {
+            let victim = queueArtwork.values.sorted {
+                let a = protectedImages.contains($0.reference), b = protectedImages.contains($1.reference)
+                if a != b { return !a }
+                return $0.deadline == $1.deadline ? $0.reference < $1.reference : $0.deadline < $1.deadline
+            }.first!.reference
+            queueArtwork = queueArtwork.filter { $0.value.reference != victim }
+        }
+        while queueArtwork.count > Self.artworkBindingLimit {
             let victim = queueArtwork.keys.sorted {
-                let left = currentRefs.contains($0), right = currentRefs.contains($1)
-                if left != right { return !left }
-                let a = queueArtwork[$0]!.deadline, b = queueArtwork[$1]!.deadline
-                return a == b ? $0 < $1 : a < b
+                let a = items.contains($0), b = items.contains($1)
+                if a != b { return !a }
+                let left = queueArtwork[$0]!.deadline, right = queueArtwork[$1]!.deadline
+                return left == right ? $0 < $1 : left < right
             }.first!
             queueArtwork.removeValue(forKey:victim)
         }
-        completed = true; missingArtUntil.removeValue(forKey:item.reference)
-        nextQueueArtAttempt = clock() + 0.2
+        artworkItems = artworkItems.filter { queueArtwork[$0.key] != nil }
     }
     func startVoice() {
         guard context.screen == .ask, !context.typing else { return }

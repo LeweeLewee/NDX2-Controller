@@ -248,3 +248,6 @@ On 24 October the user authorized the defect sprint after physical testing. Reta
 
 
 **D040 renewal follow-up — 25 October:** under the authorized focused defect cycle, begin authenticated artwork revalidation20 seconds before original expiry, retain valid pixels until replacement or expiry, and reuse existing bounded grid images in detail. Retain at most one Library page per section (four sections, one contract-bounded page each) for60 seconds; invalidate on security/session change and collection writes. No image cache enlargement, local expiry extension, new routes or mutation permission expansion.
+
+
+**D040 navigation-cache amendment — 25 October:** following physical failure across Library sections, replace the client24-item image limit with64 unique images and128 metadata aliases; cap palette renders at64. This explicitly supersedes the earlier unchanged-client-cache-bound statement; bridge bounds remain unchanged. Catalogue covers already viewed may renew off-screen after foreground artwork is satisfied. No local expiry extension or automatic playback. The user requests prefetch after this defect is solved; retain that sequencing.

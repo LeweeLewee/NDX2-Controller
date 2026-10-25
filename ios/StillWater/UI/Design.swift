@@ -233,7 +233,8 @@ private final class RenderedArtworkCache: @unchecked Sendable {
     func put(_ key: String, _ image: UIImage) {
         lock.lock(); defer { lock.unlock() }
         entries.removeAll { $0.0 == key }; entries.append((key,image))
-        if entries.count > 12 { entries.removeFirst(entries.count-12) }
+        // At most 64 rendered 320-square RGBA images: 25 MiB pixel data.
+        if entries.count > 64 { entries.removeFirst(entries.count-64) }
     }
 }
 

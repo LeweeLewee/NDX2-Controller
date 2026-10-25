@@ -138,6 +138,50 @@ import XCTest
         XCTAssertTrue(t.requests.isEmpty, "Back reuses completed grid covers until their original deadline")
         m.deactivate()
     }
+    func testVisitedCoverRenewsOffscreenBeforeExpiryWithoutPrefetch() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.context.screen = .library
+        let item = MusicItem(.object(["reference":.string("inputs/tidal/albums/1"),"kind":.string("albums")]))
+        m.context.items = [item]; await m.loadQueueArtwork()
+        let first = try XCTUnwrap(m.queueArtwork[item.reference])
+        m.navigate(.now); now = 141; await m.refresh(); t.requests = []
+        await m.loadQueueArtwork()
+        XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,first.deadline)
+        XCTAssertEqual(m.queueArtwork[item.reference]?.renderID,first.renderID)
+        XCTAssertFalse(t.requests.contains("library_page"))
+        XCTAssertTrue(t.fixture.mutations.isEmpty)
+        m.deactivate()
+    }
+    func testThreeLibrarySectionsRetainAllThirtySixDistinctCovers() async throws {
+        let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh()
+        var originals: [String:Preview] = [:]
+        for section in ["albums","tracks","artists"] {
+            let items = (0..<12).map { "inputs/tidal/" + section + "/" + String($0) }
+            for item in items {
+                let preview = Preview(reference:item,pixels:Data([0,1]),side:1,deadline:160)
+                originals[item] = preview; m.queueArtwork[item] = preview
+            }
+            m.trimArtworkCache(protecting:Set(items))
+        }
+        XCTAssertEqual(m.queueArtwork.count,36)
+        for (item,preview) in originals { XCTAssertEqual(m.queueArtwork[item]?.renderID,preview.renderID) }
+        m.deactivate()
+    }
+    func testCacheBoundsUniqueImagesSeparatelyFromTrackAliases() {
+        let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        for i in 0..<80 { m.queueArtwork["item-\(i)"] = Preview(reference:"image-\(i)",pixels:Data([0,1]),side:1,deadline:160) }
+        m.trimArtworkCache(protecting:["item-79"])
+        XCTAssertEqual(Set(m.queueArtwork.values.map(\.reference)).count,ControllerModel.artworkImageLimit)
+        let shared = m.queueArtwork["item-79"]!
+        for i in 0..<150 { m.queueArtwork["alias-\(i)"] = shared }
+        m.trimArtworkCache(protecting:["item-79"])
+        XCTAssertLessThanOrEqual(m.queueArtwork.count,ControllerModel.artworkBindingLimit)
+        XCTAssertNotNil(m.queueArtwork["item-79"])
+        XCTAssertLessThanOrEqual(Set(m.queueArtwork.values.map(\.reference)).count,ControllerModel.artworkImageLimit)
+    }
     func testArtworkCacheStaysBoundedAcrossDifferentPages() async throws {
         let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
@@ -145,7 +189,8 @@ import XCTest
         for i in 1...30 {
             m.context.items = [MusicItem(.object(["reference":.string("inputs/tidal/albums/\(i)"),"kind":.string("albums")]))]
             await m.loadQueueArtwork()
-            XCTAssertLessThanOrEqual(m.queueArtwork.count,24)
+            XCTAssertLessThanOrEqual(m.queueArtwork.count,ControllerModel.artworkBindingLimit)
+            XCTAssertLessThanOrEqual(Set(m.queueArtwork.values.map(\.reference)).count,ControllerModel.artworkImageLimit)
             XCTAssertNotNil(m.queueArtwork[m.context.items[0].reference])
         }
         m.deactivate()
@@ -388,6 +433,7 @@ import XCTest
         t.release(); await renewal.value
         XCTAssertTrue(t.requests.contains("browse"))
         XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,first.deadline)
+        XCTAssertEqual(m.queueArtwork[item.reference]?.renderID,first.renderID,"Unchanged pixels must reuse their palette rendering")
         m.deactivate()
     }
     func testCollectionArtworkUses320AndPaletteFollowsSettledItem() async throws {
