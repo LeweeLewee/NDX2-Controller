@@ -157,7 +157,7 @@ import XCTest
     func testThreeLibrarySectionsRetainAllThirtySixDistinctCovers() async throws {
         let m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.active = true; m.snapshotMode = true; await m.refresh()
-        var originals: [String:Preview] = [:]
+        var originals: [String:StillWater.Preview] = [:]
         for section in ["albums","tracks","artists"] {
             let items = (0..<12).map { "inputs/tidal/" + section + "/" + String($0) }
             for item in items {
