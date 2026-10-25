@@ -209,3 +209,6 @@ Assessment validation: source `5b741b5` passes all 156 offline Python tests. Rea
 
 
 **25 October distribution handover:** exact uploaded build is0.1.0(23.1.0). Apple browser session expired and sign-in is stuck loading; existing protected API credential also returns403 for build reads. User sign-in is requested. Group assignment/Testing status remains unverified, so do not claim availability. Resume physically passes on the updated running bridge. Artwork code passed all65 native tests but needs phone acceptance after23.1.0 is assigned. Existing tester/group/pairing unchanged.
+
+
+**25 October beta23.1.0 available:** after renewed Apple sign-in, build1e3171bf-6c3a-4ae8-a4bd-e34ceea630ec was assigned to the existing Naim NDX2 Controller TestFlight internal group and visibly verified Testing. Sourcef981a00; release run40206262462 passed65 native tests, four modern TLS checks and signed upload. No new testers, permissions or pairing changes. Update over the paired app. Retest Library Albums/Tracks/Artists/Playlists round trips and leave covers visible for at least90 seconds to exercise renewal; verify detail cover reuse and regress same-track Pause/Resume. Resume already passed physically against the corrected bridge; artwork phone acceptance remains open.
