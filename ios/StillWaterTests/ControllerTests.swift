@@ -3,7 +3,8 @@ import XCTest
 
 @MainActor final class ControllerTests: XCTestCase {
     final class FaultTransport: BridgeTransport {
-        let fixture = FixtureTransport()
+        let fixture: FixtureTransport
+        init(seedCollection: Bool = false) { fixture = FixtureTransport(seedCollection:seedCollection) }
         var requests: [String] = []
         var artworkSides: [Int] = []
         var loseMutation = false
@@ -277,13 +278,15 @@ import XCTest
         m.deactivate()
     }
     func testFailedLibraryReadEndsLoadingAndCanRetry() async {
-        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
         t.failRead = "library_page"; m.navigate(.library); await settle()
         XCTAssertFalse(m.loading); XCTAssertNotNil(m.pageError)
         XCTAssertNotEqual(m.libraryEmptyMessage,"Looking…")
         t.failRead = nil; await m.refresh(); m.loadPage(); await settle()
-        XCTAssertFalse(m.loading); XCTAssertNil(m.pageError); XCTAssertFalse(m.context.items.isEmpty)
+        XCTAssertFalse(m.loading, "Recovered page must finish loading")
+        XCTAssertNil(m.pageError, "Successful retry must clear the page error")
+        XCTAssertFalse(m.context.items.isEmpty, "Seeded saved albums must return after recovery")
         m.deactivate()
     }
     func testBusyReadDoesNotBackOffMissingGridCover() async throws {
