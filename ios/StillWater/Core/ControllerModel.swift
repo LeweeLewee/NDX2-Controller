@@ -347,7 +347,7 @@ struct Preview {
     }
     // Warm only first pages, not the full collection; foreground work always wins.
     func prefetchLibrary() async {
-        guard active, online, clock() < freshUntil, account == "connected", context.screen == .now,
+        guard active, online, clock() < freshUntil, ["connected","fixture"].contains(account), context.screen == .now,
               clock() - lastTouch >= 4, clock() >= nextPrefetch, clock() >= prefetchPausedUntil,
               inFlight == nil, pendingAction == nil, !preparingCommand else { return }
         let kinds = ["albums","artists","playlists","tracks"]
