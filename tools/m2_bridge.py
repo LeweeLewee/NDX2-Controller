@@ -283,6 +283,7 @@ class Contract:
                 passed = {k: v for k, v in args.items() if k not in ('offset','expected_reference','expected_state')}
                 if action == 'browse': passed['offset'] = offset
                 if action == 'queue': passed.update(artwork_offset=offset, artwork_limit=PAGE_SIZE)
+                if action == 'library_page': passed['artwork_offset'] = offset
                 if action == 'library_state': passed['fresh'] = True
                 data = self.service.request(action, passed)
                 if action == 'browse':
@@ -293,7 +294,7 @@ class Contract:
                     start = 0 if action == 'browse' else offset
                     data = {**data, 'items': items[start:start + PAGE_SIZE],
                             'next_offset': offset + PAGE_SIZE if len(items) > start + PAGE_SIZE else None}
-                    if action == 'queue':
+                    if action in ('queue', 'library_page'):
                         for item in data['items']: self.artwork.register(item.get('artwork'))
                     if action == 'browse' and data.get('total', 0) and offset + PAGE_SIZE < data['total']:
                         data['next_offset'] = offset + PAGE_SIZE

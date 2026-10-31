@@ -41,6 +41,23 @@ class M2Tests(unittest.TestCase):
         self.vault.close(); self.temp.cleanup()
     def req(self, action, args=None, rid='a'*32):
         return self.contract.handle('device', {'version':1,'request_id':rid,'action':action,'args':args or {}})
+    def test_collection_cover_registered_only_for_returned_page_and_expires(self):
+        original = self.service.request
+        paths = list(self.service.fixture_images)
+        def request(action,args):
+            if action == 'library_page':
+                return {'items':[{'reference':f'inputs/tidal/playlists/{i}', 'title':'Mix',
+                                 'kind':'playlists', 'artwork':paths[0 if i < 12 else 1]} for i in range(24)]}
+            return original(action,args)
+        self.service.request = request
+        page = self.client.request('library_page',{'kind':'playlists'})
+        self.assertEqual(len(page['data']['items']),12)
+        self.assertTrue(self.client.request('artwork',{'reference':paths[0],'side':320})['data']['available'])
+        self.assertFalse(self.client.request('artwork',{'reference':paths[1],'side':320})['data']['available'])
+        self.time[0] += 61
+        self.assertFalse(self.client.request('artwork',{'reference':paths[0],'side':320})['data']['available'])
+        self.assertFalse(self.service.resolved)
+
     def test_fixture_next_previous_changes_current_identity_and_position(self):
         naim=self.service.naim; naim.transport('pause')
         for command,index,title in [('next',102,'Soft Light'),('prev',101,'A Still Morning'),('prev',103,'Quiet Hours'),('next',101,'A Still Morning')]:

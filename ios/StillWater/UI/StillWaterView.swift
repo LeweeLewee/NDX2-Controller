@@ -84,7 +84,7 @@ struct StillWaterView: View {
         .task(id: collectionOffset) {
             do { try await Task.sleep(nanoseconds:250_000_000) } catch { return }
             guard model.context.screen == .library else { return }
-            let stride: CGFloat = model.context.kind == "tracks" ? 72 : 198
+            let stride: CGFloat = model.context.kind == "tracks" ? 72 : 186
             let columns = model.context.kind == "tracks" ? 1 : 6
             let offset = max(0,-collectionOffset)
             let row = Int(floor(offset/stride))
@@ -142,10 +142,10 @@ struct StillWaterView: View {
                 .frame(width:glyph,height:glyph).frame(width:w,height:h)
                 .background { if ring { Circle().fill((accent ? Design.accent : Design.ink).opacity(accent && mark == .mic ? 0 : 0.12)).frame(width:ringSize ?? min(w,h),height:ringSize ?? min(w,h)) } }
                 .overlay { if ring { Circle().stroke((accent ? Design.accent : Design.ink).opacity(0.7),lineWidth:1.5).frame(width:ringSize ?? min(w,h),height:ringSize ?? min(w,h)) } }
-                .overlay { if model.pendingAction != nil && model.pendingAction != "amplifier" && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
+                .overlay { if model.pendingAction != nil && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(!enabled)
-            .opacity(model.pendingAction == "amplifier" && id.hasPrefix("amp-") ? 0.35 : enabled || (model.pendingAction != nil && model.pendingTarget == id) ? 1 : 0.35)
+        }.buttonStyle(ExplicitContrastButtonStyle()).disabled(!enabled)
+            .opacity(enabled || model.keepsControlVisibleWhileBusy(id) ? 1 : 0.35)
             .accessibilityLabel(label).accessibilityIdentifier(id).audit(id,tap:true).position(x:x+w/2,y:y+h/2)
     }
     private func sleeve(x: CGFloat,y: CGFloat,size: CGFloat, hidden: Bool = false) -> some View {
@@ -232,16 +232,16 @@ struct StillWaterView: View {
     private func time(_ milliseconds: Int) -> String { String(format:"%d:%02d",milliseconds/60000,(milliseconds/1000)%60) }
     private func header(_ title: String) -> some View {
         ZStack {
-            label(title,id:"screen-title",x:48,y:56,w:560,h:42,size:32,serif:true)
+            label(title,id:"screen-title",x:48,y:56,w:title == "Library" ? 240 : 560,h:42,size:32,serif:true)
             button("‹ Back",id:"back",x:888,y:24,w:112,border:false,size:22) { model.back() }
         }
     }
     private func connectionLine() -> some View {
         Group { if !model.online { label("Reconnecting to the bridge",id:"offline",x:48,y:190,w:650,h:30,size:26,alpha:0.7,serif:true,italic:true) } }
     }
-    private func filters(y: CGFloat) -> some View {
+    private func filters(y: CGFloat, x: CGFloat = 48) -> some View {
         ForEach(Array(["albums","tracks","artists","playlists"].enumerated()),id:\.offset) { i,kind in
-            button(kind.capitalized,id:"filter-"+kind,x:48+CGFloat(i)*128,y:y,w:120,border:false,size:18,indicator:model.context.kind == kind) { model.filter(kind) }
+            button(kind.capitalized,id:"filter-"+kind,x:x+CGFloat(i)*128,y:y,w:120,border:false,size:18,indicator:model.context.kind == kind) { model.filter(kind) }
                 .opacity(model.context.kind == kind ? 1 : 0.55)
         }
     }
@@ -260,18 +260,18 @@ struct StillWaterView: View {
     }
     private var library: some View {
         ZStack(alignment:.topLeading) {
-            header("Library"); filters(y:112)
+            header("Library"); filters(y:46,x:336)
             if model.account == "disconnected" {
                 label("Connect your collection on the bridge computer",id:"collection-connect",x:48,y:180,w:952,h:72,size:26,alpha:0.7,serif:true,italic:true,lines:2)
-            } else if model.context.kind == "tracks" { rows(y:180,height:300,width:704) }
+            } else if model.context.kind == "tracks" { rows(y:110,height:370,width:704) }
             else { libraryGrid }
         }
     }
     private var libraryGrid: some View {
         ScrollView {
-            LazyVGrid(columns:Array(repeating:GridItem(.fixed(144),spacing:16),count:6),alignment:.leading,spacing:16) {
+            LazyVGrid(columns:Array(repeating:GridItem(.fixed(144),spacing:16),count:6),alignment:.leading,spacing:12) {
                 ForEach(model.context.items) { item in
-                    VStack(alignment:.leading,spacing:10) {
+                    VStack(alignment:.leading,spacing:8) {
                         Button { model.details(item) } label: {
                             ZStack {
                                 if model.context.kind == "playlists" {
@@ -282,8 +282,9 @@ struct StillWaterView: View {
                         }.buttonStyle(.plain).accessibilityIdentifier("library-cover-"+item.id).accessibilityLabel(item.title)
                             .audit("library-cover-"+item.id,tap:true,scroll:true)
                         Text(item.title).font(Design.font(18)).opacity(0.7).lineLimit(1).truncationMode(.tail)
-                            .frame(width:144,height:26,alignment:.topLeading)
-                    }.frame(width:144,height:182,alignment:.topLeading).id(item.id)
+                            .frame(width:144,height:22,alignment:.topLeading)
+                            .audit("library-title-"+item.id,font:18,scroll:true)
+                    }.frame(width:144,height:174,alignment:.topLeading).id(item.id)
                 }
                 if model.context.nextOffset != nil || model.context.cursor != nil {
                     Button("More") { model.loadPage(more:true) }.font(Design.font(18))
@@ -298,9 +299,9 @@ struct StillWaterView: View {
                     .opacity(0.7).frame(maxWidth:.infinity,alignment:.leading)
             }
         }.coordinateSpace(name:"collection").scrollPosition(id:$model.context.scrollID,anchor:.top)
-            .frame(width:952,height:300,alignment:.leading).clipped()
-            .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:260.0/300),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
-            .position(x:524,y:330)
+            .frame(width:952,height:370,alignment:.leading).clipped()
+            .mask(LinearGradient(stops:[.init(color:.black,location:0),.init(color:.black,location:366.0/370),.init(color:.clear,location:1)],startPoint:.top,endPoint:.bottom))
+            .position(x:524,y:295)
     }
     @ViewBuilder private func collectionCover(_ item: MusicItem) -> some View {
         let image = model.queueArtwork[item.reference]?.uiImage(palette:model.preferences.palette)

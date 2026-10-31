@@ -85,7 +85,14 @@ import Foundation
                 let detail = try await send(BridgeRequest("browse",["reference":.string(ref)]))
                 catalog.append(detail.data["item"])
             }
-            let selected = catalog.filter { memberships[$0["reference"].text ?? ""] == "saved" }
+            var selected = catalog.filter { memberships[$0["reference"].text ?? ""] == "saved" }
+            if kind == "playlists" {
+                for index in selected.indices {
+                    guard case .object(var item) = selected[index], let ref = item["reference"]?.text else { continue }
+                    let detail = try await send(BridgeRequest("browse",["reference":.string(ref)]))
+                    item["artwork"] = detail.data["item"]["artwork"]; selected[index] = .object(item)
+                }
+            }
             let offset = request.args["offset"]?.number ?? 0
             data["items"] = .array(Array(selected.dropFirst(max(0,offset)).prefix(12)))
             data["next_offset"] = offset + 12 < selected.count ? .int(offset + 12) : .null

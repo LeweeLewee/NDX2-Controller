@@ -46,6 +46,8 @@ import XCTest
         XCTAssertEqual(t.fixture.mutations,["transport"])
         XCTAssertFalse(m.controlsAvailable)
         XCTAssertEqual(m.pendingAction,"transport")
+        for id in ["previous","play-pause","next","amp-up","amp-down"] { XCTAssertTrue(m.keepsControlVisibleWhileBusy(id)) }
+        XCTAssertFalse(m.keepsControlVisibleWhileBusy("unrelated"))
         m.mutate("transport",["command":.string("resume")])
         t.release(); await settle()
         XCTAssertEqual(t.fixture.mutations,["transport"])
@@ -363,6 +365,21 @@ import XCTest
         XCTAssertFalse(t.requests.contains("library_page")); XCTAssertFalse(m.context.items.isEmpty)
         m.navigate(.now); m.handleMemoryPressure(); now += 16; await m.refresh(); t.requests = []
         await m.prefetchLibrary(); XCTAssertFalse(t.requests.contains("library_page")); m.deactivate()
+    }
+    func testPlaylistCoversLoadAndRenewFromCollectionWithoutNativeBrowse() async throws {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh()
+        m.navigate(.library); await settle(); m.filter("playlists"); await settle()
+        let item = try XCTUnwrap(m.context.items.first)
+        XCTAssertNotNil(item.artwork)
+        t.requests = []; await m.loadQueueArtwork()
+        let first = try XCTUnwrap(m.queueArtwork[item.reference])
+        XCTAssertFalse(t.requests.contains("browse")); XCTAssertTrue(t.requests.contains("artwork"))
+        now += 45; await m.refresh(); t.requests = []; await m.loadQueueArtwork()
+        XCTAssertTrue(t.requests.contains("library_page")); XCTAssertFalse(t.requests.contains("browse"))
+        XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[item.reference]).deadline,first.deadline)
+        XCTAssertTrue(t.fixture.mutations.isEmpty); m.deactivate()
     }
     func testFailedLibraryReadEndsLoadingAndCanRetry() async {
         let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)

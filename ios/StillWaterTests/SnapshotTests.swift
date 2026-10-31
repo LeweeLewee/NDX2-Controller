@@ -91,9 +91,13 @@ import UIKit
                 XCTAssertFalse(taps[i].frame.insetBy(dx:0.25,dy:0.25).intersects(taps[j].frame.insetBy(dx:0.25,dy:0.25)),"Overlapping \(state): \(taps[i].id) / \(taps[j].id)")
                 XCTAssertFalse(taps[i].frame.insetBy(dx:-3.75,dy:-3.75).intersects(taps[j].frame.insetBy(dx:-3.75,dy:-3.75)),"Less than 8-unit target gap \(state): \(taps[i].id) / \(taps[j].id)")
             } }
-            if state == "library-albums" {
+            if ["library-albums","library-artists","library-playlists"].contains(state) {
                 let covers = visible.filter { $0.id.hasPrefix("library-cover-") }.sorted { $0.frame.minY == $1.frame.minY ? $0.frame.minX < $1.frame.minX : $0.frame.minY < $1.frame.minY }
-                XCTAssertGreaterThanOrEqual(covers.count,6)
+                XCTAssertGreaterThanOrEqual(covers.count,12)
+                let titles = visible.filter { $0.id.hasPrefix("library-title-") }
+                XCTAssertGreaterThanOrEqual(titles.count,12)
+                for title in titles.prefix(12) { XCTAssertLessThanOrEqual(title.frame.maxY,476) }
+                for cover in covers.prefix(12) { XCTAssertLessThanOrEqual(cover.frame.maxY,450) }
                 for (index,cover) in covers.prefix(6).enumerated() {
                     XCTAssertEqual(cover.frame.minX,48+CGFloat(index)*160,accuracy:1)
                     XCTAssertEqual(cover.frame.width,144,accuracy:1)

@@ -103,6 +103,19 @@ struct Preview {
         if restore { unknownAction = UserDefaults.standard.string(forKey: "uncertain-command") }
     }
     var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation && !preparingCommand }
+    func keepsControlVisibleWhileBusy(_ id: String) -> Bool {
+        guard pendingAction != nil, active, online, clock() < freshUntil, unknownAction == nil else { return false }
+        if id == "play-pause" { return ["playing","paused"].contains(player.state) }
+        return ["previous","next","amp-up","amp-down"].contains(id)
+    }
+    private var libraryArtworkOrigins: [String:[String:JSONValue]] = [:]
+    private func rememberLibraryArtwork(_ items: [MusicItem], args: [String:JSONValue]) {
+        for item in items where item.kind == "playlists" && item.artwork != nil { libraryArtworkOrigins[item.reference] = args }
+        if libraryArtworkOrigins.count > Self.artworkBindingLimit {
+            libraryArtworkOrigins = libraryArtworkOrigins.filter { entry in queueArtwork[entry.key] != nil || items.contains(where: { $0.reference == entry.key }) }
+            if libraryArtworkOrigins.count > Self.artworkBindingLimit { libraryArtworkOrigins = Dictionary(uniqueKeysWithValues:items.filter { $0.kind == "playlists" && $0.artwork != nil }.map { ($0.reference,args) }) }
+        }
+    }
     var extendedTransportAvailable: Bool { controlsAvailable && unknownAction == nil }
     var pauseResumeAvailable: Bool { controlsAvailable && unknownAction != "transport" && ["playing","paused"].contains(player.state) }
     var touched: Bool { rest == .touched }
@@ -134,7 +147,7 @@ struct Preview {
         if flightMutation { markUnknown() }
         inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil
         transport.cancel(); readTask?.cancel(); artTask?.cancel(); artTask = nil
-        if clearArtwork { artworkItems = [:]; libraryPages = [:]; artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
+        if clearArtwork { artworkItems = [:]; libraryPages = [:]; libraryArtworkOrigins = [:]; artworkDeadlines = [:]; recentArtwork = []; artwork = nil; colorPreview = nil; queueArtwork = [:] }; context.membership = "unknown"; context.items = context.items.map { var i = $0; i.saved = "unknown"; return i }
         for i in history.indices { history[i].membership = "unknown"; history[i].items = history[i].items.map { var v = $0; v.saved = "unknown"; return v } }
         cancelVoice()
     }
@@ -334,6 +347,7 @@ struct Preview {
             self.context.resultID = r.data["result_id"].text
             if old.screen == .library, ["albums","artists","tracks","playlists"].contains(old.kind) {
                 self.libraryPages[old.kind] = (self.context, self.clock() + 60)
+                self.rememberLibraryArtwork(self.context.items,args:args)
             }
         }
     }
@@ -360,6 +374,7 @@ struct Preview {
         page.items = reply.data["items"].values.map(MusicItem.init)
         page.nextOffset = reply.data["next_offset"].number; page.cursor = reply.data["cursor"].text
         libraryPages[kind] = (page,clock() + 60)
+        rememberLibraryArtwork(page.items,args:["kind":.string(kind)])
     }
     func handleMemoryPressure() {
         // Retain visible images; discard speculative/offscreen storage and cool prefetch.
@@ -562,7 +577,7 @@ struct Preview {
                 guard let page = libraryPages[kind], clock() < page.deadline else { return [] }
                 return Array(page.context.items.prefix(12))
             }.first { queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) } : nil
-        guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? background ?? prefetched else { return }
+        guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? prefetched ?? background else { return }
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
         var completed = false
@@ -583,7 +598,14 @@ struct Preview {
             reference = page.data["items"].values.map(MusicItem.init).first { $0.reference == item.reference }?.artwork
             guard reference != nil else { return }
         }
-        if reference == nil || (renewing && !item.reference.hasPrefix("inputs/playqueue/")) {
+        if renewing, item.kind == "playlists", let args = libraryArtworkOrigins[item.reference] {
+            guard let page = await perform(BridgeRequest("library_page",args)), page.outcome == "observed", generation == gen else { return }
+            let items = page.data["items"].values.map(MusicItem.init)
+            rememberLibraryArtwork(items,args:args)
+            reference = items.first { $0.reference == item.reference }?.artwork
+            guard reference != nil else { return }
+        }
+        if reference == nil || (renewing && !item.reference.hasPrefix("inputs/playqueue/") && libraryArtworkOrigins[item.reference] == nil) {
             let action = item.kind == "artists" ? "artist_bio" : "browse"
             guard let detail = await perform(BridgeRequest(action,["reference":.string(item.reference)])),
                   detail.outcome == "observed", generation == gen else { return }

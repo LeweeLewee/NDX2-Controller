@@ -48,6 +48,28 @@ class LibraryTests(unittest.TestCase):
         self.library.finish({'state': params['state'], 'code': ['code']})
         return params
 
+    def test_playlist_cover_uses_exact_relationship_and_rejects_untrusted_url(self):
+        from unittest.mock import patch
+        from controller_service import Bridge
+        self.connect()
+        url = 'https://resources.tidal.com/images/example/320x320.jpg'
+        page = {'data':[{'type':'playlists','id':'abc'}], 'included':[
+            {'type':'playlists','id':'abc','attributes':{'title':'Mix'},
+             'relationships':{'coverArt':{'data':{'type':'artworks','id':'cover'}}}},
+            {'type':'artworks','id':'other','attributes':{'files':[{'href':url+'/wrong'}]}},
+            {'type':'artworks','id':'cover','attributes':{'files':[{'href':url}]}}]}
+        bridge = Bridge(); bridge.library = self.library
+        with patch.object(self.catalog,'_json',return_value=page):
+            result = bridge.request('library_page',{'kind':'playlists'})
+            item = result['items'][0]
+            self.assertEqual(item['reference'],'inputs/tidal/playlists/abc')
+            self.assertEqual(bridge.artwork_refs[item['artwork']],url)
+            self.assertFalse(bridge.resolved)
+            page['included'][-1]['attributes']['files'][0]['href']='https://evil.example/art.jpg'
+            self.assertIsNone(bridge.request('library_page',{'kind':'playlists'})['items'][0]['artwork'])
+            page['included'][0]['relationships'] = {}
+            self.assertIsNone(self.library.page('playlists')['items'][0]['artwork'])
+
     def test_read_only_consent_accepts_read_scope_and_blocks_writes(self):
         from unittest.mock import patch
         self.library = TidalLibrary(self.catalog,clock=lambda:100,sleep=lambda _:None,read_only=True)

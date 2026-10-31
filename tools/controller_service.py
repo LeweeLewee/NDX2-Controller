@@ -60,7 +60,10 @@ class Bridge:
                 self.library.disconnect()
                 return {'message': 'TIDAL library disconnected from this controller session.'}
             if action == 'library_page':
-                return self.library.page(args.get('kind', 'albums'), args.get('cursor'))
+                page = self.library.page(args.get('kind', 'albums'), args.get('cursor'))
+                offset = args.get('artwork_offset', 0)
+                return {**page, 'items': [{**item, 'artwork': self.cover(item.get('artwork')) if offset <= n < offset + 12 else None}
+                                        for n, item in enumerate(page['items'])]}
             if action == 'library_state':
                 return {'saved': self.library.contains(args.get('reference'), args.get('fresh', False))}
             if action == 'library_save':

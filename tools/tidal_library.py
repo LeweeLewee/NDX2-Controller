@@ -121,7 +121,7 @@ class TidalLibrary:
     def page(self, kind, cursor=None):
         if cursor is not None and (not isinstance(cursor, str) or len(cursor) > 4096):
             raise ValueError('Invalid collection cursor')
-        params = {'include': 'items'}
+        params = {'include': 'items.coverArt' if kind == 'playlists' else 'items'}
         if cursor:
             params['page[cursor]'] = cursor
         data = self._request(kind, params=params)
@@ -131,8 +131,21 @@ class TidalLibrary:
         next_cursor = urllib.parse.parse_qs(urllib.parse.urlsplit(link or '').query).get('page[cursor]', [None])[0]
         if link and not next_cursor:
             raise LibraryError('TIDAL returned unsupported collection pagination')
+        included = {(i.get('type'), i.get('id')): i for i in data.get('included', []) if isinstance(i, dict)}
+        def cover(item_id):
+            from artwork_cache import validate_artwork_url
+            resource = included.get((kind, item_id), {})
+            refs = resource.get('relationships', {}).get('coverArt', {}).get('data') or []
+            if isinstance(refs, dict): refs = [refs]
+            for ref in refs:
+                if not isinstance(ref, dict) or ref.get('type') != 'artworks': continue
+                art = included.get(('artworks', ref.get('id')), {})
+                for file in art.get('attributes', {}).get('files', []):
+                    try: return validate_artwork_url(file.get('href'))
+                    except (ValueError, AttributeError): continue
+            return None
         return {'items': [{'reference': i['candidate_native_reference'], 'title': i['title'] or i['id'],
-                           'kind': kind, 'artist': '', 'saved': True} for i in ordered_items(data, kind)],
+                           'kind': kind, 'artist': '', 'saved': True, 'artwork': cover(i['id'])} for i in ordered_items(data, kind)],
                 'cursor': next_cursor}
 
     def contains(self, reference, fresh=False):
