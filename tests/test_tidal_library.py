@@ -57,7 +57,7 @@ class LibraryTests(unittest.TestCase):
             {'type':'playlists','id':'abc','attributes':{'title':'Mix'},
              'relationships':{'coverArt':{'data':{'type':'artworks','id':'cover'}}}},
             {'type':'artworks','id':'other','attributes':{'files':[{'href':url+'/wrong'}]}},
-            {'type':'artworks','id':'cover','attributes':{'files':[{'href':url}]}}]}
+            {'type':'artworks','id':'cover','attributes':{'files':[{'href':url,'meta':{'width':320,'height':320}}, {'href':url.replace('320','160'),'meta':{'width':160,'height':160}}]}}]}
         bridge = Bridge(); bridge.library = self.library
         with patch.object(self.catalog,'_json',return_value=page):
             result = bridge.request('library_page',{'kind':'playlists'})

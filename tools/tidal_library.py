@@ -140,7 +140,9 @@ class TidalLibrary:
             for ref in refs:
                 if not isinstance(ref, dict) or ref.get('type') != 'artworks': continue
                 art = included.get(('artworks', ref.get('id')), {})
-                for file in art.get('attributes', {}).get('files', []):
+                files = [f for f in art.get('attributes', {}).get('files', []) if isinstance(f, dict)
+                         and all(type(f.get('meta', {}).get(k)) is int and f['meta'][k] >= 320 for k in ('width', 'height'))]
+                for file in sorted(files, key=lambda f: max(f['meta']['width'], f['meta']['height'])):
                     try: return validate_artwork_url(file.get('href'))
                     except (ValueError, AttributeError): continue
             return None
