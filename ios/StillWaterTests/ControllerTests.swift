@@ -41,6 +41,21 @@ import XCTest
             return reply
         }
     }
+    func testTimerWarmsEveryLibrarySectionBeforeFirstVisit() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true)
+        let m = ControllerModel(transport:t,clock:{now},restore:false)
+        m.active = true; m.contactEnded()
+        // Exercise the production scheduler, including polling and current artwork.
+        // No direct prefetch/loadQueueArtwork calls and no manually refreshed snapshot.
+        for _ in 0..<450 { m.tick(); await settle(); now += 0.2 }
+        XCTAssertEqual(Set(t.libraryKinds),Set(["albums","artists","playlists","tracks"]))
+        for kind in ["albums","artists","playlists","tracks"] {
+            XCTAssertTrue(m.queueArtwork.keys.contains { $0.contains("/"+kind+"/") },"Missing scheduled cover for " + kind)
+        }
+        XCTAssertTrue(t.fixture.mutations.isEmpty)
+        m.deactivate()
+    }
     func testControlFeedbackSpansPreflightWriteAndReadbackWithoutUnlocking() async {
         let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
         m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh(); m.contactEnded()
