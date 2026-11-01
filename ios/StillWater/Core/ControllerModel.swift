@@ -57,7 +57,7 @@ struct Preview {
     @Published var queueArtwork: [String:Preview] = [:]
     @Published private(set) var libraryFirstIndex = 0
     @Published private(set) var preparingCommand = false
-    private var recentArtwork: [Preview] = [] // At most four completed previews; original deadlines only.
+    private var recentArtwork: [Preview] = [] // Display-only retention; original deadlines still govern refresh.
     private var artworkDeadlines: [String:Double] = [:] // Bounded registration hints, never image bytes.
     static let artworkImageLimit = 256 // 50 MiB RGB565 ceiling; shared across aliases.
     static let artworkBindingLimit = 1024
@@ -68,7 +68,7 @@ struct Preview {
     var fieldPreview: Preview? {
         guard context.screen == .library else { return colorPreview }
         let ordered = Array(context.items.dropFirst(libraryFirstIndex)) + Array(context.items.prefix(libraryFirstIndex))
-        return ordered.compactMap { queueArtwork[$0.reference] }.first { clock() < $0.deadline }
+        return ordered.compactMap { queueArtwork[$0.reference] }.first
     }
     func settleLibrary(firstIndex: Int) { libraryFirstIndex = min(max(0,firstIndex),max(0,context.items.count-1)) }
     @Published var voiceState = "idle"
@@ -98,6 +98,7 @@ struct Preview {
     private var libraryRecoveryAttempts = 0, nextLibraryRecovery = 0.0
     private var nextPrefetch = 0.0, prefetchPausedUntil = 0.0
     private var prefetchPageTurn = 0, prefetchArtworkTurn = 0
+    private var refreshVisiblePageOnResume = false
     private let prefetchKinds = ["albums","artists","playlists","tracks"]
     let clock: () -> Double
     init(transport: BridgeTransport, clock: @escaping () -> Double = { ProcessInfo.processInfo.systemUptime }, restore: Bool = true) {
@@ -125,7 +126,7 @@ struct Preview {
     func replaceTransport(_ value: BridgeTransport) {
         // A distributed design preview cannot switch to saved or newly entered live trust.
         if RuntimeMode.demoOnly && value is BridgeClient { return }
-        deactivate(); transport = value; fixture = value is FixtureTransport; player = Player(); queue = []; boot = nil; revision = -1
+        deactivate(); invalidate(); transport = value; fixture = value is FixtureTransport; player = Player(); queue = []; boot = nil; revision = -1
         activate()
     }
     func activate() {
@@ -141,7 +142,8 @@ struct Preview {
     }
     func deactivate() {
         active = false; timer?.cancel(); timer = nil
-        invalidate(); online = false; freshUntil = 0; applyIdlePolicy?(false)
+        refreshVisiblePageOnResume = context.screen == .library
+        invalidate(clearArtwork:false); online = false; freshUntil = 0; applyIdlePolicy?(false)
     }
     func invalidate(clearArtwork: Bool = true) {
         generation += 1; consumeContact = true
@@ -172,9 +174,8 @@ struct Preview {
         let now = clock()
         if inFlight != nil && now >= flightDeadline { invalidate(clearArtwork:flightMutation); online = false; status = "Connection unavailable"; nextPoll = now + retry }
         if now >= freshUntil { online = false; if voiceState == "recording" { cancelVoice() } }
-        if let art = artwork, now >= art.deadline { artwork = nil }
-        if let art = colorPreview, now >= art.deadline { colorPreview = nil }
-        if queueArtwork.values.contains(where:{ now >= $0.deadline }) { queueArtwork = queueArtwork.filter { now < $0.value.deadline } }
+        // Expired images remain display-only while authenticated renewal runs.
+        // Their deadlines are never extended and cannot enable player controls.
         if rest == .waking && now - lastTouch >= 0.4 { rest = .still }
         if context.screen == .now && rest == .touched && now - lastTouch >= 8 { rest = .still }
         if voiceState == "recording" {
@@ -192,6 +193,9 @@ struct Preview {
         } else if now >= nextBattery, let reportBattery {
             nextBattery = now + 900
             readTask = Task { await reportBattery() }
+        } else if refreshVisiblePageOnResume && online && now < freshUntil {
+            refreshVisiblePageOnResume = false
+            if context.screen == .library { loadPage(automaticRecovery:true) }
         } else if recoverLibraryIfNeeded() {
             // A fresh connection permits a bounded page retry, never a command replay.
         } else if [.now,.detail].contains(context.screen) && (artwork == nil || (artwork?.deadline ?? 0) - now <= artworkRenewalLead) && artTask == nil && artworkReference != nil && online && now >= nextArtAttempt {
@@ -265,8 +269,7 @@ struct Preview {
         if includeMembership && context.screen == .now { await currentMembership() }
     }
     private func rememberArtwork() {
-        recentArtwork = recentArtwork.filter { clock() < $0.deadline }
-        for preview in [artwork, colorPreview].compactMap({ $0 }) where clock() < preview.deadline {
+        for preview in [artwork, colorPreview].compactMap({ $0 }) {
             recentArtwork.removeAll { $0.reference == preview.reference && $0.side == preview.side }
             recentArtwork.append(preview)
         }
@@ -274,9 +277,8 @@ struct Preview {
     }
     private func restoreArtwork() {
         artwork = nil; colorPreview = nil
-        guard active, online, clock() < freshUntil, let ref = artworkReference else { return }
-        recentArtwork = recentArtwork.filter { clock() < $0.deadline }
-        artwork = (recentArtwork + Array(queueArtwork.values)).filter { $0.reference == ref && $0.side == 320 && clock() < $0.deadline }.max { $0.deadline < $1.deadline }
+        guard let ref = artworkReference else { return }
+        artwork = (recentArtwork + Array(queueArtwork.values)).filter { $0.reference == ref && $0.side == 320 }.max { $0.deadline < $1.deadline }
         colorPreview = artwork
     }
     func navigate(_ screen: Screen) {
@@ -316,10 +318,10 @@ struct Preview {
         if !automaticRecovery { libraryRecoveryAttempts = 0 }
         guard cancelReadForInteraction() else { return }
         if context.screen == .find && context.query.utf8.count > 256 { status = "Search text too long; use fewer words."; return }
-        libraryPages = libraryPages.filter { clock() < $0.value.deadline }
         if context.screen == .library, !more, let cached = libraryPages[context.kind] {
             context = cached.context; loading = false; pageError = nil; libraryFirstIndex = 0
-            return
+            if clock() < cached.deadline { return }
+            // Keep the saved page visible while its metadata is revalidated.
         }
         let gen = generation, old = context
         loading = true; pageError = nil
@@ -399,7 +401,7 @@ struct Preview {
         guard !item.reference.isEmpty else { return }
         let old = context
         navigate(.detail); context.selected = item
-        if context.selected.artwork == nil, let cached = queueArtwork[item.reference], clock() < cached.deadline {
+        if context.selected.artwork == nil, let cached = queueArtwork[item.reference] {
             context.selected.artwork = cached.reference
         }
         restoreArtwork()
@@ -643,7 +645,6 @@ struct Preview {
               generation == gen else { return }
         guard let preview = await fetchPreview(ref), online, clock() < freshUntil,
               generation == gen, context.screen == screen else { return }
-        queueArtwork = queueArtwork.filter { clock() < $0.value.deadline }
         artworkDeadlines[item.reference] = preview.deadline
         while artworkDeadlines.count > Self.artworkBindingLimit {
             if let oldest = artworkDeadlines.min(by: { $0.value < $1.value })?.key { artworkDeadlines.removeValue(forKey:oldest) }

@@ -41,6 +41,61 @@ import XCTest
             return reply
         }
     }
+    func testResumeRetainsExpiredNowArtworkUntilAuthenticatedReplacement() async throws {
+        var now = 100.0
+        let t = FaultTransport(), m = ControllerModel(transport:t,clock:{now},restore:false)
+        m.active = true; m.snapshotMode = true
+        await m.refresh(); await m.loadArtwork(); m.contactEnded()
+        let original = try XCTUnwrap(m.artwork)
+        m.deactivate(); now = original.deadline + 90
+        XCTAssertEqual(m.artwork?.renderID,original.renderID)
+        XCTAssertFalse(m.controlsAvailable)
+        t.holdNextAction = "snapshot"; m.snapshotMode = false; m.activate(); await settle()
+        XCTAssertNotNil(t.held); XCTAssertFalse(m.controlsAvailable)
+        XCTAssertEqual(m.artwork?.deadline,original.deadline)
+        m.snapshotMode = true; t.release(); await settle()
+        XCTAssertTrue(m.online)
+        t.failRead = "artwork"; await m.loadArtwork()
+        XCTAssertEqual(m.artwork?.renderID,original.renderID,"Failed renewal must not blank the cover")
+        XCTAssertEqual(m.artwork?.deadline,original.deadline)
+        t.failRead = nil; await m.refresh(); await m.loadArtwork()
+        XCTAssertGreaterThan(try XCTUnwrap(m.artwork).deadline,original.deadline)
+        XCTAssertEqual(m.artwork?.renderID,original.renderID,"Identical pixels preserve render identity")
+        XCTAssertTrue(t.fixture.mutations.isEmpty); m.deactivate()
+    }
+    func testResumeKeepsLibraryPageAndCoversDuringSlowMetadataAndImageRefresh() async throws {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:t,clock:{now},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh()
+        m.navigate(.library); await settle(); await m.loadQueueArtwork()
+        let items = m.context.items, ref = items[0].reference
+        let original = try XCTUnwrap(m.queueArtwork[ref])
+        m.deactivate(); now = original.deadline + 90
+        XCTAssertEqual(m.context.items.map(\.reference),items.map(\.reference))
+        XCTAssertEqual(m.queueArtwork[ref]?.renderID,original.renderID)
+        m.active = true; await m.refresh()
+        t.holdNextAction = "library_page"; m.loadPage(); await settle()
+        XCTAssertNotNil(t.held); XCTAssertFalse(m.context.items.isEmpty)
+        XCTAssertEqual(m.queueArtwork[ref]?.deadline,original.deadline)
+        t.release(); await settle()
+        t.holdNextAction = "artwork"
+        let renewal = Task { await m.loadQueueArtwork() }; await settle()
+        XCTAssertNotNil(t.held); XCTAssertEqual(m.queueArtwork[ref]?.renderID,original.renderID)
+        t.release(); await renewal.value
+        XCTAssertGreaterThan(try XCTUnwrap(m.queueArtwork[ref]).deadline,original.deadline)
+        XCTAssertTrue(t.fixture.mutations.isEmpty); m.deactivate()
+    }
+    func testRetainedArtworkClearsForTrustFailureAndTransportReplacement() async throws {
+        let t = FaultTransport(), m = ControllerModel(transport:t,clock:{100},restore:false)
+        m.active = true; m.snapshotMode = true; await m.refresh(); await m.loadArtwork()
+        m.deactivate(); XCTAssertNotNil(m.artwork)
+        m.invalidate(); XCTAssertNil(m.artwork); XCTAssertTrue(m.queueArtwork.isEmpty)
+        m.active = true; await m.refresh(); await m.loadArtwork()
+        XCTAssertNotNil(m.artwork)
+        m.replaceTransport(FixtureTransport())
+        XCTAssertNil(m.artwork); XCTAssertTrue(m.queueArtwork.isEmpty)
+        XCTAssertFalse(m.controlsAvailable); m.deactivate()
+    }
     func testTimerWarmsEveryLibrarySectionBeforeFirstVisit() async {
         var now = 100.0
         let t = FaultTransport(seedCollection:true)
@@ -163,8 +218,8 @@ import XCTest
         m.navigate(.settings)
         now = original.deadline
         await m.refresh() // Fresh player state does not extend an old image's deadline.
-        m.back(); XCTAssertNil(m.artwork)
-        XCTAssertNil(m.colorPreview)
+        m.back(); XCTAssertEqual(m.artwork?.deadline,original.deadline)
+        XCTAssertEqual(m.colorPreview?.renderID,field.renderID)
         m.deactivate()
     }
     func testArtworkReuseIsClearedOnDisconnect() async throws {
@@ -315,7 +370,8 @@ import XCTest
         XCTAssertEqual(m.queueArtwork[item.reference]?.renderID,original.renderID)
         XCTAssertEqual(m.queueArtwork[item.reference]?.deadline,original.deadline)
         now = original.deadline; m.tick()
-        XCTAssertNil(m.queueArtwork[item.reference])
+        XCTAssertEqual(m.queueArtwork[item.reference]?.deadline,original.deadline)
+        XCTAssertFalse(m.controlsAvailable)
         m.deactivate()
     }
     func testExpiredGridCoverRenewsMetadataBeforeFetching() async throws {
@@ -590,7 +646,7 @@ import XCTest
         model.queueArtwork[model.context.items[1].reference] = nil
         XCTAssertEqual(model.fieldPreview?.reference,first.reference,"Use loaded cover before fallback")
         now = first.deadline
-        XCTAssertNil(model.fieldPreview,"Never tint with an expired preview")
+        XCTAssertEqual(model.fieldPreview?.renderID,first.renderID,"Retain display colour during authenticated renewal")
         XCTAssertFalse(transport.requests.contains("play"))
         XCTAssertFalse(transport.requests.contains("library_save"))
     }
