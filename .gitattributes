@@ -2,6 +2,8 @@
 *.md text eol=lf
 *.py text eol=lf
 *.json text eol=lf
+tools/pi_trial_sampler.sh text eol=lf
+deployment/home-assistant/* text eol=lf
 
 # Font licence hashes are byte-exact on Windows and macOS.
 ios/StillWater/Resources/Fonts/*.txt text eol=lf
