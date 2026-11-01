@@ -144,7 +144,7 @@ struct StillWaterView: View {
                 .overlay { if ring { Circle().stroke((accent ? Design.accent : Design.ink).opacity(0.7),lineWidth:1.5).frame(width:ringSize ?? min(w,h),height:ringSize ?? min(w,h)) } }
                 .overlay { if model.pendingAction != nil && model.pendingTarget == id { Circle().stroke(Design.ink,lineWidth:1) } }
                 .contentShape(Rectangle())
-        }.buttonStyle(ExplicitContrastButtonStyle()).disabled(!enabled)
+        }.buttonStyle(ExplicitContrastButtonStyle(dimsWhenPressed: !["previous","play-pause","next","amp-up","amp-down"].contains(id))).disabled(!enabled)
             .opacity(enabled || model.keepsControlVisibleWhileBusy(id) ? 1 : 0.35)
             .accessibilityLabel(label).accessibilityIdentifier(id).audit(id,tap:true).position(x:x+w/2,y:y+h/2)
     }
@@ -636,7 +636,8 @@ struct Ripples: View {
 
 // Disabled action opacity is explicit above; the native plain style also dims labels.
 private struct ExplicitContrastButtonStyle: ButtonStyle {
+    var dimsWhenPressed = true
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.opacity(configuration.isPressed ? 0.7 : 1)
+        configuration.label.opacity(dimsWhenPressed && configuration.isPressed ? 0.7 : 1)
     }
 }

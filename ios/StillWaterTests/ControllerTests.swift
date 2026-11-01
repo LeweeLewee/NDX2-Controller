@@ -7,6 +7,9 @@ import XCTest
         init(seedCollection: Bool = false) { fixture = FixtureTransport(seedCollection:seedCollection) }
         var requests: [String] = []
         var artworkSides: [Int] = []
+        var libraryKinds: [String] = []
+        var failLibraryKind: String?
+        var omitFirstPlaylistCover = false
         var loseMutation = false
         var failRead: String?
         var holdNextAction: String?
@@ -16,9 +19,19 @@ import XCTest
         func cancel() {}
         func send(_ request: BridgeRequest) async throws -> BridgeReply {
             requests.append(request.action)
+            if request.action == "library_page" {
+                libraryKinds.append(request.args["kind"]?.text ?? "albums")
+                if request.args["kind"]?.text == failLibraryKind { throw BridgeFailure.unavailable }
+            }
             if failRead == request.action { throw BridgeFailure.unavailable }
             if request.action == "artwork" { artworkSides.append(request.args["side"]?.number ?? 80) }
-            let reply = try await fixture.send(request)
+            var reply = try await fixture.send(request)
+            if omitFirstPlaylistCover, request.action == "library_page", request.args["kind"]?.text == "playlists", case .object(var data) = reply.data {
+                var items = data["items"]!.values
+                if !items.isEmpty, case .object(var item) = items[0] { item["artwork"] = .null; items[0] = .object(item) }
+                data["items"] = .array(items)
+                reply = BridgeReply(version:reply.version,request_id:reply.request_id,boot_id:reply.boot_id,outcome:reply.outcome,fixture:reply.fixture,data:.object(data),error:reply.error)
+            }
             if holdNextAction == request.action {
                 holdNextAction = nil
                 await withCheckedContinuation { held = $0 }
@@ -27,6 +40,53 @@ import XCTest
             if loseMutation && request.isMutation { throw BridgeFailure.unavailable }
             return reply
         }
+    }
+    func testControlFeedbackSpansPreflightWriteAndReadbackWithoutUnlocking() async {
+        let t = FaultTransport(), m = ControllerModel(transport:FixtureTransport(),clock:{100},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; await m.refresh(); m.contactEnded()
+        t.holdNextAction = "snapshot"
+        m.mutate("transport",["command":.string("pause")],target:"play-pause"); await settle()
+        XCTAssertNotNil(t.held); XCTAssertEqual(m.pendingAction,"transport")
+        t.holdNextAction = "transport"; t.release(); await settle()
+        XCTAssertNotNil(t.held); XCTAssertEqual(m.pendingTarget,"play-pause")
+        t.afterReply = { request in if request.action == "transport" { t.holdNextAction = "snapshot" } }
+        t.release(); await settle()
+        XCTAssertNotNil(t.held); XCTAssertEqual(m.pendingAction,"transport")
+        XCTAssertEqual(m.pendingTarget,"play-pause"); XCTAssertFalse(m.controlsAvailable)
+        for id in ["play-pause","previous","next","amp-up","amp-down"] { XCTAssertTrue(m.keepsControlVisibleWhileBusy(id)) }
+        m.mutate("transport",["command":.string("next")],target:"next")
+        XCTAssertEqual(t.fixture.mutations,["transport"])
+        t.release(); await settle()
+        XCTAssertNil(m.pendingAction); XCTAssertNil(m.pendingTarget); XCTAssertTrue(m.controlsAvailable)
+        m.deactivate()
+    }
+    func testIdlePrefetchReachesEverySectionAndSkipsMissingPlaylistCover() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; m.contactEnded()
+        t.omitFirstPlaylistCover = true
+        for _ in 0..<4 { now += 16; await m.refresh(); await m.prefetchLibrary() }
+        XCTAssertEqual(t.libraryKinds,["albums","artists","playlists","tracks"])
+        for _ in 0..<4 { await m.loadQueueArtwork() }
+        for kind in ["albums","artists","playlists","tracks"] {
+            XCTAssertTrue(m.queueArtwork.keys.contains { $0.contains("/"+kind+"/") },"Missing idle cover for " + kind)
+        }
+        XCTAssertFalse(t.fixture.mutations.count > 0)
+        XCTAssertEqual(m.context.screen,.now)
+        m.navigate(.library); await settle(); m.filter("playlists"); await settle()
+        let missing = m.context.items.first!
+        XCTAssertNil(missing.artwork)
+        t.requests = []; await m.loadQueueArtwork()
+        XCTAssertFalse(t.requests.contains("browse")); XCTAssertTrue(m.online)
+        m.deactivate()
+    }
+    func testPrefetchFailedFirstSectionDoesNotStarveLaterSections() async {
+        var now = 100.0
+        let t = FaultTransport(seedCollection:true), m = ControllerModel(transport:FixtureTransport(),clock:{now},restore:false)
+        m.replaceTransport(t); await settle(); m.snapshotMode = true; m.contactEnded(); t.failLibraryKind = "albums"
+        for _ in 0..<4 { now += 16; await m.refresh(); await m.prefetchLibrary() }
+        XCTAssertEqual(t.libraryKinds,["albums","artists","playlists","tracks"])
+        XCTAssertTrue(t.fixture.mutations.isEmpty); m.deactivate()
     }
     func testControlsPreemptSlowReadsAndReserveOneMutationBeforeTaskStarts() async throws {
         let t = FaultTransport(), m = ControllerModel(transport:FaultTransport(),clock:{100},restore:false)

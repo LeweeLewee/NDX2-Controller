@@ -97,6 +97,8 @@ struct Preview {
     private var nextQueueArtAttempt = 0.0
     private var libraryRecoveryAttempts = 0, nextLibraryRecovery = 0.0
     private var nextPrefetch = 0.0, prefetchPausedUntil = 0.0
+    private var prefetchPageTurn = 0, prefetchArtworkTurn = 0
+    private let prefetchKinds = ["albums","artists","playlists","tracks"]
     let clock: () -> Double
     init(transport: BridgeTransport, clock: @escaping () -> Double = { ProcessInfo.processInfo.systemUptime }, restore: Bool = true) {
         self.transport = transport; self.clock = clock; fixture = transport is FixtureTransport
@@ -104,16 +106,16 @@ struct Preview {
     }
     var controlsAvailable: Bool { active && online && clock() < freshUntil && !consumeContact && pendingAction == nil && !flightMutation && !preparingCommand }
     func keepsControlVisibleWhileBusy(_ id: String) -> Bool {
-        guard pendingAction != nil, active, online, clock() < freshUntil, unknownAction == nil else { return false }
+        guard pendingAction != nil || preparingCommand, active, online, clock() < freshUntil, unknownAction == nil else { return false }
         if id == "play-pause" { return ["playing","paused"].contains(player.state) }
         return ["previous","next","amp-up","amp-down"].contains(id)
     }
     private var libraryArtworkOrigins: [String:[String:JSONValue]] = [:]
     private func rememberLibraryArtwork(_ items: [MusicItem], args: [String:JSONValue]) {
-        for item in items where item.kind == "playlists" && item.artwork != nil { libraryArtworkOrigins[item.reference] = args }
+        for item in items where item.kind == "playlists" { libraryArtworkOrigins[item.reference] = args }
         if libraryArtworkOrigins.count > Self.artworkBindingLimit {
             libraryArtworkOrigins = libraryArtworkOrigins.filter { entry in queueArtwork[entry.key] != nil || items.contains(where: { $0.reference == entry.key }) }
-            if libraryArtworkOrigins.count > Self.artworkBindingLimit { libraryArtworkOrigins = Dictionary(uniqueKeysWithValues:items.filter { $0.kind == "playlists" && $0.artwork != nil }.map { ($0.reference,args) }) }
+            if libraryArtworkOrigins.count > Self.artworkBindingLimit { libraryArtworkOrigins = Dictionary(uniqueKeysWithValues:items.filter { $0.kind == "playlists" }.map { ($0.reference,args) }) }
         }
     }
     var extendedTransportAvailable: Bool { controlsAvailable && unknownAction == nil }
@@ -208,7 +210,13 @@ struct Preview {
             pendingAction = request.action
             UserDefaults.standard.set(request.action, forKey: "uncertain-command")
         }
-        defer { if inFlight == token { inFlight = nil; flightMutation = false; pendingAction = nil; pendingTarget = nil } }
+        defer {
+            if inFlight == token {
+                inFlight = nil; flightMutation = false
+                // The enclosing command owns feedback through preflight, write and readback.
+                if !preparingCommand { pendingAction = nil; pendingTarget = nil }
+            }
+        }
         do {
             let r = try await transport.send(request)
             guard active, generation == gen, inFlight == token else { return nil }
@@ -364,8 +372,11 @@ struct Preview {
         guard active, online, clock() < freshUntil, ["connected","fixture"].contains(account), context.screen == .now,
               clock() - lastTouch >= 4, clock() >= nextPrefetch, clock() >= prefetchPausedUntil,
               inFlight == nil, pendingAction == nil, !preparingCommand else { return }
-        let kinds = ["albums","artists","playlists","tracks"]
-        guard let kind = kinds.first(where:{ libraryPages[$0] == nil || libraryPages[$0]!.deadline <= clock() }) else { return }
+        let turns = (0..<prefetchKinds.count).map { (prefetchPageTurn + $0) % prefetchKinds.count }
+        guard let turn = turns.first(where:{ libraryPages[prefetchKinds[$0]] == nil })
+            ?? turns.first(where:{ libraryPages[prefetchKinds[$0]]!.deadline <= clock() }) else { return }
+        let kind = prefetchKinds[turn]
+        prefetchPageTurn = (turn + 1) % prefetchKinds.count
         nextPrefetch = clock() + 15
         let gen = generation
         guard let reply = await perform(BridgeRequest("library_page",["kind":.string(kind)])),
@@ -572,11 +583,19 @@ struct Preview {
             guard let preview = queueArtwork[$0.reference] else { return false }
             return !$0.reference.hasPrefix("inputs/playqueue/") && preview.deadline - clock() <= artworkRenewalLead && clock() >= (missingArtUntil[$0.reference] ?? 0)
         }.min { queueArtwork[$0.reference]!.deadline < queueArtwork[$1.reference]!.deadline }
-        let prefetched = screen == .now && clock() - lastTouch >= 4 && clock() >= prefetchPausedUntil
-            ? ["albums","artists","playlists","tracks"].flatMap { kind -> [MusicItem] in
-                guard let page = libraryPages[kind], clock() < page.deadline else { return [] }
-                return Array(page.context.items.prefix(12))
-            }.first { queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0) } : nil
+        var prefetched: MusicItem?
+        if screen == .now && clock() - lastTouch >= 4 && clock() >= prefetchPausedUntil {
+            for step in 0..<prefetchKinds.count {
+                let turn = (prefetchArtworkTurn + step) % prefetchKinds.count
+                guard let page = libraryPages[prefetchKinds[turn]], clock() < page.deadline else { continue }
+                if let candidate = page.context.items.prefix(12).first(where: {
+                    queueArtwork[$0.reference] == nil && clock() >= (missingArtUntil[$0.reference] ?? 0)
+                        && !($0.kind == "playlists" && $0.artwork == nil)
+                }) {
+                    prefetched = candidate; prefetchArtworkTurn = (turn + 1) % prefetchKinds.count; break
+                }
+            }
+        }
         guard [.now,.queue,.detail,.library,.find].contains(screen), let item = expiring ?? missing ?? prefetched ?? background else { return }
         let gen = generation
         let renewing = queueArtwork[item.reference] != nil || (artworkDeadlines[item.reference].map { $0 <= clock() } ?? false)
@@ -592,6 +611,11 @@ struct Preview {
         // Queue identities are not catalogue browse references. Use artwork registered
         // by the authenticated queue read, retaining browse fallback for catalogue cards.
         var reference = item.artwork
+        // Collection metadata is authoritative about an absent supported playlist cover.
+        // Native playlist browse cannot supply it and repeated retries starve background work.
+        if item.kind == "playlists", reference == nil, libraryArtworkOrigins[item.reference] != nil {
+            retryDelay = 60; return
+        }
         if renewing && item.reference.hasPrefix("inputs/playqueue/") {
             guard let page = await perform(BridgeRequest("queue",["offset":.int(context.pageOffset)])),
                   page.outcome == "observed", generation == gen else { return }
