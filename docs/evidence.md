@@ -632,3 +632,31 @@ Next phone checks: install29.1.0 over the paired app; test one Pause/Resume, Nex
 
 
 **1 November beta31.1.0 physical acceptance:** user reports PASS for the requested NOW and Library artwork-retention checks after switching apps promptly and after more than60 seconds away/locked. This completes physical acceptance of the app-switch retention change; prior NOW button, transport/volume and traced idle-prefetch passes remain recorded. Keep the earlier intermittent all-section prefetch failure in the history because its original cause was not established. Recommended next phase is ordinary-use soak testing on31.1.0, including a longer idle return and recovery from a temporary Wi-Fi interruption; do not start another release solely for these checks. Persistent artwork across process termination and live voice capture remain separate future scope. No new code, bridge restart, pairing change or player command in this acceptance-recording turn.
+
+
+**1 November 2026 D041 Pi deployment:** installed local Home Assistant app0.1.0
+on the existing Raspberry Pi4/4GB, Home Assistant OS18.3/Core2026.10.4. Pre-install
+backup completed. Encrypted private configuration transfer; same existing CA,
+new host-specific leaf with strict SKI/AKI/SAN/EKU validation; CA signing key remains
+on Windows. App has no HA/Supervisor API, host network or Docker privileges. Existing
+HTTPS routes and auth/rate/command bounds remain. First start before Supervisor
+created the app-config directory exited safely; after provisioning and correcting
+strict leaf certificate extensions, verified authenticated real snapshot80ms,
+queue32ms, Albums162ms and Playlists407ms (12 items each). 320px artwork cold456ms,
+cached34ms; unauthenticated requests401. Retained enrollment verified after a bridge
+app restart. Windows fallback TLS remains reachable; no assistant-issued audible
+commands. Start-on-boot/watchdog enabled. Initial idle bridge memory about18MB,
+CPU0.01%; HA Core CPU0.22% at sample, not sustained-load proof.
+
+177 Python tests, five Node navigation tests and all six silent demo stages pass.
+The Pi-side sampler started at17:17:06 UTC on1 November, scheduled to finish after
+17:17:06 on2 November, recording every five minutes in private app storage. The
+sampler survives PC shutdown, but a Pi/Terminal app restart can interrupt it; missing
+samples are not a pass. Host trial is running; phone origin cutover/pairing and
+physical acceptance are pending. User was asked to prepare Pairing using the new
+private Pi origin and the same v3 trust certificate. Windows files/pairing are
+preserved; rollback after token rotation needs secure TIDAL-state synchronization.
+No production reliability or24-hour completion claim. See docs/pi-bridge-trial.md.
+A separate proposed hourly Codex follow-up was rejected by automatic approval
+review as a persistent schedule without explicit authorization; permission was
+requested. This does not affect the already-running bounded Pi sampler.

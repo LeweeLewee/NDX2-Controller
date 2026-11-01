@@ -263,3 +263,23 @@ On 24 October the user authorized the defect sprint after physical testing. Reta
 
 
 **1 November D040 app-switch artwork retention amendment:** user explicitly authorizes keeping artwork visible across foreground/background transitions and refreshing in the background without blanking it. Retain bounded in-memory previews and Library page display state on ordinary deactivation; expiry continues to govern authenticated renewal, but no longer erases already-loaded display pixels or their palette. Never extend original deadlines locally or use retained images/page display as player freshness or permission to write. Resume first obtains a fresh authenticated snapshot; an expired visible Library page refreshes while its saved contents remain visible. Failed ordinary reads retain display artwork. Explicit invalidation, trust/authentication failure, changed bridge boot and transport/enrollment replacement still clear artwork; memory-pressure and256-image/1024-binding bounds remain. This supersedes earlier expiry-as-display-removal language only; bridge registration/expiry, routes, rate limits, firmware and no-replay rules are unchanged. This is in-process retention, not disk persistence or networking while iOS suspends the app. Lifecycle/renewal/security regressions and next TestFlight validation pending.
+
+
+## D041 — Home Assistant Pi bridge deployment trial
+
+**Accepted user direction, 1 November 2026.** Deploy the existing authenticated
+bridge on the inspected Home Assistant Raspberry Pi4/4GB using an isolated
+Supervisor-managed local app and begin a24-hour coexistence trial. Retain the
+Windows bridge as fallback. This advances the conditional D018 host option; it
+makes no change to native Naim playback, phone UI, firmware, trust enforcement,
+rate limits or no-replay behavior. No Home Assistant/Supervisor API, Docker socket,
+host network or device privileges are granted to the bridge. Keep TLS and account
+state out of app options and source images. Use encrypted private transfer and
+POSIX owner-only persistence; preserve Windows state and signing identity.
+
+The trial package uses the proven read-only collection adapter and tested native
+control allowlist. Start-on-boot and watchdog are enabled. Pi-side resource sampling
+runs for24 hours independently of the PC; phone cutover and user acceptance remain
+separate gates. Do not run both hosts as active owners of the same rotating TIDAL
+session. Rollback requires the latest account authorization to be securely restored
+before restarting Windows when tokens have rotated. See [runbook](pi-bridge-trial.md).
